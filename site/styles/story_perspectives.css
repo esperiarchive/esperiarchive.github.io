@@ -1,0 +1,4 @@
+.perspective-divider { display: flex; align-items: center; gap: 12px; margin: 28px 0; padding: 12px 16px; border-block: 1px solid #7fb49f55; border-left: 3px solid #83baa4; background: #83baa40b; color: var(--text, #edf3f7); }
+.perspective-divider strong { font-size: 1.02em; font-weight: 600; }
+.perspective-divider .dialogue-line-portrait { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 50%; }
+@media (max-width: 600px) { .perspective-divider { margin: 20px 0; padding: 10px 12px; } }

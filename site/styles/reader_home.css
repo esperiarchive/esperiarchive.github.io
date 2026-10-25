@@ -1,0 +1,39 @@
+/* Home shares the reader fonts, header and preferences. */
+.home-hero h1, .home-card h2 { font-weight: 400; }
+.app-shell.home-view { grid-template-rows: auto minmax(0, 1fr); }
+.home-page { width: min(1120px, 100%); margin: 0 auto; }
+.home-hero { max-width: 800px; margin: 0 auto; padding: clamp(24px, 5vh, 64px) 0 44px; text-align: center; }
+.home-kicker { margin: 0 0 18px; color: var(--accent); font-size: 13px; letter-spacing: .06em; }
+.home-hero h1 { margin: 0; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.2; letter-spacing: -.025em; }
+.home-intro { margin: 20px auto 28px; color: var(--muted); font-size: clamp(17px, 1.6vw, 21px); line-height: 1.6; text-wrap: balance; }
+.home-browse { display: inline-flex; align-items: center; gap: 16px; min-height: 46px; padding: 10px 22px; border: 1px solid var(--accent); border-radius: 8px; color: #102523; background: var(--accent); font-weight: 650; text-decoration: none; }
+.home-browse:hover { background: #a5d8d2; }
+.home-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.home-status { margin: 0 0 24px; color: var(--muted); text-align: center; overflow-wrap: anywhere; }
+.home-card { position: relative; display: block; padding: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-decoration: none; transition: border-color .15s, background .15s; }
+.home-card:hover { border-color: var(--accent); background: var(--panel-strong); }
+.home-card h2 { margin: 22px 0 12px; font-size: 23px; line-height: 1.3; }
+.home-card p { margin: 0; color: var(--muted); line-height: 1.65; font-size: 16px; }
+.home-card svg, .home-browse svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.home-card .home-icon { display: block; width: 80px; height: 80px; object-fit: contain; padding: 10px; border-radius: 50%; background: rgba(214, 189, 128, .12); border: 1px solid rgba(214, 189, 128, .3); }
+.home-card .home-icon-character { object-fit: cover; object-position: center 18%; padding: 0; }
+.home-card .home-arrow { position: absolute; right: 24px; top: 28px; color: var(--soft); }
+.home-page a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.home-feedback { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 40px; padding: 22px; border: 1px solid var(--line); border-radius: var(--button-radius, 3px); background: var(--panel); }
+.home-feedback-copy { min-width: 0; }
+.home-feedback h2 { margin: 0 0 16px; font-size: 22px; line-height: 1.3; font-weight: 400; }
+.home-feedback-copy p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
+.home-feedback-actions { display: flex; flex: 0 1 330px; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+.home-feedback-link { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 18px; border: 1px solid var(--accent); border-radius: var(--button-radius, 3px); color: var(--accent); text-decoration: none; white-space: nowrap; }
+.home-feedback-link:hover { background: var(--control-hover); }
+.home-feedback-link svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.home-footer { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.home-footer p { margin: 6px 0; }
+@media (max-width: 700px) {
+  .home-hero { padding-top: 20px; padding-bottom: 30px; }
+  .home-cards { grid-template-columns: 1fr; gap: 12px; }
+  .home-card { padding: 22px; }
+  .home-card h2 { margin-top: 16px; font-size: 21px; }
+  .home-feedback { display: block; text-align: center; }
+  .home-feedback-actions { margin-top: 22px; }
+}

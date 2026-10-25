@@ -1,0 +1,7 @@
+(c) 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+
+Copyright 2020 The Hahmlet Project Authors (https://github.com/hyper-type/hahmlet)
+
+© 2014-2020 Adobe (http://www.adobe.com/).
+
+All bundled fonts use SIL OFL 1.1. See OFL.txt.

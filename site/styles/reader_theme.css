@@ -1,0 +1,110 @@
+/* Neutral surfaces and gold accents shared by every reader section. */
+:root {
+  color-scheme: dark;
+  --bg: #101010;
+  --bg-2: #181818;
+  --shell: #0c0c0c;
+  --panel: #191919;
+  --panel-strong: #202020;
+  --panel-rgb: 25, 25, 25;
+  --surface-low: #080808;
+  --control: #252525;
+  --control-hover: #303030;
+  --ink: #ececec;
+  --text: var(--ink);
+  --ink-rgb: 236, 236, 236;
+  --muted: #b3b3b3;
+  --soft: #999999;
+  --line: #363636;
+  --accent: #d6bd80;
+  --accent-2: var(--accent);
+  --accent-rgb: 214, 189, 128;
+  --accent-ink: #1b170d;
+  --amber: #e0b75a;
+  --danger: #ef8b83;
+  --success: #94c19b;
+  --button: #252525;
+  --button-hover: #303030;
+  --button-radius: 3px;
+  --dialogue-shadow: 0 6px 18px rgba(0, 0, 0, .14);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f5f5;
+  --bg-2: #ebebeb;
+  --shell: #ffffff;
+  --panel: #ffffff;
+  --panel-strong: #fafafa;
+  --panel-rgb: 255, 255, 255;
+  --surface-low: #eeeeee;
+  --control: #eeeeee;
+  --control-hover: #e3e3e3;
+  --ink: #262626;
+  --ink-rgb: 38, 38, 38;
+  --muted: #595959;
+  --soft: #6d6d6d;
+  --line: #d2d2d2;
+  --accent: #80601f;
+  --accent-rgb: 128, 96, 31;
+  --accent-ink: #ffffff;
+  --amber: #815d13;
+  --danger: #ae342b;
+  --success: #306c3c;
+  --button: #e6e6e6;
+  --button-hover: #dadada;
+  --dialogue-shadow: 0 2px 8px rgba(0, 0, 0, .045);
+}
+
+html, body { background: var(--bg); }
+.app-shell { background: transparent; }
+:root button:not(.dialogue-line-portrait), :root select,
+:root input[type="text"], :root input[type="search"], :root input[type="number"], textarea,
+.home-browse, .primary-tab, .choice-option, .character-tab, .profile-tab {
+  border-radius: var(--button-radius);
+}
+select { box-shadow: none; }
+input { accent-color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible {
+  outline-color: var(--accent);
+}
+.home-browse { background: var(--accent); color: var(--accent-ink); }
+.home-browse:hover { background: var(--accent); filter: brightness(1.08); }
+.home-card, .character-card, .archive-card, .settings-popover,
+.reader-appearance-prompt { border-radius: 6px; }
+.player-appearance-dialog { background: var(--panel-strong); color: var(--ink); }
+.appearance-card[aria-pressed="true"] { border-color: var(--accent); background: rgba(var(--accent-rgb), .1); }
+.perspective-divider { border-color: rgba(var(--accent-rgb), .35); border-left-color: var(--accent); background: rgba(var(--accent-rgb), .06); color: var(--ink); }
+.aside-sequence { background: var(--panel); }
+.dialogue-block.dialogue-presentation-aside .line-text,
+.dialogue-block.dialogue-presentation-blackscene .line-text { color: var(--ink); }
+.dialogue-block.dialogue-presentation-lite .speaker { border-radius: 3px 3px 0 0; }
+.dialogue-block.dialogue-presentation-lite .line-text { border-radius: 3px; }
+.portrait-dialogue-row > .dialogue-block,
+.dialogue-block.dialogue-presentation-lite .line-text,
+.blackscene-sequence { box-shadow: var(--dialogue-shadow); }
+.activity-result-dialog {
+  color: var(--ink); background: var(--panel-strong); border-color: var(--accent); border-radius: 6px;
+}
+.activity-result-dialog::backdrop { background: #000a; }
+.activity-result-expanded .activity-result-heading,
+.activity-result-fishing .activity-result-heading { color: var(--accent); }
+.activity-result-content, .activity-result-fishing { --result-accent: var(--accent); }
+.inspection-points button.inspection-read { border-color: var(--success); }
+.inspection-complete { color: var(--success); }
+.story-battle-enemy { background: var(--panel-strong); }
+.story-battle-enemy img { background: rgba(var(--accent-rgb), .045); }
+.full-script-choice { background: var(--panel); }
+.full-script-choice .choice-option.selected:disabled {
+  color: var(--ink); border-color: var(--accent); background: rgba(var(--accent-rgb), .14);
+}
+.scene-summary-block { background: rgba(var(--accent-rgb), .055); border-color: rgba(var(--accent-rgb), .3); }
+.scene-summary-label, .chapter-artwork figcaption,
+.chapter-artwork-gallery > summary, .collection-card-preview > summary { color: var(--accent); }
+.chapter-artwork-label { color: var(--muted); }
+/* Portraits and faction/role badges keep their original shapes and artwork. */
+.dialogue-line-portrait { border-radius: 7px; }
+.perspective-divider .dialogue-line-portrait { border-radius: 50%; }
+@media (max-width: 600px) {
+  .player-appearance-dialog { border-radius: 0; }
+}

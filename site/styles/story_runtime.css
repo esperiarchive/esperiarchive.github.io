@@ -1,0 +1,338 @@
+.story-choice-history {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  border-left: 2px solid rgba(214, 189, 128, .48);
+  padding: 7px 0 7px 13px;
+  margin: 18px 0 12px;
+}
+.story-runtime-notice { color: var(--soft, #778592); font-size: 14px; line-height: 1.55; margin: 8px 0; }
+.story-activity {
+  min-width: 0; overflow-wrap: anywhere;
+  margin: 18px 0 12px; padding: 7px 0 7px 13px;
+  border-left: 2px solid rgba(214, 189, 128, .48);
+}
+.story-route-dialogue { min-width: 0; overflow-wrap: anywhere; margin: 18px 0; }
+.story-route-dialogue h4, .story-route-dialogue > summary {
+  font-size: calc(var(--dialogue-font-size, 20px) * .9); color: var(--accent-2, #d6bd80); margin: 0 0 12px; line-height: 1.5;
+}
+.story-route-dialogue > .dialogue-sequence + :is(h4, .dialogue-sequence) { margin-top: 22px; }
+.story-route-optional { border-left: 2px solid #a6804440; padding-left: 13px; }
+.story-route-optional > summary { cursor: pointer; margin: 0; }
+.story-route-optional[open] > summary { margin-bottom: 14px; }
+.story-helper-dialogues { display: grid; gap: 22px; min-width: 0; }
+.story-helper-dialogue { min-width: 0; }
+.story-activity h3 { margin: 0 0 4px; color: var(--accent-2, #d6bd80); font-size: calc(var(--dialogue-font-size, 20px) * 1.1); font-weight: 700; line-height: 1.4; }
+.story-battle {
+  min-width: 0; overflow-wrap: anywhere;
+  border-left: 2px solid rgba(214, 189, 128, .48);
+  padding: 7px 0 7px 13px; margin: 18px 0 12px;
+}
+.story-battle-label { font-size: 12px; color: var(--soft, #778592); margin-bottom: 4px; }
+.story-battle-dialogue { min-width: 0; margin-top: 22px; }
+.story-battle-dialogue h4 { font-size: calc(var(--dialogue-font-size, 20px) * .9); color: var(--accent-2, #d6bd80); margin: 0 0 12px; }
+.story-battle-dialogue + .story-battle-dialogue { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line, rgba(237, 243, 247, 0.16)); }
+.story-battle h3 { font-size: calc(var(--dialogue-font-size, 20px) * 1.1); font-weight: 700; line-height: 1.4; color: var(--accent-2, #d6bd80); margin: 0 0 4px; }
+.story-battle p { font-size: .82em; line-height: 1.6; margin: 6px 0; }
+.story-battle .story-battle-summary { font-size: .9em; margin-bottom: 14px; }
+.story-battle-wave { font-size: .7em; opacity: .72; margin: 16px 0 10px; }
+.story-battle-more { margin-top: 16px; }
+.story-battle-more summary { cursor: pointer; font-size: .72em; opacity: .8; }
+.story-battle-enemies { display: flex; flex-wrap: wrap; gap: 12px; list-style: none; padding: 0; margin: 16px 0 4px; }
+.story-battle-enemy {
+  flex: 0 1 128px; min-width: 0; overflow: hidden; border-radius: 9px;
+  background: #72748820; text-align: center;
+}
+.story-battle-enemy img { display: block; width: 100%; height: auto; aspect-ratio: 180 / 248; object-fit: contain; background: #aa51591a; }
+.story-battle-enemy span { display: block; padding: 8px 5px; font: .82em/1.35 var(--reader-font); overflow-wrap: anywhere; }
+.story-battle-enemy-placeholder { display: grid; place-items: center; aspect-ratio: 180 / 248; opacity: .35; font: 2em var(--reader-font); }
+.story-sources { margin-top: 36px; padding-top: 16px; border-top: 1px solid #a6804433; font-size: .72em; line-height: 1.6; }
+.story-sources p { margin: 0 0 8px; }
+.story-sources a { color: inherit; text-underline-offset: 3px; }
+@media (max-width: 600px) {
+  .story-battle { padding: 7px 0 7px 13px; }
+  .story-battle-enemies { gap: 8px; }
+  .story-battle-enemy { flex-basis: calc((100% - 16px) / 3); }
+  .story-battle-enemy span { font-size: .72em; padding: 6px 3px; }
+}
+.story-activity p, .story-choice-history p { margin: 4px 0 10px; font-size: 14px; line-height: 1.55; color: var(--soft, #778592); }
+.story-activity-controls, .story-history-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.story-activity select, .story-history-row select { min-width: 0; width: min(340px, 100%); max-width: 100%; flex: 0 1 340px; }
+.story-activity select, .story-activity button, .story-history-row select, .story-history-row button {
+  font: inherit; font-size: 13px; padding: 8px 10px; border-radius: 7px;
+  border: 1px solid rgba(182, 143, 82, .48); background: var(--panel, #fffaf1); color: var(--ink, #352a21);
+}
+.story-choice-warning { color: var(--amber, #e0b75a); font-size: .8em; margin: 12px 0 0; }
+.story-choice-status { opacity: .8; font-size: .75em; margin: 7px 0 0; }
+.story-choice-history summary { cursor: pointer; font-size: 14px; font-weight: 800; line-height: 1.4; color: var(--accent-2, #d6bd80); }
+.story-history-row { padding: 10px 0; }
+.story-history-row span { flex: 1 0 100%; font-size: .72em; opacity: .8; }
+
+.activity-result {
+  margin: 22px auto; width: min(100%, 640px); overflow: hidden;
+  border: 1px solid #a6804460; border-radius: 16px;
+  background: linear-gradient(135deg, #b4831b12, transparent 70%);
+  text-align: center;
+}
+.activity-result-content { padding: 22px 24px 12px; --result-accent: #d99729; }
+.activity-result-fishing { --result-accent: #308fac; }
+.activity-result-heading { font-size: .72em; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--amber, #b8802c); }
+.activity-result-fishing .activity-result-heading { color: #419fbb; }
+.activity-result-ribbon { position: relative; isolation: isolate; margin: 16px -24px 10px; }
+.activity-result-ribbon::before {
+  content: ""; position: absolute; z-index: -1; inset: 24% 0 16%; opacity: .22;
+  background: var(--result-accent); transform: skewY(-3deg);
+  clip-path: polygon(0 8%, 26% 0, 67% 12%, 100% 0, 100% 91%, 68% 100%, 25% 90%, 0 100%);
+}
+.activity-result-ribbon img { display: block; width: 150px; height: 125px; object-fit: contain; margin: auto; filter: drop-shadow(0 5px 7px #0002); }
+.activity-result-name { font-family: var(--reader-font); font-size: 1.25em; margin: 12px 0; }
+.activity-result-description { font-size: .82em; line-height: 1.65; max-width: 48ch; margin: auto; }
+.activity-result-sequence { font-size: .66em; opacity: .65; margin: 14px 0 0; }
+.activity-result-view, .activity-result select, .activity-result-close {
+  max-width: calc(100% - 16px);
+  font: inherit; font-size: .72em; border: 1px solid #a6804470; border-radius: 7px;
+  padding: 8px 16px; background: transparent; color: inherit; cursor: pointer; margin: 4px 8px 18px;
+}
+.activity-result button:focus-visible, .activity-result select:focus-visible, .activity-result-close:focus-visible { outline: 2px solid #d99729; outline-offset: 3px; }
+.fishing-results { margin: 18px 0 30px; }
+.activity-result-dialog {
+  width: min(620px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0;
+  overflow-wrap: anywhere;
+  border: 1px solid #c49a55; border-radius: 20px; color: #fff3d6; text-align: center;
+  background: radial-gradient(ellipse at 50% 40%, #74531d, #30291f 65%, #191c22);
+  box-shadow: 0 20px 90px #0009;
+}
+.activity-result-dialog::backdrop { background: #0d1019bb; backdrop-filter: blur(5px); }
+.activity-result-expanded { padding: 36px 32px 24px; }
+.activity-result-expanded .activity-result-heading { font: italic 2em var(--reader-font); text-transform: none; letter-spacing: 0; color: #ffdc88; }
+.activity-result-expanded .activity-result-ribbon { margin: 28px -32px 22px; }
+.activity-result-expanded .activity-result-ribbon::before { opacity: .72; }
+.activity-result-expanded .activity-result-ribbon img { width: 240px; height: 210px; }
+.activity-result-expanded .activity-result-name { font-style: italic; font-size: 1.65em; }
+.activity-result-expanded .activity-result-description { font-size: 1em; }
+@media (max-width: 600px) {
+  .activity-result-content { padding: 18px 18px 12px; }
+  .activity-result-ribbon { margin-left: -18px; margin-right: -18px; }
+  .activity-result-expanded { padding: 28px 24px 20px; }
+  .activity-result-expanded .activity-result-ribbon { margin-left: -24px; margin-right: -24px; }
+  .activity-result-expanded .activity-result-ribbon img { width: 190px; height: 170px; }
+}
+/* Map requirements use their quest wording, at the existing objective boundary. */
+.map-activity-label { color: var(--muted, #acaaa3); font-size: .8em; margin-bottom: .45rem; }
+.map-activity h3 { margin-top: 0; }
+.inspection-points { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 16px; }
+.inspection-points button, .inspection-continue { cursor: pointer; max-width: 100%; overflow-wrap: anywhere; }
+.inspection-points button.inspection-read { border-color: #6baf99; }
+.inspection-continue:disabled { opacity: .45; cursor: default; }
+.inspection-progress { color: var(--muted, #acaaa3); }
+.inspection-point-heading { margin: 24px 0 12px; font-size: .75em; color: var(--muted, #acaaa3); scroll-margin-top: 24px; }
+.inspection-complete { margin: 24px 0; color: #6baf99; font-size: .8em; }
+.inspection-points button:focus-visible, .inspection-continue:focus-visible { outline: 2px solid #d99729; outline-offset: 3px; }
+.story-encounter-dialogue { margin: 1rem 0 0; min-width: 0; overflow-wrap: anywhere; }
+.story-encounter-dialogue > .dialogue-sequence { margin-top: 14px; }
+.story-encounter-dialogue > summary { cursor: pointer; color: var(--muted, #acaaa3); font-size: .85em; }
+.story-encounter-dialogue > summary:focus-visible { outline: 2px solid #d99729; outline-offset: 3px; }
+.story-encounter-condition { color: var(--muted, #acaaa3); font-size: .8em; line-height: 1.5; }
+/* Recaps are compact notes; objectives retain their separate left-rule style. */
+/* The inner portrait/body/background slots are fixed. Additional cast lives
+   in the outer margins and never sizes the dialogue body column. */
+:is(.timeline, .dialogue-sequence, .cinematic-scene) {
+  --reader-portrait-size: 76px;
+  --reader-column-gap: 12px;
+  --reader-background-size: 60px;
+  grid-template-columns: var(--reader-portrait-size) minmax(0, 1fr) var(--reader-background-size);
+  column-gap: var(--reader-column-gap);
+}
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > * { grid-column: 1 / -1; }
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > .portrait-dialogue-row {
+  position: relative;
+  grid-template-columns: subgrid;
+  column-gap: var(--reader-column-gap);
+}
+.outer-portrait-stack {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 6px;
+  width: var(--reader-background-size, 60px);
+}
+.outer-portrait-stack > .dialogue-line-portrait { grid-column: auto; grid-row: auto; }
+.secondary-portrait-stack { align-self: center; }
+.portrait-dialogue-row { align-items: center; }
+.outer-portrait-left {
+  width: var(--reader-portrait-size, 76px);
+  right: calc(100% + var(--reader-column-gap, 12px));
+}
+.outer-portrait-left .dialogue-line-portrait { width: 100%; height: auto; aspect-ratio: 1; }
+.outer-portrait-right { left: calc(100% + var(--reader-column-gap, 12px)); }
+.portrait-dialogue-row:has(.outer-portrait-stack) {
+  min-height: max(var(--reader-portrait-size), var(--stacked-left-height, 0px), var(--stacked-right-height, 0px), calc(var(--outer-cast-count, 0) * (var(--reader-background-size) + 6px)), calc(var(--outer-active-count, 0) * (var(--reader-portrait-size) + 6px)));
+}
+/* When there is no free outer margin, stack beneath the fixed portrait slot.
+   Center each complete column independently and reserve its full height so
+   short dialogue cards cannot make adjacent portrait stacks overlap. */
+.portrait-dialogue-row[data-left-cast="stacked"] {
+  --stacked-left-height: calc(var(--reader-portrait-size) + var(--outer-active-count, 0) * (var(--reader-portrait-size) + 6px));
+}
+.portrait-dialogue-row[data-right-cast="stacked"] {
+  --stacked-right-height: calc(var(--reader-background-size) + var(--outer-cast-count, 0) * (var(--reader-background-size) + 6px));
+}
+.portrait-dialogue-row[data-left-cast="stacked"] > .dialogue-line-portrait {
+  top: calc(var(--outer-active-count, 0) * (var(--reader-portrait-size) + 6px) / -2);
+}
+.portrait-dialogue-row[data-right-cast="stacked"] > .secondary-portrait-stack {
+  position: relative;
+  top: calc(var(--outer-cast-count, 0) * (var(--reader-background-size) + 6px) / -2);
+}
+.portrait-dialogue-row[data-left-cast="stacked"] > .outer-portrait-left {
+  left: 0;
+  right: auto;
+  top: calc(50% + (var(--reader-portrait-size) + 6px) / 2);
+}
+.portrait-dialogue-row[data-right-cast="stacked"] > .outer-portrait-right {
+  left: auto;
+  right: 0;
+  top: calc(50% + (var(--reader-background-size) + 6px) / 2);
+}
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > :is(.scene-summary-block, .choice-block) {
+  grid-column: 2;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline: 0;
+}
+.scene-summary-block {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  justify-self: start;
+  padding: 12px 18px;
+  margin: -6px 0;
+  border: 1px solid rgba(197, 177, 126, .24);
+  border-radius: 8px;
+  background: rgba(197, 177, 126, .055);
+}
+.scene-summary-label {
+  color: #c5b17e;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.scene-summary-block .cinematic-summary { font-size: 14px; line-height: 1.6; }
+.full-script-choice { min-width: 0; padding: 12px; background: rgba(10, 15, 21, .78); }
+.full-script-choice .choice-options { gap: 8px; }
+.full-script-choice .choice-option { min-height: 42px; padding: 9px 12px; overflow-wrap: anywhere; }
+.full-script-choice .choice-option.dimmed { opacity: 1; color: var(--muted); background: transparent; }
+.full-script-choice .choice-option.selected:disabled { color: #152125; background: #b6ceca; border-color: #c6ded9; }
+.full-script-choice .choice-option.selected .choice-number { color: inherit; }
+.full-script-choice .choice-option:focus-visible { outline: 2px solid #d6bd80; outline-offset: 3px; }
+@media (max-width: 900px) {
+  :is(.timeline, .dialogue-sequence, .cinematic-scene) {
+    --reader-portrait-size: 58px;
+    --reader-column-gap: 8px;
+    --reader-background-size: 46px;
+  }
+  .scene-summary-block { padding: 9px 13px; }
+  .full-script-choice { padding: 10px; }
+}
+@media (max-width: 600px) {
+  :is(.timeline, .dialogue-sequence, .cinematic-scene) {
+    --reader-portrait-size: 44px;
+    --reader-background-size: 34px;
+    --reader-column-gap: 6px;
+  }
+  .portrait-dialogue-row > .dialogue-line-portrait { width: 44px; height: 44px; }
+  .portrait-dialogue-row .dialogue-line-portrait.secondary-portrait { width: 34px; height: 34px; }
+  .outer-portrait-left .dialogue-line-portrait.secondary-portrait { width: 44px; height: 44px; }
+  .portrait-dialogue-row > .dialogue-block { min-height: 44px; }
+}
+.cinematic-scene > .cinematic-block:only-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.chapter-artwork {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 780px;
+  min-width: 0;
+  margin: 28px auto;
+  padding: 24px 20px;
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(171,117,34,.22), transparent 72%);
+}
+.chapter-artwork img {display: block; width: 100%; max-width: 740px; height: auto; margin: auto;}
+.chapter-artwork figcaption {color: #e5d8b5; font: italic 28px/1.25 var(--reader-font); margin-top: 12px;}
+.chapter-artwork-label {color: #b9ae94; font: 12px/1.5 var(--reader-font); margin-bottom: 6px;}
+.chapter-artwork-gallery {grid-column: 1 / -1; min-width: 0; margin-top: 8px;}
+.chapter-artwork-gallery > summary {cursor: pointer; color: #c6b27e; font-size: 14px;}
+.chapter-artwork-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px;}
+.chapter-artwork-grid .chapter-artwork {margin: 12px auto; padding: 12px 8px;}
+.chapter-artwork-grid figcaption {font-size: 21px;}
+.collection-card-preview {margin-block: 18px;}
+.collection-card-preview > summary {cursor: pointer; color: #c6b27e; font-weight: 650;}
+.collection-card-controls {display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 14px;}
+.collection-card-controls select {max-width: 100%; font: inherit; padding: 5px 10px;}
+.collection-card-preview > img {display: block; width: min(100%, 300px); height: auto; margin: 12px auto 0;}
+.blessing-collection{max-width:34rem;margin:1rem auto 2rem;padding:0 1rem}
+.blessing-sender-picker{width:100%;margin-bottom:1rem}
+.blessing-card-holder{display:flex;justify-content:center}
+.blessing-card{position:relative;box-sizing:border-box;width:100%;min-height:30rem;padding:2.25rem 2rem 2.75rem;text-align:center;color:#4b3928;border:1px solid #b3914c;border-radius:.85rem;background:repeating-linear-gradient(125deg,transparent 0 5px,#fff5 5px 6px),linear-gradient(155deg,#fffcef,#f4e8c8 73%,#e6b957);box-shadow:inset 0 0 0 .4rem #fff9,inset 0 0 0 .55rem #bd98496b,0 .5rem 1.5rem #0003}
+.blessing-card>img{width:7rem;height:7rem;object-fit:cover;object-position:50% 60%;border-radius:50%;border:3px solid #c5a65d;background:#ebdbb3}
+.blessing-sender{display:table;margin:.65rem auto 0;padding:.2rem 1.25rem;border-radius:2rem;background:#d9c58066;font-family:var(--reader-font);font-size:1.25rem;font-weight:700}
+.blessing-card h3{margin:.7rem 0 1.2rem;color:#88500d;font:italic 700 clamp(1.8rem,5vw,2.6rem)/1.12 var(--reader-font)}
+.blessing-message{font:1.1rem/1.65 var(--reader-font);overflow-wrap:anywhere}
+.blessing-source-language{display:block;margin-top:1.25rem;font-size:.75rem;color:#78684e}
+@media(max-width:600px){.blessing-collection{padding:0 .4rem}.blessing-card{padding:1.6rem 1.3rem 2.2rem;min-height:27rem}.blessing-card>img{width:5.5rem;height:5.5rem}.blessing-message{font-size:1rem}}
+
+/* Reading rhythm, shared by both profiles and both reading modes.
+   These are border-to-border gaps, not extra space added to a grid gap.
+   16px attaches related content; 22px is normal dialogue; 40px marks a scene.
+   Keep card padding, label spacing, and the portrait columns independent. */
+:root {
+  --reader-space-related: 16px;
+  --reader-space-flow: 22px;
+  --reader-space-scene: 40px;
+}
+:is(.timeline, .dialogue-sequence, .cinematic-scene, .blackscene-sequence, .aside-sequence, .story-helper-dialogues) {
+  row-gap: 0;
+}
+:is(.timeline, .dialogue-sequence, .cinematic-scene, .blackscene-sequence, .aside-sequence, .story-helper-dialogues) > :not(.story-outline-anchor) {
+  --reader-space-before: var(--reader-space-flow);
+  margin-block: 0;
+}
+/* Cinematic captions and the lines belonging to that cinematic stay together. */
+.cinematic-scene > :not(.story-outline-anchor) {
+  --reader-space-before: var(--reader-space-related);
+}
+:is(.timeline, .dialogue-sequence, .cinematic-scene, .blackscene-sequence, .aside-sequence, .story-helper-dialogues) > :not([hidden]):not(.story-outline-anchor) ~ :not([hidden]):not(.story-outline-anchor) {
+  margin-block-start: var(--reader-space-before);
+}
+/* Whole scenes, encounters, and inserted records have one clear boundary.
+   Two adjacent scene blocks still get one 40px gap, never two margins. */
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > :is(.cinematic-scene, .blackscene-sequence, .aside-sequence, .chapter-artwork, .perspective-divider, .story-chapter-heading, .beat-part-divider, .asset-context-block, .story-battle, .story-activity, .activity-result, .fishing-results, .document-block, .picture-block, .blessing-collection, .story-route-dialogue),
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > :is(.cinematic-scene, .blackscene-sequence, .aside-sequence, .chapter-artwork, .story-battle, .story-activity, .activity-result, .fishing-results, .document-block, .picture-block, .blessing-collection, .story-route-dialogue) + :where(:not([hidden]):not(.story-outline-anchor)) {
+  --reader-space-before: var(--reader-space-scene);
+}
+/* A recap belongs to the preceding scene. Its next ordinary line is also
+   close, but a new scene after it retains the scene boundary above. */
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > .scene-summary-block,
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > .scene-summary-block + :where(.portrait-dialogue-row, .dialogue-block, .choice-block, .reader-appearance-prompt, .scene-summary-block),
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > :is(.asset-context-block, .perspective-divider, .story-chapter-heading, .beat-part-divider) + :where(.portrait-dialogue-row, .dialogue-block, .choice-block, .scene-summary-block, .reader-appearance-prompt) {
+  --reader-space-before: var(--reader-space-related);
+}
+/* Outline anchors occupy no reading space and remain valid scroll targets. */
+.timeline > .story-outline-anchor { margin: 0; padding: 0; height: 0; min-height: 0; }
+.timeline > .story-chapter-heading { padding-top: 0; }
+/* Nested transcripts use the same rhythm instead of adding 14/18/20px gaps. */
+.story-route-dialogue > .dialogue-sequence + :is(h4, .dialogue-sequence),
+.story-battle-dialogue { margin-top: var(--reader-space-flow); }
+.story-route-optional[open] > summary,
+.story-route-dialogue h4,
+.story-battle-dialogue h4 { margin-bottom: var(--reader-space-related); }
+.story-battle-dialogue + .story-battle-dialogue {
+  margin-top: var(--reader-space-flow);
+  padding-top: var(--reader-space-related);
+}
+.story-encounter-dialogue { margin-top: var(--reader-space-flow); }
+.story-encounter-dialogue > .dialogue-sequence { margin-top: var(--reader-space-related); }
+.story-sources { margin-top: var(--reader-space-scene); }

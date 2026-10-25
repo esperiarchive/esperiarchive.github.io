@@ -1,0 +1,72 @@
+.dialogue-communicator {
+  color: #ddbd79;
+  font-size: .72rem;
+  letter-spacing: .055em;
+  margin-bottom: .35rem;
+}
+.dialogue-communicator::before { content: "◉"; margin-right: .4rem; }
+[data-communicator="bad"] > .dialogue-communicator { color: #df9f7b; }
+/* Show the interior of a larger projection, cropped by the portrait box.
+   Overscan keeps the source cone's tapered sides outside the visible image.
+   These are static captures of recovered particles, not a game shader replay. */
+.dialogue-line-portrait[data-communicator-overlay] { isolation: isolate; }
+.dialogue-communicator-overlay {
+  position: absolute;
+  left: -140%;
+  top: -45%;
+  width: 380%;
+  height: 180%;
+  object-fit: fill;
+  opacity: .85;
+  filter: url("../assets/dialogue_effects/communicator/overlay-filters.svg#portrait-strength");
+  mix-blend-mode: screen;
+  pointer-events: none;
+  user-select: none;
+}
+.dialogue-effect-debug { font-size: .7rem; opacity: .85; margin-top: .5rem; }
+.dialogue-effect-debug pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 16rem; overflow: auto; }
+.dialogue-memory-color, .dialogue-memory-vignette {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+.dialogue-memory-color { opacity: 0; }
+[data-memory-graded="true"] > .dialogue-memory-color { opacity: 1; }
+[data-memory-graded="true"] > .dialogue-line-portrait-image { opacity: 0; }
+/* Static adaptation of the source's warm vignette; dialogue text remains clear. */
+.dialogue-memory-vignette {
+  background: radial-gradient(ellipse at center, transparent 38%, rgba(68, 39, 17, .42) 100%);
+  box-shadow: inset 0 0 12px rgba(188, 128, 75, .18);
+}
+/* Reviewed static phase: black/red use the source fade at 1 second (0.4).
+   Lite retains authored alpha. Recovered sprite bytes are unchanged. */
+.dialogue-line-portrait[data-portrait-effects] { isolation: isolate; }
+.dialogue-portrait-mask, .dialogue-haunted-overlay, .dialogue-haunted-shade, .dialogue-haunted-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.dialogue-portrait-mask, .dialogue-haunted-tint {
+  mask-image: url("../assets/dialogue_effects/portrait_v1/spui_bg_fog.png");
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+}
+.dialogue-portrait-mask-black { background: #000; opacity: .4; }
+.dialogue-portrait-mask-red { background: rgb(214, 13, 13); opacity: .4; }
+.dialogue-portrait-mask-lite { background: #000; opacity: .501960814; }
+/* The approved haunted adaptation preserves a clear face while adding recovered
+   corners and wisps. It does not simulate the original moving particles. */
+.dialogue-haunted-overlay { overflow: hidden; }
+.dialogue-haunted-shade { background: radial-gradient(ellipse at 50% 43%, transparent 25%, rgba(8,29,23,.18) 54%, rgba(4,19,16,.66) 100%); }
+.dialogue-haunted-tint { background: rgb(188,245,184); opacity: .28; mix-blend-mode: screen; }
+.dialogue-haunted-texture { position: absolute; max-width: none; pointer-events: none; user-select: none; object-fit: fill; mix-blend-mode: multiply; }
+.dialogue-haunted-texture.top-left { width: 43%; height: 43%; left: -5%; top: -6%; opacity: .78; }
+.dialogue-haunted-texture.top-right { width: 43%; height: 45%; right: -6%; top: -5%; opacity: .74; }
+.dialogue-haunted-texture.bottom-left { width: 43%; height: 43%; left: -8%; bottom: -7%; opacity: .62; }
+.dialogue-haunted-texture.bottom-right { width: 43%; height: 43%; right: -8%; bottom: -7%; opacity: .58; }
+.dialogue-haunted-texture.wisp-left { width: 19%; height: 24%; left: -5%; bottom: 11%; opacity: .45; mix-blend-mode: screen; }
+.dialogue-haunted-texture.wisp-right { width: 29%; height: 21%; right: -6%; bottom: 6%; opacity: .35; mix-blend-mode: screen; }
