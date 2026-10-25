@@ -27,6 +27,30 @@
     }
     return target;
   }
+  function bundles(load) {
+    const resources = new Map();
+    const get = create(async path => {
+      const pack = await load(path);
+      if (pack?.schema_version !== 1 || !pack.resources || Array.isArray(pack.resources)
+          || typeof pack.resources !== "object") throw new Error("Invalid story bundle");
+      const entries = Object.entries(pack.resources);
+      // Validate the whole pack before exposing any of it to ordinary loaders.
+      if (entries.some(([name, value]) => !/^[\w.-]+(?:\/[\w.:-]+)*[.]json$/.test(name)
+          || name.startsWith("/")
+          || name.split("/").some(part => ["", ".", "..", "__proto__", "constructor", "prototype"].includes(part))
+          || (value !== null && typeof value !== "object"))) throw new Error("Invalid bundled resource");
+      for (const [name, value] of entries) resources.set(name, value);
+    });
+    const key = path => path.replace(/^\.\.\/reader_data\//, "").replace(/^data\//, "").split("?")[0];
+    return {
+      has: path => resources.has(key(path)),
+      read: path => resources.get(key(path)),
+      async prepare(descriptors, language) {
+        const paths = new Set(descriptors.flatMap(row => [...row.core, ...(row.locales?.[language] || [])]));
+        await Promise.all([...paths].map(get));
+      },
+    };
+  }
   function patch(target, values) {
     for (const [pointer, value] of values || []) {
       if (typeof pointer !== "string" || !pointer.startsWith("/")) throw new Error("Invalid entity patch");
@@ -104,5 +128,5 @@
     }
     return {documents: [...documents], items: [...items], images: images || documents.size > 0 || items.size > 0};
   }
-  return {create, merge, dependencies, entities, patch};
+  return {create, merge, dependencies, entities, patch, bundles};
 });

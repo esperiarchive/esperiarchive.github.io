@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=44a6a13bb4bd060d"></script>
+  <script src="scripts/config.js?v=b0bc8fa0d563ebd6"></script>
   <script src="scripts/reader_publication.js?v=150006c8fa023db6"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <meta charset="utf-8">
@@ -1254,10 +1254,10 @@
     }
 
     .skill-power-term {
-      color: var(--accent);
+      color: var(--skill-power);
       font-weight: 750;
       cursor: help;
-      border-bottom: 1px dotted rgba(141, 194, 255, 0.55);
+      border-bottom: 1px dotted currentColor;
     }
 
     .skill-tooltip-term:focus-visible {
@@ -2412,6 +2412,10 @@
       min-width: 0;
     }
 
+    .picture-copy:only-child {
+      grid-column: 1 / -1;
+    }
+
     .picture-kicker {
       color: var(--accent);
       font-size: calc(11px * var(--reader-font-ratio));
@@ -3121,12 +3125,21 @@
       }
 
       .profile-tabs {
-        overflow-x: auto;
+        gap: 2px;
+        container-type: inline-size;
       }
 
       .profile-tab {
-        min-width: max-content;
-        flex: 1 0 auto;
+        min-width: 0;
+        flex: 1 1 auto;
+        padding-inline: 0.4em;
+        white-space: nowrap;
+        font-size: clamp(12px, 4cqi, 16px);
+      }
+
+      .profile-tab:lang(ko),
+      .profile-tab:lang(ja) {
+        font-size: clamp(11px, 4.1cqi, 16px);
       }
 
       .profile-artwork {
@@ -3190,13 +3203,31 @@
       }
 
       .picture-block {
-        grid-template-columns: 1fr;
-        gap: 14px;
-        padding: 16px;
+        grid-template-columns: clamp(64px, 22vw, 104px) minmax(0, 1fr);
+        gap: 0.75em;
+        padding: 12px;
       }
 
       .picture-image-shell {
-        min-height: 120px;
+        min-height: 0;
+        padding: 4px;
+      }
+
+      .picture-image {
+        max-width: 104px;
+        max-height: 104px;
+      }
+
+      .picture-block.picture-block-image-only {
+        width: min(100%, 144px);
+      }
+
+      .picture-copy {
+        gap: 0.35em;
+      }
+
+      .picture-title {
+        font-size: calc(17px * var(--reader-font-ratio));
       }
 
       .overview-topline,
@@ -3558,7 +3589,7 @@
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
   <script src="scripts/reader_ui.js?v=1e3a98a0718e90d9"></script>
-  <script src="scripts/reader_catalogs.js?v=b6e5fd2218ae8057"></script>
+  <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
   <script src="scripts/story_runtime.js?v=3733550704f6c2ff"></script>
   <script src="scripts/story_results.js?v=30688082fc607173"></script>
@@ -3571,7 +3602,7 @@
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
   <link rel="stylesheet" href="styles/story_runtime.css?v=ebd8207202b689a6">
-  <link rel="stylesheet" href="styles/reader_theme.css?v=78e6c56661ebc1c9">
+  <link rel="stylesheet" href="styles/reader_theme.css?v=5017060bf70f8eb3">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
     const READER_PUBLIC = Boolean(window.TEA_CONFIG?.public_reader) || document.documentElement.dataset.readerProfile === "public";
@@ -8021,6 +8052,11 @@
       if (!story) {
         return selectedAssetKey;
       }
+      // A collection's public title is separate from its hidden quest objectives.
+      const collectionTitle = story.logical_story_key && localizedField(story, ["display_title"]);
+      if (collectionTitle) {
+        return collectionTitle;
+      }
       const displayTitle = storyDisplayTitle(story);
       if (displayTitle) {
         return displayTitle;
@@ -8238,6 +8274,7 @@
     }
 
     async function loadJson(path) {
+      if (storyBundles.has(path)) return storyBundles.read(path);
       const response = await ReaderPublication.fetch(path, { cache: "no-store" });
       if (!response.ok) {
         throw new Error(`${response.status} ${response.statusText}: ${path}`);
@@ -8246,6 +8283,7 @@
     }
 
     async function loadOptionalJson(path) {
+      if (storyBundles.has(path)) return storyBundles.read(path);
       if (!optionalCache.has(path)) {
         optionalCache.set(path, ReaderPublication.fetch(path, { cache: "no-store" })
           .then((response) => response.ok ? ReaderPublication.readJson(response) : null)
@@ -8475,6 +8513,22 @@
 
     const routeJson = ReaderCatalogs.create(path => loadJson(`data/${path}`));
     const routeEntity = ReaderCatalogs.entities(routeJson);
+    const storyBundles = ReaderCatalogs.bundles(routeJson);
+
+    async function ensureStoryBundles(story) {
+      if (!routeCatalogs?.story_bundles || !story) return;
+      try {
+        const index = await routeJson(routeCatalogs.story_bundles);
+        if (index.schema_version !== 1) throw new Error("Unsupported story bundle index");
+        const keys = story.detailPaths?.length ? story.detailPaths : [story.key];
+        const descriptors = keys.map(key => index.stories[key]).filter(Boolean);
+        await storyBundles.prepare(descriptors, selectedLanguage);
+      } catch (error) {
+        // Older data releases and interrupted bundle downloads remain readable
+        // through the original per-file paths. Failed pack requests can retry.
+        console.warn("Story bundle unavailable; loading individual resources.", error);
+      }
+    }
     let routeCatalogs = null;
     let storyNavigationLoad = null;
     let characterIndexLoad = null;
@@ -8486,11 +8540,15 @@
 
     async function ensureStoryPortraits(graph, relatedGraphs = []) {
       const graphs = [graph, ...relatedGraphs.filter(Boolean)];
-      if (playerAppearance) await playerAppearance.ensure().catch(error => console.warn("Merlin appearance:", error.message));
-      if (!routeCatalogs?.portraits) return;
-      if (routeCatalogs.viewpoints && !choiceViewpoints) choiceViewpoints = await routeJson(routeCatalogs.viewpoints);
+      const appearance = playerAppearance?.ensure().catch(error => console.warn("Merlin appearance:", error.message));
+      if (!routeCatalogs?.portraits) { await appearance; return; }
+      const [, viewpoints, catalog] = await Promise.all([
+        appearance,
+        routeCatalogs.viewpoints && !choiceViewpoints ? routeJson(routeCatalogs.viewpoints) : choiceViewpoints,
+        routeJson(routeCatalogs.portraits),
+      ]);
+      choiceViewpoints = viewpoints;
       if (typeof StoryPerspectives !== "undefined") StoryPerspectives.install(graph, activeBeatContexts || [], choiceViewpoints);
-      const catalog = await routeJson(routeCatalogs.portraits);
       if (!portraitCatalogLoad) {
         installDialoguePortraits({portraits: [], line_overrides: catalog.line_overrides,
           speaker_aliases: catalog.speaker_aliases, subtitle_bindings: catalog.subtitle_bindings});
@@ -8638,7 +8696,13 @@
 
     async function hydrateLogicalStory(story) {
       if (!routeCatalogs) return;
-      const details = await Promise.all((story.detailPaths || []).map(routeJson));
+      // Navigation already identifies the main assets; their records do not
+      // need to wait for the quest's detailed objectives and related assets.
+      const [details] = await Promise.all([
+        Promise.all((story.detailPaths || []).map(routeJson)),
+        ensureStoryRecords(story.assetKeys),
+        ensureStoryBundles(story),
+      ]);
       for (const detail of details) {
         if (String(detail.quest.line_id) === String(story.id)) {
           // Preserve the former navigation contract: asset membership does not
@@ -8648,7 +8712,7 @@
           story.relatedAssets = detail.quest.related_assets || [];
         }
       }
-      await ensureStoryRecords([...story.assetKeys, ...(story.relatedAssets || []).map(row => row.asset_key)]);
+      await ensureStoryRecords((story.relatedAssets || []).map(row => row.asset_key));
       await loadMaterializedExplorationStories(selectedSection, {stories: [story]});
     }
 
@@ -8737,8 +8801,16 @@
       }
       const bindings = await ensureArchiveBindings();
       const needed = ReaderCatalogs.dependencies(contexts, bindings.document_steps, storyRuntimeCatalog);
-      const readEntries = (kind, ids) => Promise.all([...new Set(ids.map(id => bindings.archives[kind].entries[id]).filter(Boolean))].map(routeJson));
-      const [documents, items] = await Promise.all([readEntries("documents", needed.documents), readEntries("items", needed.items)]);
+      const paths = (kind, ids) => [...new Set(ids.map(id => bindings.archives[kind].entries[id]).filter(Boolean))];
+      const documentPaths = paths("documents", needed.documents), itemPaths = paths("items", needed.items);
+      const [documents, items, images, fallbacks] = await Promise.all([
+        Promise.all(documentPaths.map(routeJson)),
+        Promise.all(itemPaths.map(routeJson)),
+        needed.images ? loadOptionalJson(`data/${manifest.item_images || "media/item_images/index.json"}`) : null,
+        documentPaths.length || itemPaths.length ? Promise.all([
+          loadOptionalJson("data/mt/fallbacks.json"), loadOptionalJson("data/mt/archives.json"),
+        ]) : null,
+      ]);
       documentCatalog = {documents: documents.map(row => row.entry)};
       itemCatalog = {items: items.map(row => row.entry)};
       const combine = (rows, field, lang) => ({lang, [field]: Object.assign({}, ...rows.map(row => row.locales[lang]?.[field] || {}))});
@@ -8746,11 +8818,20 @@
       documentCnLocale = combine(documents, "documents", "cn");
       itemLocale = combine(items, "items", selectedLanguage);
       itemCnLocale = combine(items, "items", "cn");
-      if (needed.images) itemImageCatalog = await loadOptionalJson(`data/${manifest.item_images || "media/item_images/index.json"}`);
-      if (documents.length || items.length) [savedTextFallbacks, savedArchiveFallbacks] = await Promise.all([
-        loadOptionalJson("data/mt/fallbacks.json"), loadOptionalJson("data/mt/archives.json")]);
+      if (needed.images) itemImageCatalog = images;
+      if (fallbacks) [savedTextFallbacks, savedArchiveFallbacks] = fallbacks;
       buildArchiveItemIndex();
       documentsByExplorationStep = explorationDocumentIndex(documentCatalog);
+    }
+
+    async function ensureStoryPresentation(graph, contexts) {
+      // Portraits and archive references are independent. Both must be ready
+      // before rendering, including portraits used only in battle dialogue.
+      await Promise.all([
+        ensureStoryPortraits(graph, Object.values(storyRuntimeCatalog?.route_dialogues?.dialogues || {})
+          .map(dialogue => dialogue.graph)),
+        ensureStoryArchives(contexts),
+      ]);
     }
 
     async function loadManifest() {
@@ -9020,10 +9101,13 @@
           cnLocale:{texts:{},speakers:{}},machineLocale:null};
       }
       const language = selectedLanguage;
-      let [graph, loadedLocale, loadedCn, mt] = await Promise.all([
+      const scenePath = storyRuntimeCatalog?.scene_summaries?.assets?.[assetKey]
+        || storyRuntimeCatalog?.scene_summaries?.episodes?.[assetKey.split("/")[0]];
+      let [graph, loadedLocale, loadedCn, mt, scenes] = await Promise.all([
         loadGraph(assetKey), loadLocale(assetKey, language),
         language === "cn" ? null : loadLocale(assetKey, "cn"),
         loadMachineLocale(assetKey, language),
+        scenePath ? routeJson(scenePath) : null,
       ]);
       const owner = String(activeBeat?.logicalStory?.id || story.exploration_line_id || "");
       if(storyRuntimeCatalog?.route_dialogues?.story_presentations) {
@@ -9032,10 +9116,7 @@
       if (story.reader_appearance_prompt) {
         graph = ReaderPlayerAppearance.installPrompt(graph, story.reader_appearance_prompt);
       }
-      const scenePath = storyRuntimeCatalog?.scene_summaries?.assets?.[assetKey]
-        || storyRuntimeCatalog?.scene_summaries?.episodes?.[assetKey.split("/")[0]];
-      if (scenePath) {
-        const scenes = await routeJson(scenePath);
+      if (scenes) {
         graph = StoryScenes.install(graph, scenes.assets?.[assetKey]);
       }
       if (storyRuntimeCatalog?.chapter_artwork) {
@@ -12306,7 +12387,21 @@
       const rawItems = interactiveItems();
       const initial = DialogueEffects.analyse(storyGraph)[rawItems[0]?.nodeId] || {};
       const items = DialogueEffects.project(rawItems, initial);
+      const sections = currentStoryOutlineSections();
+      const outlinedAssets = new Set();
       items.forEach((item, timelineIndex) => {
+        // Only anchor chapters reached on this path. Revisiting an anchor scrolls
+        // through the existing transcript without replaying or changing choices.
+        if (!["effect", "effect_reset", "return", "system"].includes(item.type)) {
+          const assetKey = item.assetKey || storyGraph.nodes[item.nodeId]?.asset_key
+            || (String(item.nodeId || "").includes("::")
+              ? String(item.nodeId).split("::")[0] : storyGraph.asset_key);
+          const section = sections.find((entry) => (entry.assetKeys || []).includes(assetKey));
+          if (section && !outlinedAssets.has(section.targetAssetKey)) {
+            renderStoryChapterHeadings(section.targetAssetKey);
+            outlinedAssets.add(section.targetAssetKey);
+          }
+        }
         const indexedItem = { ...item, timelineIndex };
         renderTimelineItem(indexedItem, timeline, 0, true, previousItem);
         if (!["return", "effect", "effect_reset"].includes(item.type)) {
@@ -12455,13 +12550,14 @@
 
     function renderStoryOutline() {
       hideStoryOutline();
-      if (!["full", "debug"].includes(readerMode)) {
+      const outline = currentStoryOutlineSections();
+      if (outline.length < 2) {
         return;
       }
-      const sections = currentStoryOutlineSections().filter((section) => (
+      const sections = outline.filter((section) => (
         document.getElementById(section.sectionId)
       ));
-      if (sections.length < 2) {
+      if (!sections.length) {
         return;
       }
       for (const section of sections) {
@@ -14215,15 +14311,11 @@
         activeBeatContexts.length ? activeBeatContexts : [firstContext],
       );
       storyGraph = interactiveContext.graph;
-      // Encounter and activity dialogue graphs live in the current quest's small
-      // runtime pack, outside the merged main graph. Load their portraits too.
-      await ensureStoryPortraits(storyGraph, Object.values(storyRuntimeCatalog?.route_dialogues?.dialogues || {})
-        .map(dialogue => dialogue.graph));
+      await ensureStoryPresentation(storyGraph, activeBeatContexts);
       StoryInspections.install(storyGraph,activeBeatContexts,storyRuntimeCatalog,groupIndex?.group_key,logicalNavigation);
       officialLocale = interactiveContext.officialLocale;
       cnLocale = interactiveContext.cnLocale;
       machineLocale = interactiveContext.machineLocale;
-      await ensureStoryArchives(activeBeatContexts);
       initialNodeId = options.node || "";
       fullScriptOverrides = {};
       fullScriptRoute = null;
@@ -14302,6 +14394,7 @@
       if (primaryView === "mystical" && selectedInteractionAssetKey) {
         await ensureCharacterDetail(selectedCharacterId);
       }
+      await ensureStoryBundles(activeBeat?.logicalStory);
       activeBeatContexts = activeBeat
         ? await Promise.all((activeBeatContexts.length ? activeBeatContexts.map(context => context.story) : activeBeat.stories).map((story) => loadStoryContext(story)))
         : [];
@@ -14310,15 +14403,11 @@
         activeBeatContexts.length ? activeBeatContexts : [firstContext],
       );
       storyGraph = interactiveContext.graph;
-      // Encounter and activity dialogue graphs live in the current quest's small
-      // runtime pack, outside the merged main graph. Load their portraits too.
-      await ensureStoryPortraits(storyGraph, Object.values(storyRuntimeCatalog?.route_dialogues?.dialogues || {})
-        .map(dialogue => dialogue.graph));
+      await ensureStoryPresentation(storyGraph, activeBeatContexts);
       StoryInspections.install(storyGraph,activeBeatContexts,storyRuntimeCatalog,groupIndex?.group_key,logicalNavigation);
       officialLocale = interactiveContext.officialLocale;
       cnLocale = interactiveContext.cnLocale;
       machineLocale = interactiveContext.machineLocale;
-      await ensureStoryArchives(activeBeatContexts);
       savePreferences();
       updateHash(false, true);
       renderSectionOptions();
