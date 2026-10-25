@@ -269,6 +269,34 @@
       min-width: 0;
     }
 
+    .story-reader[aria-busy="true"] > :not(.interaction-reader-context):not(.reader-loading) {
+      display: none !important;
+    }
+
+    .reader-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75em;
+      padding: 2em 1em;
+      color: var(--muted);
+    }
+
+    .reader-loading::before {
+      content: "";
+      width: 1em;
+      height: 1em;
+      border: 2px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: reader-loading-spin 0.8s linear infinite;
+    }
+
+    @keyframes reader-loading-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .reader-loading::before { animation: none; }
+    }
+
     .story-content-layout {
       display: grid;
       grid-template-columns: minmax(0, var(--content-width));
@@ -2671,8 +2699,9 @@
 
     .choice-block {
       display: grid;
-      gap: 10px;
-      padding: 14px;
+      min-width: 0;
+      gap: 0.5em;
+      padding: 12px;
       border: 1px solid rgba(var(--accent-rgb), 0.2);
       border-radius: 8px;
       background: rgba(var(--panel-rgb), 0.58);
@@ -2697,18 +2726,20 @@
 
     .choice-options {
       display: grid;
-      gap: 10px;
+      gap: 0.5em;
+      font-size: var(--dialogue-font-size);
     }
 
     .choice-option {
       width: 100%;
-      min-height: 54px;
+      min-height: 44px;
       height: auto;
-      padding: 13px 16px;
+      padding: 0.4em 0.8em;
       text-align: left;
       font-size: var(--dialogue-font-size);
-      line-height: 1.35;
+      line-height: 1.55;
       white-space: pre-wrap;
+      overflow-wrap: anywhere;
       border-color: rgba(var(--ink-rgb), 0.2);
       background: rgba(var(--ink-rgb), 0.07);
     }
@@ -2745,6 +2776,8 @@
       display: grid;
       grid-template-columns: max-content minmax(0, 1fr);
       column-gap: 0.4em;
+      /* Center the complete row, keeping wrapped wording on the first baseline. */
+      align-content: center;
       align-items: baseline;
     }
 
@@ -3094,7 +3127,14 @@
 
       .archive-layout {
         grid-template-columns: 1fr;
-        gap: 22px;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .archive-entry {
+        min-height: 44px;
+        padding: 8px 10px;
+        gap: 4px 8px;
       }
 
       .archive-list {
@@ -3102,14 +3142,22 @@
       }
 
       .archive-detail {
-        padding: 22px 0 30px;
+        padding: 16px 0 24px;
+        scroll-margin-top: 12px;
         border-top: 1px solid var(--line);
         border-left: 0;
+      }
+
+      /* Leave scroll room below short entries so their heading can reach the top. */
+      .archive-detail:not(:has(.archive-detail-empty)) {
+        min-height: calc(100svh - 40px);
       }
 
       .character-toolbar {
         align-items: stretch;
         flex-direction: column;
+        gap: 8px;
+        padding: 12px 0;
       }
 
       .character-search {
@@ -3117,7 +3165,35 @@
       }
 
       .character-grid {
-        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        padding-bottom: 24px;
+      }
+
+      .character-card {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: 48px 1fr;
+        justify-items: center;
+        align-items: start;
+        min-width: 0;
+        min-height: 0;
+        padding: 8px 4px;
+        gap: 6px;
+        text-align: center;
+      }
+
+      .character-card-details {
+        width: 100%;
+      }
+
+      .character-card .character-name-row {
+        align-items: center;
+      }
+
+      .character-card .character-name {
+        font-size: calc(14px * var(--reader-font-ratio));
+        line-height: 1.5;
+        white-space: normal;
       }
 
       .profile-hero {
@@ -3249,8 +3325,18 @@
       }
 
       .line-text,
+      .choice-options,
       .choice-option {
         font-size: calc(var(--dialogue-font-size) * 0.9);
+      }
+
+      .choice-block {
+        padding: 10px;
+      }
+
+      .choice-option {
+        min-height: 32px;
+        padding: 0.35em 0.65em;
       }
 
       .portrait-dialogue-row {
@@ -3509,6 +3595,7 @@
           <button id="interaction-back" class="interaction-back" type="button" data-i18n="‹ Character profile">&lsaquo; Character profile</button>
           <span id="interaction-context-title"></span>
         </div>
+        <div id="interaction-loading" class="reader-loading" role="status" hidden></div>
         <header class="story-header">
           <div id="asset-label" class="asset-label">...</div>
           <h1 id="story-heading" class="story-heading" data-i18n="Loading story">Loading story</h1>
@@ -3601,7 +3688,7 @@
   <script src="scripts/story_chapters.js?v=92668a6e6f3de102"></script>
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
-  <link rel="stylesheet" href="styles/story_runtime.css?v=ebd8207202b689a6">
+  <link rel="stylesheet" href="styles/story_runtime.css?v=7b7c4d2fdea5750f">
   <link rel="stylesheet" href="styles/reader_theme.css?v=5017060bf70f8eb3">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
@@ -4005,6 +4092,7 @@
     const interactionReaderContext = document.getElementById("interaction-reader-context");
     const interactionBack = document.getElementById("interaction-back");
     const interactionContextTitle = document.getElementById("interaction-context-title");
+    const interactionLoading = document.getElementById("interaction-loading");
     const assetLabel = document.getElementById("asset-label");
     const storyHeading = document.getElementById("story-heading");
     const storySubtitle = document.getElementById("story-subtitle");
@@ -6130,6 +6218,11 @@
       updatePrimaryShell();
       renderArchive();
       updateHash(false, replaceHash);
+      // In the stacked layout, an explicit selection should reveal its contents.
+      // Browsing a category or refreshing translations should keep the list in view.
+      if (id && !overview && window.matchMedia("(max-width: 900px)").matches) {
+        archiveDetail.scrollIntoView({ block: "start", behavior: "auto" });
+      }
     }
 
     function scrollReaderToTop(behavior = "auto") {
@@ -6151,8 +6244,8 @@
     async function showArchive(kind, id = "", replaceHash = true) {
       await ensureArchiveData(kind);
       archiveSearch.value = "";
-      selectArchiveEntry(kind, id, replaceHash, !id);
       storyScroll.scrollTo({ top: 0 });
+      selectArchiveEntry(kind, id, replaceHash, !id);
     }
 
     function updatePrimaryShell() {
@@ -6172,7 +6265,8 @@
       mysticalHouseTab.setAttribute("aria-selected", String(primaryView === "mystical"));
       documentArchiveTab.setAttribute("aria-selected", String(archiveBrowse));
       storyNavigation.hidden = primaryView !== "stories";
-      bottomNavigation.hidden = homeOpen || mysticalBrowse || archiveBrowse;
+      const interactionPending = storyReader.getAttribute("aria-busy") === "true";
+      bottomNavigation.hidden = homeOpen || mysticalBrowse || archiveBrowse || interactionPending;
       archiveBrowser.hidden = !archiveBrowse;
       mysticalBrowser.hidden = !mysticalBrowse;
       storyContentLayout.hidden = homeOpen || mysticalBrowse || archiveBrowse;
@@ -6181,7 +6275,7 @@
         hideStoryOutline();
       }
       interactionReaderContext.hidden = !interactionOpen;
-      modeSelect.disabled = false;
+      modeSelect.disabled = interactionPending;
       modeSelect.hidden = homeOpen || mysticalBrowse || archiveBrowse;
     }
 
@@ -6393,6 +6487,11 @@
 
     function fitCharacterName(element) {
       requestAnimationFrame(() => {
+        if (window.matchMedia("(max-width: 900px)").matches) {
+          element.style.removeProperty("font-size");
+          element.style.removeProperty("white-space");
+          return;
+        }
         const maximumSize = 15;
         const minimumSize = 11;
         let size = maximumSize;
@@ -14340,30 +14439,64 @@
       translateMissingStoryText(activeBeatContexts.length ? activeBeatContexts : [firstContext], interactiveContext);
     }
 
+    function setInteractionLoading(loading) {
+      storyReader.setAttribute("aria-busy", String(loading));
+      interactionLoading.hidden = !loading;
+      interactionLoading.textContent = uiText("Loading…");
+      languageSelect.disabled = loading;
+      updatePrimaryShell();
+    }
+
     async function openMysticalInteraction(actorId, assetKey, options = {}) {
-      await ensureCharacterDetail(actorId);
-      await ensureStoryRuntime();
-      const character = mysticalCharacterById.get(String(actorId));
-      const interaction = mysticalInteractionByAsset.get(assetKey);
-      if (!character || !interaction) {
-        showCharacterProfile(actorId, options.replaceHash !== false);
-        return;
-      }
       primaryView = "mystical";
       selectedCharacterId = String(actorId);
       selectedInteractionAssetKey = assetKey;
-      logicalNavigation = false;
-      selectedSection = interaction.episode;
-      selectedCategory = "herohub_story";
-      selectedStoryId = String(interaction.story_id);
-      selectedAssetKey = assetKey;
-      updatePrimaryShell();
-      await setSelectedGroup(selectedSection, selectedCategory);
-      await loadSelectedStory(assetKey, {
-        node: options.node || "",
-        keepScroll: options.keepScroll,
-        replaceHash: options.replaceHash !== false,
-      });
+      stopActiveVoice();
+      timeline.replaceChildren();
+      for (const note of storyReader.querySelectorAll("#story-choice-history, .story-return-link")) note.remove();
+      storyHeading.textContent = "";
+      assetLabel.textContent = "";
+      storySubtitle.replaceChildren();
+      storyOverview.hidden = true;
+      translationNotice.classList.remove("visible");
+      restartButton.closest(".reader-actions").hidden = true;
+      document.getElementById("story-sources").replaceChildren();
+      document.getElementById("story-sources").hidden = true;
+      bottomPosition.textContent = "";
+      for (const button of [previousStoryTop, previousStoryBottom, nextStoryTop, nextStoryBottom]) button.disabled = true;
+      currentStoryTitle.textContent = uiText("Loading…");
+      interactionContextTitle.textContent = characterName(mysticalCharacterById.get(String(actorId)));
+      setInteractionLoading(true);
+      if (!options.keepScroll) scrollReaderToTop();
+      try {
+        await ensureCharacterDetail(actorId);
+        await ensureStoryRuntime();
+        const character = mysticalCharacterById.get(String(actorId));
+        const interaction = mysticalInteractionByAsset.get(assetKey);
+        if (!character || !interaction) {
+          await showCharacterProfile(actorId, options.replaceHash !== false);
+          return;
+        }
+        logicalNavigation = false;
+        selectedSection = interaction.episode;
+        selectedCategory = "herohub_story";
+        selectedStoryId = String(interaction.story_id);
+        selectedAssetKey = assetKey;
+        currentStoryTitle.textContent = interactionTitle(interaction);
+        interactionContextTitle.textContent = characterName(character);
+        await setSelectedGroup(selectedSection, selectedCategory);
+        await loadSelectedStory(assetKey, {
+          node: options.node || "",
+          keepScroll: options.keepScroll,
+          replaceHash: options.replaceHash !== false,
+        });
+      } catch (error) {
+        storyGraph = null;
+        currentStoryTitle.textContent = uiText("Could not load this content: {error}", {error: error.message});
+        showRouteError(error);
+      } finally {
+        setInteractionLoading(false);
+      }
     }
 
     async function changeLanguage(language) {
@@ -14620,6 +14753,9 @@
     window.addEventListener("resize", () => {
       positionStoryOutline();
       if (!window.matchMedia("(max-width: 900px)").matches) setStoryOutlineOpen(false);
+    });
+    window.matchMedia("(max-width: 900px)").addEventListener("change", () => {
+      document.querySelectorAll(".character-name").forEach(fitCharacterName);
     });
     storyOutlineToggle.addEventListener("click", () => {
       setStoryOutlineOpen(storyOutline.dataset.mobileOpen !== "true");

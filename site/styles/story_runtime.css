@@ -50,9 +50,9 @@
 .story-sources a { color: inherit; text-underline-offset: 3px; }
 @media (max-width: 600px) {
   .story-battle { padding: 7px 0 7px 13px; }
-  .story-battle-enemies { gap: 8px; }
-  .story-battle-enemy { flex-basis: calc((100% - 16px) / 3); }
-  .story-battle-enemy span { font-size: .72em; padding: 6px 3px; }
+  .story-battle-enemies { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .story-battle-enemy { border-radius: 5px; }
+  .story-battle-enemy span { font-size: .72em; line-height: 1.55; padding: 4px 2px; }
 }
 .story-activity p, .story-choice-history p { margin: 4px 0 10px; font-size: calc(14px * var(--reader-font-ratio)); line-height: 1.55; color: var(--soft, #778592); }
 .story-activity-controls, .story-history-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -133,8 +133,8 @@
 .story-encounter-dialogue > summary:focus-visible { outline: 2px solid #d99729; outline-offset: 3px; }
 .story-encounter-condition { color: var(--muted, #acaaa3); font-size: .8em; line-height: 1.5; }
 /* Recaps are compact notes; objectives retain their separate left-rule style. */
-/* The inner portrait/body/background slots are fixed. Additional cast lives
-   in the outer margins and never sizes the dialogue body column. */
+/* Portrait slots stay aligned across the scene. Dialogue can fill the empty
+   background slot; choices and recaps keep the central column. */
 :is(.timeline, .dialogue-sequence, .cinematic-scene) {
   --reader-portrait-size: 76px;
   --reader-column-gap: 12px;
@@ -159,6 +159,9 @@
 .outer-portrait-stack > .dialogue-line-portrait { grid-column: auto; grid-row: auto; }
 .secondary-portrait-stack { align-self: center; }
 .portrait-dialogue-row { align-items: center; }
+.portrait-dialogue-row:not(:has(> .secondary-portrait-stack)) > .dialogue-block {
+  grid-column: 2 / -1;
+}
 .outer-portrait-left {
   width: var(--reader-portrait-size, 76px);
   right: calc(100% + var(--reader-column-gap, 12px));
@@ -219,9 +222,7 @@
   margin-bottom: 6px;
 }
 .scene-summary-block .cinematic-summary { font-size: calc(14px * var(--reader-font-ratio)); line-height: 1.6; }
-.full-script-choice { min-width: 0; padding: 12px; background: rgba(10, 15, 21, .78); }
-.full-script-choice .choice-options { gap: 8px; }
-.full-script-choice .choice-option { min-height: 42px; padding: 9px 12px; overflow-wrap: anywhere; }
+.full-script-choice { background: rgba(10, 15, 21, .78); }
 .full-script-choice .choice-option.dimmed { opacity: 1; color: var(--muted); background: transparent; }
 .full-script-choice .choice-option.selected:disabled { color: #152125; background: #b6ceca; border-color: #c6ded9; }
 .full-script-choice .choice-option.selected .choice-number { color: inherit; }
@@ -233,7 +234,6 @@
     --reader-background-size: 46px;
   }
   .scene-summary-block { padding: 9px 13px; }
-  .full-script-choice { padding: 10px; }
 }
 @media (max-width: 600px) {
   :is(.timeline, .dialogue-sequence, .cinematic-scene) {
@@ -292,6 +292,14 @@
   --reader-space-related: 16px;
   --reader-space-flow: 22px;
   --reader-space-scene: 40px;
+}
+/* Smaller screens use a tighter rhythm without changing portrait sizes. */
+@media (max-width: 900px) {
+  :root {
+    --reader-space-related: 12px;
+    --reader-space-flow: 16px;
+    --reader-space-scene: 28px;
+  }
 }
 :is(.timeline, .dialogue-sequence, .cinematic-scene, .blackscene-sequence, .aside-sequence, .story-helper-dialogues) {
   row-gap: 0;
