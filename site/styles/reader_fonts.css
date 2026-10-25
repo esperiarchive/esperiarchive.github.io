@@ -3,36 +3,42 @@
   font-family: "TEA Reader Latin";
   src: url("../assets/fonts/tea-reader-latin.woff2") format("woff2");
   font-style: normal; font-weight: 400; font-display: swap;
+  ascent-override: 126%; descent-override: 28.8%; line-gap-override: 0%;
   unicode-range: U+20-7E,U+A0-FF,U+101-109,U+10C-119,U+11C-11F,U+123-125,U+128-12B,U+12E-131,U+133-135,U+139-13A,U+13D-13E,U+141-144,U+146-148,U+14C-155,U+157-165,U+168-17E,U+1A0-1A1,U+1AF-1B0,U+1CD-1DC,U+1EA-1EB,U+1F8-1F9,U+1FC-1FD,U+218-21B,U+2002,U+2010-2016,U+2018-201A,U+201C-201E,U+2020-2021,U+2025-2026,U+2030,U+2032-2033,U+2035,U+2039-203C,U+2042,U+2047-2049,U+2051;
 }
 @font-face {
   font-family: "TEA Reader Latin";
   src: url("../assets/fonts/shards/latin-000-e74973855fec.woff2") format("woff2");
   font-style: normal; font-weight: 400; font-display: swap;
+  ascent-override: 126%; descent-override: 28.8%; line-gap-override: 0%;
   unicode-range: U+391-3A1,U+3A3-3A9,U+3B1-3C9,U+401,U+410-44F,U+451,U+1E3E-1E3F,U+1E9E,U+1EA0-1EF9,U+20A9,U+20AB-20AC,U+20DD-20DE,U+2100,U+2103,U+2105,U+2109-210A,U+210F,U+2113,U+2116,U+2121-2122,U+2126-2127,U+212B,U+212E,U+2135,U+213B,U+2160-216B,U+2170-217B,U+2190-2192;
 }
 @font-face {
   font-family: "TEA Reader Latin";
   src: url("../assets/fonts/shards/latin-001-ebd673d85254.woff2") format("woff2");
   font-style: normal; font-weight: 400; font-display: swap;
+  ascent-override: 126%; descent-override: 28.8%; line-gap-override: 0%;
   unicode-range: U+2193-2199,U+21B8-21B9,U+21C4-21C6,U+21CB-21CC,U+21D0,U+21D2,U+21D4,U+21E6-21E9,U+21F5,U+2200,U+2202-2203,U+2205-220B,U+220F,U+2211-2213,U+2215,U+221A,U+221D-2220,U+2223,U+2225-222E,U+2234-2237,U+223D,U+2243,U+2245,U+2248,U+224C,U+2252,U+2260-2262,U+2264-2267,U+226A-226B,U+226E-226F,U+2272-2273,U+2276-2277,U+2282-2287,U+228A-228B,U+2295-2299,U+22A0,U+22A5,U+22BF,U+22DA-22DB,U+22EF,U+2305-2307,U+2312,U+2318,U+23B0-23B1,U+23BE-23CC,U+23CE,U+23DA-23DB,U+2423,U+2460-24E4;
 }
 @font-face {
   font-family: "TEA Reader Latin";
   src: url("../assets/fonts/shards/latin-002-0dac758d6e89.woff2") format("woff2");
   font-style: normal; font-weight: 400; font-display: swap;
+  ascent-override: 126%; descent-override: 28.8%; line-gap-override: 0%;
   unicode-range: U+24E5-25AB,U+25B1-25B3,U+25B6-25B7,U+25BC-25BD,U+25C0-25C1,U+25C6-25CC,U+25CE-25D3,U+25E2-25E6,U+25EF,U+2600-2603,U+2605-2606,U+2609,U+260E-260F,U+2616-2617,U+261C-261F,U+262F,U+2640-2642,U+2660-2669;
 }
 @font-face {
   font-family: "TEA Reader Latin";
   src: url("../assets/fonts/shards/latin-003-54706e6fbc58.woff2") format("woff2");
   font-style: normal; font-weight: 400; font-display: swap;
+  ascent-override: 126%; descent-override: 28.8%; line-gap-override: 0%;
   unicode-range: U+266A-266F,U+2672-267D,U+26A0,U+26BD-26BE,U+2702,U+2713,U+271A,U+273D,U+273F-2740,U+2756,U+2776-2793,U+27A1,U+2934-2935,U+29BF,U+29FA-29FB,U+2B05-2B07,U+2B1A,U+2B95,U+2E3A-2E3B,U+FF01-FF5D,U+FF5F-FF65,U+FFE3-FFE6,U+FFE8-FFEE,U+1F100-1F10C,U+1F110-1F14C;
 }
 @font-face {
   font-family: "TEA Reader Latin";
   src: url("../assets/fonts/shards/latin-004-9666d9e96f6f.woff2") format("woff2");
   font-style: normal; font-weight: 400; font-display: swap;
+  ascent-override: 126%; descent-override: 28.8%; line-gap-override: 0%;
   unicode-range: U+1F14D-1F16C,U+1F170-1F1AC;
 }
 @font-face {
