@@ -6,13 +6,14 @@
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <meta charset="utf-8">
   <link rel="stylesheet" href="styles/reader_fonts.css?v=97b8151887634d54">
-  <link rel="stylesheet" href="styles/reader_home.css?v=9c99a8e15653bd57">
+  <link rel="stylesheet" href="styles/reader_home.css?v=b0b0de43b7b49e73">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Esperia Archive</title>
   <style>
     :root {
       --content-width: 960px;
       --dialogue-font-size: 17px;
+      --reader-font-ratio: 1;
       font-family: var(--reader-font);
     }
 
@@ -252,6 +253,7 @@
     }
 
     .story-scroll {
+      font-size: calc(16px * var(--reader-font-ratio));
       overflow-anchor: none;
       min-width: 0;
       overflow: auto;
@@ -378,7 +380,7 @@
 
     .archive-heading {
       margin: 0;
-      font-size: 34px;
+      font-size: calc(34px * var(--reader-font-ratio));
       line-height: 1.15;
     }
 
@@ -425,7 +427,7 @@
 
     .archive-count {
       color: var(--soft);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       white-space: nowrap;
     }
 
@@ -553,7 +555,7 @@
       min-width: 0;
       overflow: hidden;
       color: var(--ink);
-      font-size: 14px;
+      font-size: calc(14px * var(--reader-font-ratio));
       font-weight: 750;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -563,7 +565,7 @@
       min-width: 0;
       overflow: hidden;
       color: var(--muted);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -577,7 +579,7 @@
       grid-row: 1 / span 2;
       color: var(--soft);
       font-family: var(--reader-font);
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
     }
 
     .archive-detail {
@@ -589,7 +591,7 @@
     .archive-detail-kicker {
       margin-bottom: 8px;
       color: var(--accent-2);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
       text-transform: uppercase;
     }
@@ -619,14 +621,14 @@
     .archive-detail-title {
       margin: 0;
       color: var(--ink);
-      font-size: 28px;
+      font-size: calc(28px * var(--reader-font-ratio));
       line-height: 1.2;
     }
 
     .archive-detail-subtitle {
       margin-top: 8px;
       color: var(--soft);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
     }
 
     .archive-detail-image {
@@ -646,7 +648,7 @@
     .archive-detail-content {
       margin-top: 24px;
       color: var(--ink);
-      font-size: var(--dialogue-size);
+      font-size: var(--dialogue-font-size);
       line-height: 1.65;
       white-space: pre-wrap;
     }
@@ -654,7 +656,7 @@
     .archive-item-comment {
       margin-top: 16px;
       color: var(--muted);
-      font-size: calc(var(--dialogue-size) * 0.88);
+      font-size: calc(var(--dialogue-font-size) * 0.88);
       font-style: italic;
       line-height: 1.6;
       white-space: pre-wrap;
@@ -669,7 +671,7 @@
     .archive-item-story h3 {
       margin: 0 0 12px;
       color: var(--accent-2);
-      font-size: 15px;
+      font-size: calc(15px * var(--reader-font-ratio));
     }
 
     .archive-item-story .archive-detail-content {
@@ -685,7 +687,7 @@
     .archive-variant-label {
       margin-bottom: 7px;
       color: var(--accent-2);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
     }
 
@@ -697,7 +699,7 @@
 
     .archive-related-title {
       margin: 0 0 12px;
-      font-size: 16px;
+      font-size: calc(16px * var(--reader-font-ratio));
     }
 
     .archive-related-list {
@@ -731,7 +733,7 @@
 
     .mystical-kicker {
       color: var(--accent-2);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -739,14 +741,14 @@
 
     .mystical-heading {
       margin: 0;
-      font-size: 34px;
+      font-size: calc(34px * var(--reader-font-ratio));
       line-height: 1.15;
     }
 
     .mystical-description {
       max-width: 72ch;
       color: var(--muted);
-      font-size: 16px;
+      font-size: calc(16px * var(--reader-font-ratio));
       line-height: 1.55;
       white-space: pre-wrap;
     }
@@ -771,7 +773,7 @@
 
     .character-count {
       color: var(--soft);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       white-space: nowrap;
     }
 
@@ -784,7 +786,7 @@
 
     .character-faction-heading {
       color: var(--ink);
-      font-size: 23px;
+      font-size: calc(23px * var(--reader-font-ratio));
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -836,7 +838,7 @@
       overflow: hidden;
       color: var(--ink);
       background: color-mix(in srgb, var(--character-color) 42%, var(--panel-strong));
-      font-size: 20px;
+      font-size: calc(20px * var(--reader-font-ratio));
       font-weight: 850;
     }
 
@@ -863,7 +865,7 @@
     .character-name {
       display: block;
       color: var(--ink);
-      font-size: 15px;
+      font-size: calc(15px * var(--reader-font-ratio));
       font-weight: 800;
       line-height: 1.2;
       overflow-wrap: anywhere;
@@ -874,7 +876,7 @@
       display: block;
       margin-top: 4px;
       color: var(--soft);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
     }
 
     .character-profile {
@@ -911,12 +913,12 @@
     .profile-identity .character-initial {
       width: 82px;
       height: 82px;
-      font-size: 30px;
+      font-size: calc(30px * var(--reader-font-ratio));
     }
 
     .profile-name {
       margin: 0;
-      font-size: 34px;
+      font-size: calc(34px * var(--reader-font-ratio));
       line-height: 1.1;
     }
 
@@ -932,7 +934,7 @@
       padding-left: 11px;
       border-left: 2px solid rgba(var(--accent-rgb), 0.55);
       color: var(--soft);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       line-height: 1.5;
       overflow-wrap: anywhere;
     }
@@ -1008,7 +1010,7 @@
 
     .combat-provenance {
       color: var(--soft);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
     }
 
     .combat-stat-grid,
@@ -1032,7 +1034,7 @@
 
     .combat-stat-label {
       color: var(--soft);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 760;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -1041,7 +1043,7 @@
     .combat-stat-value {
       min-width: 0;
       color: var(--ink);
-      font-size: clamp(15px, 1.5vw, 20px);
+      font-size: calc(clamp(15px, 1.5vw, 20px) * var(--reader-font-ratio));
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       overflow-wrap: anywhere;
@@ -1088,7 +1090,7 @@
       width: 20px; height: 20px; margin: 8px 0; accent-color: var(--accent);
     }
     .battle-update-scroll { overflow-x: auto; }
-    .battle-update-table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 12px; }
+    .battle-update-table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: calc(12px * var(--reader-font-ratio)); }
     .battle-update-table th, .battle-update-table td {
       padding: 8px; border-bottom: 1px solid var(--line); text-align: left;
       vertical-align: top; overflow-wrap: anywhere;
@@ -1160,7 +1162,7 @@
 
     .base-stat-context {
       color: var(--accent);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -1205,20 +1207,20 @@
       display: grid;
       place-items: center;
       color: var(--accent-2);
-      font-size: 24px;
+      font-size: calc(24px * var(--reader-font-ratio));
       font-weight: 850;
     }
 
     .skill-name {
       margin: 0;
-      font-size: 20px;
+      font-size: calc(20px * var(--reader-font-ratio));
       line-height: 1.2;
     }
 
     .skill-category {
       margin-top: 5px;
       color: var(--accent);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -1267,7 +1269,7 @@
       color: var(--ink);
       background: var(--panel);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       line-height: 1.5;
       pointer-events: none;
     }
@@ -1298,7 +1300,7 @@
       border-radius: 999px;
       color: var(--muted);
       background: rgba(var(--accent-rgb), 0.055);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
     }
 
     .skill-upgrades {
@@ -1308,7 +1310,7 @@
     .skill-upgrades summary {
       padding: 12px 18px;
       color: var(--accent-2);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       font-weight: 780;
       cursor: pointer;
     }
@@ -1328,7 +1330,7 @@
 
     .skill-upgrade-label {
       color: var(--accent);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       font-weight: 800;
     }
 
@@ -1369,13 +1371,13 @@
       display: grid;
       place-items: center;
       color: var(--accent-2);
-      font-size: 30px;
+      font-size: calc(30px * var(--reader-font-ratio));
       font-weight: 850;
     }
 
     .exclusive-equipment-kicker {
       color: var(--accent);
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
       font-weight: 820;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -1383,7 +1385,7 @@
 
     .exclusive-equipment-name {
       margin: 5px 0 0;
-      font-size: 24px;
+      font-size: calc(24px * var(--reader-font-ratio));
       line-height: 1.2;
     }
 
@@ -1424,12 +1426,12 @@
       justify-content: space-between;
       gap: 14px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
     }
 
     .exclusive-level-summary strong {
       color: var(--ink);
-      font-size: 16px;
+      font-size: calc(16px * var(--reader-font-ratio));
     }
 
     .exclusive-milestones {
@@ -1444,7 +1446,7 @@
       border-radius: 999px;
       color: var(--muted);
       background: rgba(var(--accent-rgb), 0.055);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
     }
 
     .exclusive-milestone strong {
@@ -1458,7 +1460,7 @@
     .profile-section-title,
     .interaction-section-title {
       margin: 28px 0 14px;
-      font-size: 19px;
+      font-size: calc(19px * var(--reader-font-ratio));
     }
 
     .profile-section .profile-section-title {
@@ -1533,7 +1535,7 @@
 
     .voice-line-label {
       color: var(--accent);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       font-weight: 850;
       text-transform: uppercase;
     }
@@ -1545,7 +1547,7 @@
     .voice-fallback-badge {
       margin-left: 8px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
       font-weight: 800;
     }
 
@@ -1575,7 +1577,7 @@
     .idle-dialogue-line {
       margin: 0;
       color: var(--muted);
-      font-size: 17px;
+      font-size: calc(17px * var(--reader-font-ratio));
       line-height: 1.5;
     }
 
@@ -1584,7 +1586,7 @@
       padding: 12px 2px;
       border-bottom: 1px solid var(--line);
       color: var(--ink);
-      font-size: 17px;
+      font-size: calc(17px * var(--reader-font-ratio));
       line-height: 1.5;
     }
 
@@ -1648,7 +1650,7 @@
     .skin-art-fallback {
       align-self: center;
       color: var(--soft);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
     }
 
     .skin-card-body {
@@ -1667,7 +1669,7 @@
     .skin-kind,
     .skin-quality {
       color: var(--accent);
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
       font-weight: 820;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -1679,7 +1681,7 @@
 
     .skin-name {
       margin: 0;
-      font-size: 20px;
+      font-size: calc(20px * var(--reader-font-ratio));
       line-height: 1.2;
     }
 
@@ -1694,7 +1696,7 @@
       padding-top: 8px;
       border-top: 1px solid rgba(var(--ink-rgb), 0.08);
       color: var(--soft);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
     }
 
     .interaction-list {
@@ -1718,12 +1720,12 @@
       gap: 9px;
       margin: 0;
       color: var(--ink);
-      font-size: 17px;
+      font-size: calc(17px * var(--reader-font-ratio));
     }
 
     .interaction-season-number {
       color: var(--accent-2);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 850;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -1758,7 +1760,7 @@
       gap: 12px;
       margin-bottom: 8px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
     }
 
     .interaction-reader-context > .interaction-back {
@@ -1781,14 +1783,14 @@
 
     .asset-label {
       color: var(--accent);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
     .story-heading {
       margin: 0;
-      font-size: 28px;
+      font-size: calc(28px * var(--reader-font-ratio));
       line-height: 1.15;
       font-weight: 760;
     }
@@ -1818,7 +1820,7 @@
       justify-content: space-between;
       gap: 14px;
       color: var(--soft);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       letter-spacing: 0.1em;
       text-transform: uppercase;
     }
@@ -1838,7 +1840,7 @@
       align-items: center;
       gap: 14px;
       color: var(--success);
-      font-size: 22px;
+      font-size: calc(22px * var(--reader-font-ratio));
       font-weight: 800;
       line-height: 1.2;
     }
@@ -1869,7 +1871,7 @@
 
     .overview-title {
       color: var(--ink);
-      font-size: 26px;
+      font-size: calc(26px * var(--reader-font-ratio));
       font-weight: 820;
       line-height: 1.18;
       overflow-wrap: anywhere;
@@ -1878,7 +1880,7 @@
     .overview-summary {
       margin-top: 6px;
       color: var(--muted);
-      font-size: 16px;
+      font-size: calc(16px * var(--reader-font-ratio));
       line-height: 1.55;
       white-space: pre-wrap;
     }
@@ -1893,7 +1895,7 @@
       flex-wrap: wrap;
       gap: 7px;
       color: var(--soft);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
     }
 
     .overview-meta span {
@@ -1919,7 +1921,7 @@
       border-radius: 999px;
       color: var(--accent);
       background: rgba(var(--accent-rgb), 0.11);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
     }
 
     .notice.visible {
@@ -1941,7 +1943,7 @@
       align-items: center;
       gap: 12px;
       color: var(--soft);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -1965,7 +1967,7 @@
 
     .story-chapter-kicker {
       color: var(--soft);
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -1974,7 +1976,7 @@
     .story-chapter-title {
       margin: 0;
       color: var(--ink);
-      font-size: 22px;
+      font-size: calc(22px * var(--reader-font-ratio));
       line-height: 1.25;
     }
 
@@ -2231,7 +2233,7 @@
     .dialogue-portrait-dialog figcaption {
       padding-top: 12px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       text-align: center;
     }
 
@@ -2286,7 +2288,7 @@
 
     .cinematic-label {
       color: var(--accent);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.07em;
       text-transform: uppercase;
@@ -2294,7 +2296,7 @@
 
     .cinematic-summary {
       color: var(--muted);
-      font-size: 15px;
+      font-size: calc(15px * var(--reader-font-ratio));
       line-height: 1.55;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
@@ -2337,7 +2339,7 @@
 
     .document-title {
       color: var(--accent);
-      font-size: 18px;
+      font-size: calc(18px * var(--reader-font-ratio));
       font-weight: 800;
     }
 
@@ -2405,7 +2407,7 @@
 
     .picture-kicker {
       color: var(--accent);
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -2413,14 +2415,14 @@
 
     .picture-title {
       color: var(--ink);
-      font-size: 21px;
+      font-size: calc(21px * var(--reader-font-ratio));
       font-weight: 800;
       overflow-wrap: anywhere;
     }
 
     .picture-description {
       color: var(--muted);
-      font-size: 14px;
+      font-size: calc(14px * var(--reader-font-ratio));
       line-height: 1.55;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
@@ -2443,7 +2445,7 @@
 
     .document-variant-label {
       color: var(--muted);
-      font: 700 12px/1.65 var(--reader-font);
+      font: 700 calc(12px * var(--reader-font-ratio))/1.65 var(--reader-font);
     }
 
     .speaker {
@@ -2518,7 +2520,7 @@
     }
 
     .asset-context-block.reputation-quest-heading .asset-context-summary {
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
     }
 
     .asset-context-action {
@@ -2539,7 +2541,7 @@
 
     .asset-context-summary {
       color: var(--soft);
-      font-size: 14px;
+      font-size: calc(14px * var(--reader-font-ratio));
       line-height: 1.5;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
@@ -2616,7 +2618,7 @@
       margin-left: 8px;
       padding: 1px 6px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
       line-height: 1;
       vertical-align: middle;
     }
@@ -2632,7 +2634,7 @@
       display: inline-block;
       margin-left: 0.65em;
       vertical-align: middle;
-      font: 400 10px/1.4 var(--reader-font);
+      font: 400 calc(10px * var(--reader-font-ratio))/1.4 var(--reader-font);
       letter-spacing: 0;
       text-transform: none;
     }
@@ -2640,7 +2642,7 @@
     .archive-detail-content > .archive-translation-badge {
       display: table;
       margin: 0 0 10px;
-      font-size: 11px;
+      font-size: calc(11px * var(--reader-font-ratio));
       line-height: 1.2;
     }
 
@@ -2672,7 +2674,7 @@
       border-radius: 6px;
       color: var(--accent-2);
       background: rgba(var(--accent-rgb), 0.09);
-      font-size: 13px;
+      font-size: calc(13px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -2693,7 +2695,7 @@
       height: auto;
       padding: 13px 16px;
       text-align: left;
-      font-size: 17px;
+      font-size: var(--dialogue-font-size);
       line-height: 1.35;
       white-space: pre-wrap;
       border-color: rgba(var(--ink-rgb), 0.2);
@@ -2753,7 +2755,7 @@
       border-radius: 999px;
       color: var(--accent-2);
       background: rgba(var(--accent-rgb), 0.08);
-      font-size: 12px;
+      font-size: calc(12px * var(--reader-font-ratio));
       font-weight: 800;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -2874,6 +2876,23 @@
       width: 150px;
       min-width: 0;
       min-height: 32px;
+    }
+
+    /* Reading content scales; navigation and input controls keep stable sizing. */
+    .story-outline,
+    .reader-actions,
+    .profile-tabs,
+    .archive-kind-tabs,
+    .profile-back,
+    .interaction-back,
+    .archive-back,
+    .archive-search,
+    .character-search,
+    .base-stat-controls,
+    .exclusive-level-control,
+    .home-browse,
+    .home-feedback-link {
+      font-size: 16px;
     }
 
     @media (max-width: 1200px) {
@@ -3027,13 +3046,13 @@
       }
 
       .story-heading {
-        font-size: 23px;
+        font-size: calc(23px * var(--reader-font-ratio));
       }
 
       .mystical-heading,
       .profile-name,
       .archive-heading {
-        font-size: 27px;
+        font-size: calc(27px * var(--reader-font-ratio));
       }
 
       .archive-header-row,
@@ -3169,18 +3188,19 @@
       }
 
       .overview-arc {
-        font-size: 19px;
+        font-size: calc(19px * var(--reader-font-ratio));
       }
 
       .overview-title {
-        font-size: 22px;
+        font-size: calc(22px * var(--reader-font-ratio));
       }
 
       .speaker {
         font-size: var(--dialogue-font-size);
       }
 
-      .line-text {
+      .line-text,
+      .choice-option {
         font-size: calc(var(--dialogue-font-size) * 0.9);
       }
 
@@ -3532,7 +3552,7 @@
   <script src="scripts/story_chapters.js?v=92668a6e6f3de102"></script>
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
-  <link rel="stylesheet" href="styles/story_runtime.css?v=c43f276dc5f04cf6">
+  <link rel="stylesheet" href="styles/story_runtime.css?v=ebd8207202b689a6">
   <link rel="stylesheet" href="styles/reader_theme.css?v=78e6c56661ebc1c9">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
@@ -6327,14 +6347,14 @@
         const maximumSize = 15;
         const minimumSize = 11;
         let size = maximumSize;
-        element.style.fontSize = `${size}px`;
+        element.style.fontSize = `calc(${size}px * var(--reader-font-ratio))`;
         element.style.whiteSpace = "nowrap";
         if (!element.clientWidth) {
           return;
         }
         while (element.scrollWidth > element.clientWidth && size > minimumSize) {
           size -= 0.5;
-          element.style.fontSize = `${size}px`;
+          element.style.fontSize = `calc(${size}px * var(--reader-font-ratio))`;
         }
         if (element.scrollWidth > element.clientWidth) {
           element.style.whiteSpace = "normal";
@@ -9567,6 +9587,8 @@
       playerNameInput.value = playerName;
       genderSelect.value = selectedGender;
       document.documentElement.style.setProperty("--dialogue-font-size", `${fontSize}px`);
+      document.documentElement.style.setProperty("--reader-font-ratio", String(fontSize / 17));
+      document.querySelectorAll(".character-name").forEach(fitCharacterName);
       appShell.classList.toggle("show-debug", showDebug || readerMode === "debug");
       updateHomeLinks();
     }

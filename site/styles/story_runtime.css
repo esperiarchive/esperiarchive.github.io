@@ -5,7 +5,7 @@
   padding: 7px 0 7px 13px;
   margin: 18px 0 12px;
 }
-.story-runtime-notice { color: var(--soft, #778592); font-size: 14px; line-height: 1.55; margin: 8px 0; }
+.story-runtime-notice { color: var(--soft, #778592); font-size: calc(14px * var(--reader-font-ratio)); line-height: 1.55; margin: 8px 0; }
 .story-activity {
   min-width: 0; overflow-wrap: anywhere;
   margin: 18px 0 12px; padding: 7px 0 7px 13px;
@@ -27,7 +27,7 @@
   border-left: 2px solid rgba(214, 189, 128, .48);
   padding: 7px 0 7px 13px; margin: 18px 0 12px;
 }
-.story-battle-label { font-size: 12px; color: var(--soft, #778592); margin-bottom: 4px; }
+.story-battle-label { font-size: calc(12px * var(--reader-font-ratio)); color: var(--soft, #778592); margin-bottom: 4px; }
 .story-battle-dialogue { min-width: 0; margin-top: 22px; }
 .story-battle-dialogue h4 { font-size: calc(var(--dialogue-font-size, 20px) * .9); color: var(--accent-2, #d6bd80); margin: 0 0 12px; }
 .story-battle-dialogue + .story-battle-dialogue { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line, rgba(237, 243, 247, 0.16)); }
@@ -54,7 +54,7 @@
   .story-battle-enemy { flex-basis: calc((100% - 16px) / 3); }
   .story-battle-enemy span { font-size: .72em; padding: 6px 3px; }
 }
-.story-activity p, .story-choice-history p { margin: 4px 0 10px; font-size: 14px; line-height: 1.55; color: var(--soft, #778592); }
+.story-activity p, .story-choice-history p { margin: 4px 0 10px; font-size: calc(14px * var(--reader-font-ratio)); line-height: 1.55; color: var(--soft, #778592); }
 .story-activity-controls, .story-history-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .story-activity select, .story-history-row select { min-width: 0; width: min(340px, 100%); max-width: 100%; flex: 0 1 340px; }
 .story-activity select, .story-activity button, .story-history-row select, .story-history-row button {
@@ -63,7 +63,7 @@
 }
 .story-choice-warning { color: var(--amber, #e0b75a); font-size: .8em; margin: 12px 0 0; }
 .story-choice-status { opacity: .8; font-size: .75em; margin: 7px 0 0; }
-.story-choice-history summary { cursor: pointer; font-size: 14px; font-weight: 800; line-height: 1.4; color: var(--accent-2, #d6bd80); }
+.story-choice-history summary { cursor: pointer; font-size: calc(14px * var(--reader-font-ratio)); font-weight: 800; line-height: 1.4; color: var(--accent-2, #d6bd80); }
 .story-history-row { padding: 10px 0; }
 .story-history-row span { flex: 1 0 100%; font-size: .72em; opacity: .8; }
 
@@ -214,11 +214,11 @@
 }
 .scene-summary-label {
   color: #c5b17e;
-  font-size: 12px;
+  font-size: calc(12px * var(--reader-font-ratio));
   font-weight: 700;
   margin-bottom: 6px;
 }
-.scene-summary-block .cinematic-summary { font-size: 14px; line-height: 1.6; }
+.scene-summary-block .cinematic-summary { font-size: calc(14px * var(--reader-font-ratio)); line-height: 1.6; }
 .full-script-choice { min-width: 0; padding: 12px; background: rgba(10, 15, 21, .78); }
 .full-script-choice .choice-options { gap: 8px; }
 .full-script-choice .choice-option { min-height: 42px; padding: 9px 12px; overflow-wrap: anywhere; }
@@ -261,13 +261,13 @@
   background: radial-gradient(ellipse at center, rgba(171,117,34,.22), transparent 72%);
 }
 .chapter-artwork img {display: block; width: 100%; max-width: 740px; height: auto; margin: auto;}
-.chapter-artwork figcaption {color: #e5d8b5; font: italic 28px/1.25 var(--reader-font); margin-top: 12px;}
-.chapter-artwork-label {color: #b9ae94; font: 12px/1.5 var(--reader-font); margin-bottom: 6px;}
+.chapter-artwork figcaption {color: #e5d8b5; font: italic calc(28px * var(--reader-font-ratio))/1.25 var(--reader-font); margin-top: 12px;}
+.chapter-artwork-label {color: #b9ae94; font: calc(12px * var(--reader-font-ratio))/1.5 var(--reader-font); margin-bottom: 6px;}
 .chapter-artwork-gallery {grid-column: 1 / -1; min-width: 0; margin-top: 8px;}
-.chapter-artwork-gallery > summary {cursor: pointer; color: #c6b27e; font-size: 14px;}
+.chapter-artwork-gallery > summary {cursor: pointer; color: #c6b27e; font-size: calc(14px * var(--reader-font-ratio));}
 .chapter-artwork-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px;}
 .chapter-artwork-grid .chapter-artwork {margin: 12px auto; padding: 12px 8px;}
-.chapter-artwork-grid figcaption {font-size: 21px;}
+.chapter-artwork-grid figcaption {font-size: calc(21px * var(--reader-font-ratio));}
 .collection-card-preview {margin-block: 18px;}
 .collection-card-preview > summary {cursor: pointer; color: #c6b27e; font-weight: 650;}
 .collection-card-controls {display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 14px;}
@@ -278,11 +278,11 @@
 .blessing-card-holder{display:flex;justify-content:center}
 .blessing-card{position:relative;box-sizing:border-box;width:100%;min-height:30rem;padding:2.25rem 2rem 2.75rem;text-align:center;color:#4b3928;border:1px solid #b3914c;border-radius:.85rem;background:repeating-linear-gradient(125deg,transparent 0 5px,#fff5 5px 6px),linear-gradient(155deg,#fffcef,#f4e8c8 73%,#e6b957);box-shadow:inset 0 0 0 .4rem #fff9,inset 0 0 0 .55rem #bd98496b,0 .5rem 1.5rem #0003}
 .blessing-card>img{width:7rem;height:7rem;object-fit:cover;object-position:50% 60%;border-radius:50%;border:3px solid #c5a65d;background:#ebdbb3}
-.blessing-sender{display:table;margin:.65rem auto 0;padding:.2rem 1.25rem;border-radius:2rem;background:#d9c58066;font-family:var(--reader-font);font-size:1.25rem;font-weight:700}
-.blessing-card h3{margin:.7rem 0 1.2rem;color:#88500d;font:italic 700 clamp(1.8rem,5vw,2.6rem)/1.12 var(--reader-font)}
-.blessing-message{font:1.1rem/1.65 var(--reader-font);overflow-wrap:anywhere}
-.blessing-source-language{display:block;margin-top:1.25rem;font-size:.75rem;color:#78684e}
-@media(max-width:600px){.blessing-collection{padding:0 .4rem}.blessing-card{padding:1.6rem 1.3rem 2.2rem;min-height:27rem}.blessing-card>img{width:5.5rem;height:5.5rem}.blessing-message{font-size:1rem}}
+.blessing-sender{display:table;margin:.65rem auto 0;padding:.2rem 1.25rem;border-radius:2rem;background:#d9c58066;font-family:var(--reader-font);font-size:calc(1.25rem * var(--reader-font-ratio));font-weight:700}
+.blessing-card h3{margin:.7rem 0 1.2rem;color:#88500d;font:italic 700 calc(clamp(1.8rem,5vw,2.6rem) * var(--reader-font-ratio))/1.12 var(--reader-font)}
+.blessing-message{font:calc(1.1rem * var(--reader-font-ratio))/1.65 var(--reader-font);overflow-wrap:anywhere}
+.blessing-source-language{display:block;margin-top:1.25rem;font-size:calc(.75rem * var(--reader-font-ratio));color:#78684e}
+@media(max-width:600px){.blessing-collection{padding:0 .4rem}.blessing-card{padding:1.6rem 1.3rem 2.2rem;min-height:27rem}.blessing-card>img{width:5.5rem;height:5.5rem}.blessing-message{font-size:calc(1rem * var(--reader-font-ratio))}}
 
 /* Reading rhythm, shared by both profiles and both reading modes.
    These are border-to-border gaps, not extra space added to a grid gap.
