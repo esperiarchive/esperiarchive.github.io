@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=b0bc8fa0d563ebd6"></script>
+  <script src="scripts/config.js?v=2313b65ad8903b5c"></script>
   <script src="scripts/reader_publication.js?v=150006c8fa023db6"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <meta charset="utf-8">
@@ -272,6 +272,24 @@
     .story-reader[aria-busy="true"] > :not(.interaction-reader-context):not(.reader-loading) {
       display: none !important;
     }
+
+    /* Preserve layout while waiting so language changes keep their scroll position. */
+    .story-scroll[data-content-state] > :not(#content-loading) {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #content-loading {
+      position: fixed;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 30;
+      width: min(90vw, 480px);
+      text-align: center;
+    }
+
+    .reader-load-error::before { display: none; }
 
     .reader-loading {
       display: flex;
@@ -1046,6 +1064,10 @@
     .combat-provenance {
       color: var(--soft);
       font-size: calc(12px * var(--reader-font-ratio));
+    }
+
+    .app-shell:not(.show-debug) .combat-debug-only {
+      display: none;
     }
 
     .combat-stat-grid,
@@ -2285,8 +2307,18 @@
       border-radius: 50%;
       color: var(--ink);
       background: rgba(var(--panel-rgb), 0.76);
-      font-size: 24px;
       line-height: 1;
+    }
+
+    .dialogue-portrait-dialog-close svg {
+      display: block;
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      pointer-events: none;
     }
 
     .cinematic-block {
@@ -2538,12 +2570,12 @@
     }
 
     .asset-context-block.prerequisite-side-quest {
-      border-left-color: var(--accent);
-      background: rgba(var(--accent-rgb), 0.055);
+      border-left-color: var(--skill-power);
+      background: color-mix(in srgb, var(--skill-power) 6%, transparent);
     }
 
     .asset-context-block.prerequisite-side-quest .asset-context-action {
-      color: var(--accent);
+      color: var(--skill-power);
     }
 
     .asset-context-block.reputation-quest-heading {
@@ -3148,11 +3180,6 @@
         border-left: 0;
       }
 
-      /* Leave scroll room below short entries so their heading can reach the top. */
-      .archive-detail:not(:has(.archive-detail-empty)) {
-        min-height: calc(100svh - 40px);
-      }
-
       .character-toolbar {
         align-items: stretch;
         flex-direction: column;
@@ -3264,6 +3291,45 @@
 
       .exclusive-level-control {
         grid-column: 1 / -1;
+      }
+
+      .combat-stat-grid,
+      .combat-coefficient-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      @media (min-width: 420px) {
+        .combat-stat-grid,
+        .combat-coefficient-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      .combat-stat {
+        min-height: 0;
+        padding: 8px;
+        gap: 4px;
+        align-content: start;
+      }
+
+      .combat-stat-label {
+        min-width: 0;
+        line-height: 1.35;
+        letter-spacing: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .combat-stat-value {
+        font-size: calc(15px * var(--reader-font-ratio));
+        line-height: 1.35;
+      }
+
+      .base-stat-results,
+      .exclusive-equipment-body {
+        padding: 12px;
+        gap: 12px;
       }
 
       .base-stat-controls {
@@ -3439,6 +3505,7 @@
     </nav>
 
     <main id="story-scroll" class="story-scroll">
+      <div id="content-loading" class="reader-loading" role="status" hidden></div>
       <section id="home-page" class="home-page" aria-labelledby="home-heading" hidden>
         <header class="home-hero">
           <p class="home-kicker" data-i18n="AFK Journey · Unofficial fan archive">AFK Journey · Unofficial fan archive</p>
@@ -3661,7 +3728,7 @@
   </aside>
 
   <dialog id="dialogue-portrait-dialog" class="dialogue-portrait-dialog" aria-labelledby="dialogue-portrait-caption">
-    <button id="dialogue-portrait-dialog-close" class="dialogue-portrait-dialog-close" type="button" aria-label="Close full portrait" data-i18n-aria-label="Close full portrait">&times;</button>
+    <button id="dialogue-portrait-dialog-close" class="dialogue-portrait-dialog-close" type="button" aria-label="Close full portrait" data-i18n-aria-label="Close full portrait"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5 19 19 M19 5 5 19"/></svg></button>
     <figure>
       <img id="dialogue-portrait-dialog-image" class="dialogue-portrait-dialog-image" alt="">
       <figcaption id="dialogue-portrait-caption"></figcaption>
@@ -3683,12 +3750,12 @@
   <script src="scripts/story_activities.js?v=6ec47e6f16c883ca"></script>
   <script src="scripts/story_battles.js?v=08c8c9fce10f8a4d"></script>
   <script src="scripts/story_objectives.js?v=34ba3c39606106b3"></script>
-  <script src="scripts/story_locale_references.js?v=e6b288e71ad40b5f"></script>
+  <script src="scripts/story_locale_references.js?v=4d50cb502dbd8009"></script>
   <script src="scripts/story_scenes.js?v=845f82d8844776e6"></script>
-  <script src="scripts/story_chapters.js?v=92668a6e6f3de102"></script>
+  <script src="scripts/story_chapters.js?v=aa58a593eed587a1"></script>
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
-  <link rel="stylesheet" href="styles/story_runtime.css?v=7b7c4d2fdea5750f">
+  <link rel="stylesheet" href="styles/story_runtime.css?v=c59b52be8ca9366c">
   <link rel="stylesheet" href="styles/reader_theme.css?v=5017060bf70f8eb3">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
@@ -4032,6 +4099,9 @@
     const storyNavigation = document.getElementById("story-navigation");
     const bottomNavigation = document.getElementById("bottom-navigation");
     const storyScroll = document.getElementById("story-scroll");
+    const contentLoading = document.getElementById("content-loading");
+    const pendingContentLoads = new Set();
+    let contentLoadingControls = null;
     const storyContentLayout = document.getElementById("story-content-layout");
     const storyOutline = document.getElementById("story-outline");
     const storyOutlineList = document.getElementById("story-outline-list");
@@ -4128,6 +4198,8 @@
     let readerDataLoad = null;
     let routeRevision = 0;
     let returnToMainQuest = "";
+    const mainQuestBookmarks = new Map();
+    const petalCardCounts = new Map();
     let archiveKind = "documents";
     let selectedArchiveId = "";
     let selectedMailFilter = "collectible";
@@ -5027,8 +5099,9 @@
           order: Number(interaction.order_index) || category.stories.length + 1,
           title: interaction.title_i18n || {},
           description: interaction.preview_i18n || {},
-          chapterKey: interaction.episode || "heart_to_heart",
-          chapterTitle: { ...HEART_TO_HEART_LABELS },
+          chapterKey: heartToHeartLocationKey(interaction),
+          chapterTitle: heartToHeartLocationNames(interaction),
+          locations: interaction.locations || [],
           chapterOrder: 0,
           groupOrder: 0,
           assetKeys,
@@ -5141,6 +5214,27 @@
     function interactionTitle(interaction) {
       return localizedValue(interaction && interaction.title_i18n)
         || `${interactionTypeLabel(interaction)} ${interaction && interaction.story_id ? interaction.story_id : ""}`.trim();
+    }
+
+    function heartToHeartLocationKey(interaction) {
+      return (interaction?.locations || []).map(location => location.region_id).sort().join("+") || "unrecorded";
+    }
+
+    function heartToHeartLocationNames(interaction) {
+      const unknown = { en: "Location not recorded", jp: "場所の記録なし", kr: "장소 정보 없음", cn: "地点未记录" };
+      return Object.fromEntries(["en", "jp", "kr", "cn"].map(language => [language,
+        (interaction?.locations || []).map(location => localizedValue(location.name_i18n, language)).filter(Boolean).join(" / ")
+          || unknown[language]]));
+    }
+
+    function numberedHeartTitle(title, titles, index) {
+      if (titles.filter(other => other === title).length < 2) return title;
+      return `${title} ${titles.slice(0, index + 1).filter(other => other === title).length}`;
+    }
+
+    function heartToHeartOptionLabel(beat, siblings) {
+      const titles = siblings.map(other => localizedValue(other.logicalStory.title));
+      return numberedHeartTitle(localizedValue(beat.logicalStory.title), titles, siblings.indexOf(beat));
     }
 
     function interactionTypeLabel(interaction) {
@@ -6225,6 +6319,57 @@
       }
     }
 
+    async function withContentLoading(action) {
+      const token = {};
+      pendingContentLoads.add(token);
+      if (pendingContentLoads.size === 1) {
+        stopActiveVoice();
+        storyScroll.dataset.contentState = "loading";
+        storyScroll.setAttribute("aria-busy", "true");
+        contentLoading.classList.remove("reader-load-error");
+        contentLoading.textContent = uiText("Loading…");
+        contentLoading.hidden = false;
+        for (const child of storyScroll.children) if (child !== contentLoading) child.inert = true;
+        contentLoadingControls = new Map([
+          languageSelect, modeSelect, sectionSelect, categorySelect, storySelect,
+          homeTab, storyArchiveTab, mysticalHouseTab, documentArchiveTab,
+        ].map(control => [control, control.disabled]));
+        for (const control of contentLoadingControls.keys()) control.disabled = true;
+        storyNavigation.inert = true;
+        updatePrimaryShell();
+      }
+      try {
+        return await action();
+      } catch (error) {
+        storyScroll.dataset.contentState = "error";
+        contentLoading.classList.add("reader-load-error");
+        contentLoading.textContent = uiText("Could not load this content: {error}", {error: error.message});
+        throw error;
+      } finally {
+        pendingContentLoads.delete(token);
+        if (!pendingContentLoads.size) {
+          storyScroll.setAttribute("aria-busy", "false");
+          const failed = storyScroll.dataset.contentState === "error";
+          if (!failed) {
+            delete storyScroll.dataset.contentState;
+            contentLoading.hidden = true;
+          }
+          for (const child of storyScroll.children) if (child !== contentLoading) child.inert = failed;
+          for (const [control, disabled] of contentLoadingControls) control.disabled = disabled;
+          contentLoadingControls = null;
+          storyNavigation.inert = false;
+          updatePrimaryShell();
+        }
+      }
+    }
+
+    function clearContentStatus() {
+      if (pendingContentLoads.size) return;
+      delete storyScroll.dataset.contentState;
+      contentLoading.hidden = true;
+      for (const child of storyScroll.children) child.inert = false;
+    }
+
     function scrollReaderToTop(behavior = "auto") {
       storyScroll.scrollTo({ top: 0, behavior });
       if (window.matchMedia("(max-width: 900px)").matches) {
@@ -6242,10 +6387,12 @@
     }
 
     async function showArchive(kind, id = "", replaceHash = true) {
-      await ensureArchiveData(kind);
-      archiveSearch.value = "";
-      storyScroll.scrollTo({ top: 0 });
-      selectArchiveEntry(kind, id, replaceHash, !id);
+      return withContentLoading(async () => {
+        await ensureArchiveData(kind);
+        archiveSearch.value = "";
+        storyScroll.scrollTo({ top: 0 });
+        selectArchiveEntry(kind, id, replaceHash, !id);
+      });
     }
 
     function updatePrimaryShell() {
@@ -6265,7 +6412,8 @@
       mysticalHouseTab.setAttribute("aria-selected", String(primaryView === "mystical"));
       documentArchiveTab.setAttribute("aria-selected", String(archiveBrowse));
       storyNavigation.hidden = primaryView !== "stories";
-      const interactionPending = storyReader.getAttribute("aria-busy") === "true";
+      const interactionPending = storyReader.getAttribute("aria-busy") === "true"
+        || storyScroll.getAttribute("aria-busy") === "true";
       bottomNavigation.hidden = homeOpen || mysticalBrowse || archiveBrowse || interactionPending;
       archiveBrowser.hidden = !archiveBrowse;
       mysticalBrowser.hidden = !mysticalBrowse;
@@ -6293,6 +6441,7 @@
     }
 
     function showHome() {
+      clearContentStatus();
       homeStatus.hidden = true;
       for (const image of homePage.querySelectorAll("img[data-home-src]")) {
         if (!image.getAttribute("src")) image.src = ReaderPublication.url(ReaderPublication.url(image.dataset.homeSrc));
@@ -6463,7 +6612,7 @@
           details.append(count);
         }
         button.append(initial, details);
-        button.addEventListener("click", () => showCharacterProfile(character.actor_id, false));
+        button.addEventListener("click", () => showCharacterProfile(character.actor_id, false).catch(showRouteError));
         characterGrid.appendChild(button);
         fitCharacterName(name);
         }
@@ -6473,6 +6622,7 @@
     }
 
     function showCharacterIndex(replaceHash = true) {
+      clearContentStatus();
       primaryView = "mystical";
       selectedCharacterId = "";
       selectedInteractionAssetKey = "";
@@ -6624,7 +6774,8 @@
       if (selectedProfileTab === "combat") {
         const actorId = selectedCharacterId;
         if (!characterCombatCatalog) combatOverview.textContent = uiText("Loading skills and stats…");
-        ensureCharacterCombat(actorId).then(() => {
+        withContentLoading(async () => {
+          await ensureCharacterCombat(actorId);
           if (primaryView === "mystical" && selectedCharacterId === actorId
               && selectedProfileTab === "combat") {
             renderCharacterCombat(mysticalCharacterById.get(actorId));
@@ -6831,7 +6982,7 @@
         mainLevelControl,
         growthLevelControl,
         labeledControl("Quality", qualitySelect),
-        labeledControl("Include PvE growth term", pveGrowthInput),
+        labeledControl("Include PvE growth term", pveGrowthInput, "combat-debug-only"),
         labeledControl("Level slider", slider, "base-stat-slider"),
       );
 
@@ -7198,7 +7349,7 @@
       }
 
       const note = document.createElement("div");
-      note.className = "combat-note";
+      note.className = "combat-note combat-debug-only";
       note.textContent = uiText(equipment.stats_note);
       body.append(levelSummary, statGrid, milestones, note);
       card.append(header, body);
@@ -7531,358 +7682,376 @@
 
     }
 
-    async function showCharacterProfile(actorId, replaceHash = true) {
-      await ensureCharacterDetail(actorId);
-      stopActiveVoice();
-      const character = mysticalCharacterById.get(String(actorId));
-      if (!character) {
-        showCharacterIndex(replaceHash);
-        return;
-      }
-      primaryView = "mystical";
-      selectedCharacterId = String(actorId);
-      selectedInteractionAssetKey = "";
-      characterIndex.hidden = true;
-      characterProfile.hidden = false;
-      profileInitial.style.setProperty("--character-color", characterColor(actorId));
-      renderCharacterAvatar(profileInitial, character);
-      renderProfileArtwork(character);
-      profileName.textContent = characterName(character);
-      document.getElementById("profile-identity-icons").replaceChildren(...characterIdentityIcons(character).childNodes);
-      const description = localizedValue(character.description_i18n || character.description);
-      profileDescription.textContent = description;
-      profileDescription.hidden = !description;
-      renderCharacterCombat(character);
-      renderProfileAvailability(character);
+    async function showCharacterProfile(actorId, replaceHash = true, options = {}) {
+      return withContentLoading(async () => {
+        await ensureCharacterDetail(actorId);
+        stopActiveVoice();
+        const character = mysticalCharacterById.get(String(actorId));
+        if (!character) {
+          showCharacterIndex(replaceHash);
+          return;
+        }
+        primaryView = "mystical";
+        selectedCharacterId = String(actorId);
+        selectedInteractionAssetKey = "";
+        characterIndex.hidden = true;
+        characterProfile.hidden = false;
+        profileInitial.style.setProperty("--character-color", characterColor(actorId));
+        renderCharacterAvatar(profileInitial, character);
+        renderProfileArtwork(character);
+        profileName.textContent = characterName(character);
+        document.getElementById("profile-identity-icons").replaceChildren(...characterIdentityIcons(character).childNodes);
+        const description = localizedValue(character.description_i18n || character.description);
+        profileDescription.textContent = description;
+        profileDescription.hidden = !description;
+        renderCharacterCombat(character);
+        renderProfileAvailability(character);
 
-      function voiceDisplay(entry) {
-        const official = (entry.text_i18n || {})[selectedLanguage] || "";
-        if (official) {
-          return { text: official, badge: "" };
+        function voiceDisplay(entry) {
+          const official = (entry.text_i18n || {})[selectedLanguage] || "";
+          if (official) {
+            return { text: official, badge: "" };
+          }
+          if (entry.voice_caption_kind_i18n?.[selectedLanguage] === "non_dialogue") {
+            return { text: "", badge: "", nonDialogue: true };
+          }
+          const transcript = (entry.transcript_i18n || {})[selectedLanguage] || "";
+          const saved = entry.saved_voice_translations?.[selectedLanguage];
+          const savedSource = saved && (entry.text_i18n?.[saved.source_language]
+            || entry.transcript_i18n?.[saved.source_language]);
+          if (showMt && saved?.text && savedSource === saved.source_text
+            && transcript === (saved.target_transcript || "")) {
+            return { text: saved.text, badge: uiText("Machine translation") };
+          }
+          if (transcript) {
+            const source = (entry.transcript_source_i18n || {})[selectedLanguage];
+            return { text: transcript, badge: source === "manual" ? "EDIT" : "STT" };
+          }
+          const cn = (entry.text_i18n || {}).cn || "";
+          if (cn) {
+            return { text: cn, badge: selectedLanguage === "cn" ? "" : "CN" };
+          }
+          return { text: "", badge: "" };
         }
-        if (entry.voice_caption_kind_i18n?.[selectedLanguage] === "non_dialogue") {
-          return { text: "", badge: "", nonDialogue: true };
-        }
-        const transcript = (entry.transcript_i18n || {})[selectedLanguage] || "";
-        const saved = entry.saved_voice_translations?.[selectedLanguage];
-        const savedSource = saved && (entry.text_i18n?.[saved.source_language]
-          || entry.transcript_i18n?.[saved.source_language]);
-        if (showMt && saved?.text && savedSource === saved.source_text
-          && transcript === (saved.target_transcript || "")) {
-          return { text: saved.text, badge: uiText("Machine translation") };
-        }
-        if (transcript) {
-          const source = (entry.transcript_source_i18n || {})[selectedLanguage];
-          return { text: transcript, badge: source === "manual" ? "EDIT" : "STT" };
-        }
-        const cn = (entry.text_i18n || {}).cn || "";
-        if (cn) {
-          return { text: cn, badge: selectedLanguage === "cn" ? "" : "CN" };
-        }
-        return { text: "", badge: "" };
-      }
 
-      function voicePlayControl(source, label) {
-        if (!source) {
-          const placeholder = document.createElement("span");
-          placeholder.className = "voice-play-placeholder";
-          return placeholder;
-        }
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "voice-play-button";
-        button.setAttribute("aria-label", uiText("Play {label}", {label}));
-        button.title = uiText("Play {label}", {label});
-        button.addEventListener("click", async () => {
-          if (activeVoiceButton === button && activeVoiceAudio) {
-            if (activeVoiceAudio.paused) {
-              await activeVoiceAudio.play();
-              button.classList.add("playing");
-              button.setAttribute("aria-label", uiText("Pause {label}", {label}));
-              button.title = uiText("Pause {label}", {label});
-            } else {
-              activeVoiceAudio.pause();
-              button.classList.remove("playing");
-              button.setAttribute("aria-label", uiText("Play {label}", {label}));
-              button.title = uiText("Play {label}", {label});
+        function voicePlayControl(source, label) {
+          if (!source) {
+            const placeholder = document.createElement("span");
+            placeholder.className = "voice-play-placeholder";
+            return placeholder;
+          }
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "voice-play-button";
+          button.setAttribute("aria-label", uiText("Play {label}", {label}));
+          button.title = uiText("Play {label}", {label});
+          button.addEventListener("click", async () => {
+            if (activeVoiceButton === button && activeVoiceAudio) {
+              if (activeVoiceAudio.paused) {
+                await activeVoiceAudio.play();
+                button.classList.add("playing");
+                button.setAttribute("aria-label", uiText("Pause {label}", {label}));
+                button.title = uiText("Pause {label}", {label});
+              } else {
+                activeVoiceAudio.pause();
+                button.classList.remove("playing");
+                button.setAttribute("aria-label", uiText("Play {label}", {label}));
+                button.title = uiText("Play {label}", {label});
+              }
+              return;
             }
-            return;
-          }
-          stopActiveVoice();
-          const audio = new Audio(ReaderPublication.url(source));
-          activeVoiceAudio = audio;
-          activeVoiceButton = button;
-          button.classList.add("playing");
-          button.setAttribute("aria-label", uiText("Pause {label}", {label}));
-          button.title = uiText("Pause {label}", {label});
-          audio.addEventListener("ended", stopActiveVoice, { once: true });
-          audio.addEventListener("error", stopActiveVoice, { once: true });
-          try {
-            await audio.play();
-          } catch (error) {
             stopActiveVoice();
-            console.warn("Unable to play character voice", source, error);
-          }
-        });
-        return button;
-      }
+            const audio = new Audio(ReaderPublication.url(source));
+            activeVoiceAudio = audio;
+            activeVoiceButton = button;
+            button.classList.add("playing");
+            button.setAttribute("aria-label", uiText("Pause {label}", {label}));
+            button.title = uiText("Pause {label}", {label});
+            audio.addEventListener("ended", stopActiveVoice, { once: true });
+            audio.addEventListener("error", stopActiveVoice, { once: true });
+            try {
+              await audio.play();
+            } catch (error) {
+              stopActiveVoice();
+              console.warn("Unable to play character voice", source, error);
+            }
+          });
+          return button;
+        }
 
-      function renderVoiceLines(target, entries, defaultLabel) {
-        target.innerHTML = "";
-        for (const [index, entry] of (entries || []).entries()) {
-          const display = voiceDisplay(entry);
-          const audioSource = (entry.audio_i18n || {})[selectedLanguage] || "";
-          if (!display.text && !audioSource) {
+        function renderVoiceLines(target, entries, defaultLabel) {
+          target.innerHTML = "";
+          for (const [index, entry] of (entries || []).entries()) {
+            const display = voiceDisplay(entry);
+            const audioSource = (entry.audio_i18n || {})[selectedLanguage] || "";
+            if (!display.text && !audioSource) {
+              continue;
+            }
+            const item = document.createElement("div");
+            item.className = "voice-line";
+            const labelText = uiText(entry.label) || `${defaultLabel} ${index + 1}`;
+            const label = document.createElement("span");
+            label.className = "voice-line-label";
+            label.textContent = labelText;
+            const lineText = document.createElement("span");
+            lineText.className = "voice-line-text";
+            setFormattedText(
+              lineText,
+              display.nonDialogue ? "" : display.text || uiText("[Official caption unavailable]"),
+            );
+            lineText.hidden = Boolean(display.nonDialogue);
+            item.append(
+              voicePlayControl(audioSource, labelText),
+              label,
+              lineText,
+            );
+            if (display.badge) {
+              const badge = document.createElement("span");
+              badge.className = "voice-fallback-badge";
+              badge.textContent = display.badge;
+              item.appendChild(badge);
+            }
+            target.appendChild(item);
+          }
+          return target.childElementCount;
+        }
+
+        unitVoiceSection.hidden = !renderVoiceLines(
+          unitVoiceList,
+          character.unit_voice_lines,
+          uiText("Voice"),
+        );
+        resonatingHallSection.hidden = !renderVoiceLines(
+          resonatingHallList,
+          character.resonating_hall_lines,
+          uiText("Idle"),
+        );
+        affinityGiftSection.hidden = !renderVoiceLines(
+          affinityGiftList,
+          character.affinity_gift_lines,
+          uiText("Gift"),
+        );
+
+        profileLineList.innerHTML = "";
+        for (const line of character.mystical_house_lines || []) {
+          const quote = document.createElement("p");
+          quote.className = "profile-quote";
+          quote.textContent = localizedValue(line.text_i18n);
+          if (quote.textContent) {
+            profileLineList.appendChild(quote);
+          }
+        }
+        profileLinesSection.hidden = !profileLineList.childElementCount;
+
+        idleDialogueList.innerHTML = "";
+        for (const entry of character.mystical_house_idle_dialogue || []) {
+          const item = document.createElement("div");
+          item.className = "idle-dialogue-item";
+          for (const line of entry.lines || []) {
+            const text = document.createElement("p");
+            text.className = "idle-dialogue-line";
+            setFormattedText(text, localizedValue(line.text_i18n));
+            if (
+              selectedLanguage !== "cn"
+              && line.text_i18n
+              && !line.text_i18n[selectedLanguage]
+            ) {
+              const badge = document.createElement("span");
+              badge.className = "voice-fallback-badge";
+              badge.textContent = "CN";
+              text.appendChild(badge);
+            }
+            if (text.textContent.trim()) {
+              item.appendChild(text);
+            }
+          }
+          if (item.childElementCount) {
+            idleDialogueList.appendChild(item);
+          }
+        }
+        idleDialogueSection.hidden = !idleDialogueList.childElementCount;
+
+        affinityTaleList.innerHTML = "";
+        for (const tale of character.affinity_tales || []) {
+          const item = document.createElement("div");
+          item.className = "affinity-tale";
+          const number = document.createElement("span");
+          number.className = "affinity-tale-number";
+          number.textContent = `${tale.number}.`;
+          const text = document.createElement("span");
+          text.textContent = localizedValue(tale.text_i18n);
+          if (text.textContent) {
+            item.append(number, text);
+            affinityTaleList.appendChild(item);
+          }
+        }
+        affinityTalesSection.hidden = !affinityTaleList.childElementCount;
+
+        skinList.innerHTML = "";
+        for (const skin of character.skins || []) {
+          const nameText = localizedValue(skin.name_i18n);
+          const descriptionText = localizedValue(skin.description_i18n);
+          if (!nameText && !descriptionText) {
             continue;
           }
-          const item = document.createElement("div");
-          item.className = "voice-line";
-          const labelText = uiText(entry.label) || `${defaultLabel} ${index + 1}`;
-          const label = document.createElement("span");
-          label.className = "voice-line-label";
-          label.textContent = labelText;
-          const lineText = document.createElement("span");
-          lineText.className = "voice-line-text";
-          setFormattedText(
-            lineText,
-            display.nonDialogue ? "" : display.text || uiText("[Official caption unavailable]"),
-          );
-          lineText.hidden = Boolean(display.nonDialogue);
-          item.append(
-            voicePlayControl(audioSource, labelText),
-            label,
-            lineText,
-          );
-          if (display.badge) {
-            const badge = document.createElement("span");
-            badge.className = "voice-fallback-badge";
-            badge.textContent = display.badge;
-            item.appendChild(badge);
-          }
-          target.appendChild(item);
-        }
-        return target.childElementCount;
-      }
+          const card = document.createElement("article");
+          card.className = "skin-card";
 
-      unitVoiceSection.hidden = !renderVoiceLines(
-        unitVoiceList,
-        character.unit_voice_lines,
-        uiText("Voice"),
-      );
-      resonatingHallSection.hidden = !renderVoiceLines(
-        resonatingHallList,
-        character.resonating_hall_lines,
-        uiText("Idle"),
-      );
-      affinityGiftSection.hidden = !renderVoiceLines(
-        affinityGiftList,
-        character.affinity_gift_lines,
-        uiText("Gift"),
-      );
-
-      profileLineList.innerHTML = "";
-      for (const line of character.mystical_house_lines || []) {
-        const quote = document.createElement("p");
-        quote.className = "profile-quote";
-        quote.textContent = localizedValue(line.text_i18n);
-        if (quote.textContent) {
-          profileLineList.appendChild(quote);
-        }
-      }
-      profileLinesSection.hidden = !profileLineList.childElementCount;
-
-      idleDialogueList.innerHTML = "";
-      for (const entry of character.mystical_house_idle_dialogue || []) {
-        const item = document.createElement("div");
-        item.className = "idle-dialogue-item";
-        for (const line of entry.lines || []) {
-          const text = document.createElement("p");
-          text.className = "idle-dialogue-line";
-          setFormattedText(text, localizedValue(line.text_i18n));
-          if (
-            selectedLanguage !== "cn"
-            && line.text_i18n
-            && !line.text_i18n[selectedLanguage]
-          ) {
-            const badge = document.createElement("span");
-            badge.className = "voice-fallback-badge";
-            badge.textContent = "CN";
-            text.appendChild(badge);
-          }
-          if (text.textContent.trim()) {
-            item.appendChild(text);
-          }
-        }
-        if (item.childElementCount) {
-          idleDialogueList.appendChild(item);
-        }
-      }
-      idleDialogueSection.hidden = !idleDialogueList.childElementCount;
-
-      affinityTaleList.innerHTML = "";
-      for (const tale of character.affinity_tales || []) {
-        const item = document.createElement("div");
-        item.className = "affinity-tale";
-        const number = document.createElement("span");
-        number.className = "affinity-tale-number";
-        number.textContent = `${tale.number}.`;
-        const text = document.createElement("span");
-        text.textContent = localizedValue(tale.text_i18n);
-        if (text.textContent) {
-          item.append(number, text);
-          affinityTaleList.appendChild(item);
-        }
-      }
-      affinityTalesSection.hidden = !affinityTaleList.childElementCount;
-
-      skinList.innerHTML = "";
-      for (const skin of character.skins || []) {
-        const nameText = localizedValue(skin.name_i18n);
-        const descriptionText = localizedValue(skin.description_i18n);
-        if (!nameText && !descriptionText) {
-          continue;
-        }
-        const card = document.createElement("article");
-        card.className = "skin-card";
-
-        const art = document.createElement("div");
-        art.className = "skin-art";
-        const source = skin.image
-          || (skin.is_default && character.media && character.media.profile_art)
-          || "";
-        if (source) {
-          const image = document.createElement("img");
-          image.loading = "lazy";
-          image.alt = nameText ? `${nameText} outfit artwork` : "Outfit artwork";
-          image.addEventListener("error", () => {
-            image.remove();
+          const art = document.createElement("div");
+          art.className = "skin-art";
+          const source = skin.image
+            || (skin.is_default && character.media && character.media.profile_art)
+            || "";
+          if (source) {
+            const image = document.createElement("img");
+            image.loading = "lazy";
+            image.alt = nameText ? `${nameText} outfit artwork` : "Outfit artwork";
+            image.addEventListener("error", () => {
+              image.remove();
+              const fallback = document.createElement("span");
+              fallback.className = "skin-art-fallback";
+              fallback.textContent = uiText("Artwork unavailable");
+              art.appendChild(fallback);
+            }, { once: true });
+            image.src = ReaderPublication.url(source);
+            art.appendChild(image);
+          } else {
             const fallback = document.createElement("span");
             fallback.className = "skin-art-fallback";
             fallback.textContent = uiText("Artwork unavailable");
             art.appendChild(fallback);
-          }, { once: true });
-          image.src = ReaderPublication.url(source);
-          art.appendChild(image);
-        } else {
-          const fallback = document.createElement("span");
-          fallback.className = "skin-art-fallback";
-          fallback.textContent = uiText("Artwork unavailable");
-          art.appendChild(fallback);
-        }
-
-        const body = document.createElement("div");
-        body.className = "skin-card-body";
-        const meta = document.createElement("div");
-        meta.className = "skin-card-meta";
-        const kind = document.createElement("span");
-        kind.className = "skin-kind";
-        kind.textContent = skin.is_default ? uiText("Default Outfit") : uiText("Skin");
-        meta.appendChild(kind);
-        const qualityText = localizedValue(skin.quality_i18n);
-        if (qualityText) {
-          const quality = document.createElement("span");
-          quality.className = "skin-quality";
-          quality.textContent = qualityText;
-          meta.appendChild(quality);
-        }
-        const name = document.createElement("h3");
-        name.className = "skin-name";
-        name.textContent = nameText || uiText("Unnamed Outfit");
-        body.append(meta, name);
-        if (descriptionText) {
-          const description = document.createElement("p");
-          description.className = "skin-description";
-          description.textContent = descriptionText;
-          body.appendChild(description);
-        }
-        const acquisitionText = localizedValue(skin.acquisition_i18n);
-        if (acquisitionText) {
-          const acquisition = document.createElement("p");
-          acquisition.className = "skin-acquisition";
-          acquisition.textContent = uiText("Availability: {text}", {text: acquisitionText});
-          body.appendChild(acquisition);
-        }
-        card.append(art, body);
-        skinList.appendChild(card);
-      }
-      skinsSection.hidden = !skinList.childElementCount;
-
-      function interactionButton(interaction) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "interaction-item";
-        const title = document.createElement("span");
-        title.className = "interaction-title";
-        title.textContent = interactionTitle(interaction);
-        const preview = document.createElement("span");
-        preview.className = "interaction-preview";
-        appendInteractionPreview(preview, interaction);
-        button.append(title);
-        if (preview.textContent) {
-          button.append(preview);
-        }
-        button.addEventListener("click", () => openMysticalInteraction(
-          actorId,
-          interaction.asset_key,
-          { replaceHash: false },
-        ));
-        return button;
-      }
-
-      function renderInteractionList(target, type) {
-        target.innerHTML = "";
-        const interactions = currentCharacterInteractions(type);
-        target.append(...interactions.map(interactionButton));
-        return interactions.length;
-      }
-
-      function renderHeartToHeartList(target) {
-        target.innerHTML = "";
-        const interactions = currentCharacterInteractions("heart_to_heart");
-        const groups = new Map();
-        for (const interaction of interactions) {
-          const heading = heartToHeartSeasonHeading(interaction);
-          if (!groups.has(heading.collectionKey)) {
-            groups.set(heading.collectionKey, { heading, interactions: [] });
           }
-          groups.get(heading.collectionKey).interactions.push(interaction);
-        }
-        for (const group of groups.values()) {
-          const section = document.createElement("section");
-          section.className = "interaction-season";
-          const heading = document.createElement("h3");
-          heading.className = "interaction-season-heading";
-          if (group.heading.number) {
-            const number = document.createElement("span");
-            number.className = "interaction-season-number";
-            number.textContent = group.heading.number;
-            heading.append(number);
+
+          const body = document.createElement("div");
+          body.className = "skin-card-body";
+          const meta = document.createElement("div");
+          meta.className = "skin-card-meta";
+          const kind = document.createElement("span");
+          kind.className = "skin-kind";
+          kind.textContent = skin.is_default ? uiText("Default Outfit") : uiText("Skin");
+          meta.appendChild(kind);
+          const qualityText = localizedValue(skin.quality_i18n);
+          if (qualityText) {
+            const quality = document.createElement("span");
+            quality.className = "skin-quality";
+            quality.textContent = qualityText;
+            meta.appendChild(quality);
           }
+          const name = document.createElement("h3");
+          name.className = "skin-name";
+          name.textContent = nameText || uiText("Unnamed Outfit");
+          body.append(meta, name);
+          if (descriptionText) {
+            const description = document.createElement("p");
+            description.className = "skin-description";
+            description.textContent = descriptionText;
+            body.appendChild(description);
+          }
+          const acquisitionText = localizedValue(skin.acquisition_i18n);
+          if (acquisitionText) {
+            const acquisition = document.createElement("p");
+            acquisition.className = "skin-acquisition";
+            acquisition.textContent = uiText("Availability: {text}", {text: acquisitionText});
+            body.appendChild(acquisition);
+          }
+          card.append(art, body);
+          skinList.appendChild(card);
+        }
+        skinsSection.hidden = !skinList.childElementCount;
+
+        function interactionButton(interaction, displayTitle = "") {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "interaction-item";
           const title = document.createElement("span");
-          title.textContent = group.heading.title;
-          heading.append(title);
-          const list = document.createElement("div");
-          list.className = "interaction-list";
-          list.append(...group.interactions.map(interactionButton));
-          section.append(heading, list);
-          target.append(section);
+          title.className = "interaction-title";
+          title.textContent = displayTitle || interactionTitle(interaction);
+          const preview = document.createElement("span");
+          preview.className = "interaction-preview";
+          appendInteractionPreview(preview, interaction);
+          button.append(title);
+          if (preview.textContent) {
+            button.append(preview);
+          }
+          button.addEventListener("click", () => openMysticalInteraction(
+            actorId,
+            interaction.asset_key,
+            { replaceHash: false },
+          ));
+          return button;
         }
-        return interactions.length;
-      }
 
-      const houseInteractionCount = renderInteractionList(
-        mysticalInteractionList,
-        "mystical_house",
-      );
-      const heartToHeartCount = renderHeartToHeartList(heartToHeartList);
-      heartToHeartTitle.textContent = heartToHeartLabel();
-      mysticalInteractionsSection.hidden = !houseInteractionCount;
-      heartToHeartSection.hidden = !heartToHeartCount;
-      setProfileTab(selectedProfileTab, false);
-      currentStoryTitle.textContent = characterName(character);
-      updatePrimaryShell();
-      updateHash(false, replaceHash);
-      storyScroll.scrollTo({ top: 0 });
+        function renderInteractionList(target, type) {
+          target.innerHTML = "";
+          const interactions = currentCharacterInteractions(type);
+          target.append(...interactions.map(interaction => interactionButton(interaction)));
+          return interactions.length;
+        }
+
+        function renderHeartToHeartList(target) {
+          target.innerHTML = "";
+          const interactions = currentCharacterInteractions("heart_to_heart");
+          const groups = new Map();
+          for (const interaction of interactions) {
+            const heading = heartToHeartSeasonHeading(interaction);
+            if (!groups.has(heading.collectionKey)) {
+              groups.set(heading.collectionKey, { heading, interactions: [] });
+            }
+            groups.get(heading.collectionKey).interactions.push(interaction);
+          }
+          for (const group of groups.values()) {
+            const section = document.createElement("section");
+            section.className = "interaction-season";
+            const heading = document.createElement("h3");
+            heading.className = "interaction-season-heading";
+            if (group.heading.number) {
+              const number = document.createElement("span");
+              number.className = "interaction-season-number";
+              number.textContent = group.heading.number;
+              heading.append(number);
+            }
+            const title = document.createElement("span");
+            title.textContent = group.heading.title;
+            heading.append(title);
+            section.append(heading);
+            const locations = new Map();
+            for (const interaction of group.interactions) {
+              const key = heartToHeartLocationKey(interaction);
+              if (!locations.has(key)) locations.set(key, []);
+              locations.get(key).push(interaction);
+            }
+            const locationGroups = [...locations.values()].sort((left, right) =>
+              (left[0].locations?.length || Infinity) - (right[0].locations?.length || Infinity));
+            for (const entries of locationGroups) {
+              const location = document.createElement("h4");
+              location.className = "interaction-location-heading";
+              location.textContent = localizedValue(heartToHeartLocationNames(entries[0]));
+              const list = document.createElement("div");
+              list.className = "interaction-list";
+              const titles = entries.map(interactionTitle);
+              list.append(...entries.map((interaction, index) => interactionButton(interaction,
+                numberedHeartTitle(titles[index], titles, index))));
+              section.append(location, list);
+            }
+            target.append(section);
+          }
+          return interactions.length;
+        }
+
+        const houseInteractionCount = renderInteractionList(
+          mysticalInteractionList,
+          "mystical_house",
+        );
+        const heartToHeartCount = renderHeartToHeartList(heartToHeartList);
+        heartToHeartTitle.textContent = heartToHeartLabel();
+        mysticalInteractionsSection.hidden = !houseInteractionCount;
+        heartToHeartSection.hidden = !heartToHeartCount;
+        setProfileTab(selectedProfileTab, false);
+        currentStoryTitle.textContent = characterName(character);
+        updatePrimaryShell();
+        updateHash(false, replaceHash);
+        if (!options.keepScroll) scrollReaderToTop();
+      });
     }
 
     function currentGroupMetadata() {
@@ -8185,6 +8354,95 @@
       target.set("lang",selectedLanguage); target.set("mode",readerMode); target.set("gender",selectedGender);
       target.set("return",source);
       return `${path}?${target}`;
+    }
+
+    function rememberMainQuestReturn(link, block) {
+      if (!logicalNavigation || selectedCategory !== "main") return;
+      const target = new URLSearchParams((link.getAttribute("href") || "").split("?")[1] || "");
+      const source = validMainQuestReturn(target.get("return"));
+      if (!source) return;
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      const bookmark = {
+        version: 1, source, section: collectionRoutePart(selectedSection), storyId: String(selectedStoryId),
+        language: selectedLanguage, mode: readerMode, gender: selectedGender,
+        anchor: block.dataset.nodeId,
+        offset: block.getBoundingClientRect().top - (mobile ? 0 : storyScroll.getBoundingClientRect().top),
+        paneTop: storyScroll.scrollTop, pageTop: window.scrollY,
+        currentNodeId, initialNodeId, runtimeSeekTarget, runtimeNotice,
+        timelineItems: structuredClone(timelineItems), visitedNodeIds: [...visitedNodeIds],
+        selectedChoices: {...selectedChoices}, seenChoiceOptions: {...seenChoiceOptions},
+        fullScriptOverrides: structuredClone(fullScriptOverrides),
+        runtime: storySession?.snapshot(), history: storyHistory?.snapshot(),
+        undo: structuredClone(choiceUndoStack),
+      };
+      mainQuestBookmarks.set(source, bookmark);
+      if (mainQuestBookmarks.size > 8) mainQuestBookmarks.delete(mainQuestBookmarks.keys().next().value);
+      // Also survive refreshing the side quest. Storage failure still permits
+      // returning normally within this visit through the in-memory bookmark.
+      try { sessionStorage.setItem("tea-main-quest-return-v1", JSON.stringify(bookmark)); } catch (_) {}
+    }
+
+    function mainQuestBookmarkForRoute(route) {
+      if (selectedCategory !== "side" || !validMainQuestReturn(returnToMainQuest)
+          || route.category !== "main") return null;
+      let bookmark = mainQuestBookmarks.get(returnToMainQuest);
+      if (!bookmark) {
+        try { bookmark = JSON.parse(sessionStorage.getItem("tea-main-quest-return-v1")); } catch (_) {}
+      }
+      if (bookmark?.version !== 1 || bookmark.source !== returnToMainQuest
+          || bookmark.section !== route.section || bookmark.storyId !== String(route.storyId)
+          || bookmark.language !== (route.language || selectedLanguage)
+          || bookmark.mode !== (route.mode || readerMode)
+          || bookmark.gender !== (route.gender || selectedGender)) return null;
+      return bookmark;
+    }
+
+    function restoreMainQuestReading(bookmark) {
+      if (!bookmark || !Array.isArray(bookmark.timelineItems) || !Array.isArray(bookmark.visitedNodeIds)
+          || (bookmark.currentNodeId && !storyGraph.nodes[bookmark.currentNodeId])
+          || bookmark.visitedNodeIds.some(id => !storyGraph.nodes[id])) return false;
+      currentNodeId = bookmark.currentNodeId;
+      initialNodeId = bookmark.initialNodeId || "";
+      runtimeSeekTarget = bookmark.runtimeSeekTarget || "";
+      runtimeNotice = bookmark.runtimeNotice || "";
+      timelineItems = structuredClone(bookmark.timelineItems);
+      visitedNodeIds = new Set(bookmark.visitedNodeIds);
+      selectedChoices = {...bookmark.selectedChoices};
+      seenChoiceOptions = {...bookmark.seenChoiceOptions};
+      fullScriptOverrides = structuredClone(bookmark.fullScriptOverrides || {});
+      fullScriptRoute = null;
+      if (bookmark.runtime) storySession?.restore(bookmark.runtime);
+      choiceUndoStack = structuredClone(bookmark.undo || []);
+      // Keep anything learned in the side quest, even when undoing an earlier
+      // main-story choice. Never roll global history back to the departure time.
+      const latest = storyHistory?.snapshot();
+      if (latest?.version === 2 && bookmark.history?.version === 2) {
+        for (const snapshot of choiceUndoStack) {
+          if (snapshot.history?.version !== 2) continue;
+          for (const field of ["records", "checkpoints"]) {
+            const before = bookmark.history[field] || {}, after = latest[field] || {};
+            for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
+              if (JSON.stringify(before[key]) === JSON.stringify(after[key])) continue;
+              if (key in after) snapshot.history[field][key] = structuredClone(after[key]);
+              else delete snapshot.history[field][key];
+            }
+          }
+        }
+      }
+      return true;
+    }
+
+    async function restoreMainQuestScroll(bookmark) {
+      // Let the new timeline settle before measuring its anchor; the page is
+      // still covered by the loading state during these frames.
+      await new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      const anchor = timeline.querySelector(`[data-node-id="${CSS.escape(bookmark.anchor || "")}"]`);
+      const top = anchor
+        ? (mobile ? window.scrollY : storyScroll.scrollTop) + anchor.getBoundingClientRect().top
+          - (mobile ? 0 : storyScroll.getBoundingClientRect().top) - bookmark.offset
+        : mobile ? bookmark.pageTop : bookmark.paneTop;
+      (mobile ? window : storyScroll).scrollTo({top: Math.max(0, top || 0), behavior: "instant"});
     }
 
     function renderStoryReturnLinks() {
@@ -9253,7 +9511,7 @@
         speakers: { ...base.speakers, ...graph.embedded_locales?.[language]?.speakers },
       });
       const locale = StoryLocaleReferences.apply(assetKey, language,
-        embeddedLocale(loadedLocale, language));
+        embeddedLocale(loadedLocale, language), graph);
       const cn = language === "cn"
         ? locale
         : embeddedLocale(loadedCn, "cn");
@@ -9901,8 +10159,11 @@
           }
           chapterGroups.get(chapterKey).beats.push(beat);
         }
-        const useGroups = chapterGroups.size > 1;
-        for (const chapter of chapterGroups.values()) {
+        const useGroups = chapterGroups.size > 1 || selectedCategory === "heart_to_heart";
+        const chapters = [...chapterGroups.values()];
+        if (selectedCategory === "heart_to_heart") chapters.sort((left, right) =>
+          (left.beats[0].logicalStory.locations?.length || Infinity) - (right.beats[0].logicalStory.locations?.length || Infinity));
+        for (const chapter of chapters) {
           const parent = useGroups ? document.createElement("optgroup") : storySelect;
           if (useGroups) {
             parent.label = chapter.title || uiText("Stories");
@@ -9910,7 +10171,8 @@
           for (const beat of chapter.beats) {
             const option = document.createElement("option");
             option.value = beat.id;
-            option.textContent = beatLabel(beat);
+            option.textContent = beat.logicalStory.sourceType === "heart_to_heart"
+              ? heartToHeartOptionLabel(beat, chapter.beats) : beatLabel(beat);
             parent.appendChild(option);
           }
           if (useGroups) {
@@ -10096,6 +10358,13 @@
 
     function visibleSpeakerName(name, source = "") {
       const value = String(name || "").trim();
+      // These are presentation labels in the source, not character names.
+      const subtitleLabels = /^(?:subtitles?|(?:black[ -]?screen )subtitles?|字幕|黑屏字幕|黒画面字幕|자막|블랙 스크린 자막)$/i;
+      if (subtitleLabels.test(value) || subtitleLabels.test(String(source || "").trim())) return "";
+      // Exact Japanese LanguageDb labels can legitimately equal Chinese.
+      // Verified records: 8C1568160B4ECCD9, F39E720C8BB69BCA,
+      // 7E9DD98934413EDD, 3C04BD28AB4EDB69, FDD3EC4313348F96.
+      if (selectedLanguage === "jp" && ["死神", "十六", "王子", "原住民A", "原住民B"].includes(value)) return value;
       // Locale exports can mark a copied source label as matched.
       // Compare the label itself; Japanese names translated into kanji remain valid.
       if (selectedLanguage !== "cn" && value === String(source || "").trim()
@@ -10930,7 +11199,55 @@
       return figure;
     }
 
+    function renderPetalCollectionCard(card, container) {
+      const panel = document.createElement("article");
+      panel.className = "activity-result petal-card";
+      const content = document.createElement("div");
+      content.className = "activity-result-content";
+      const title = document.createElement("h3");
+      title.className = "activity-result-name";
+      title.textContent = localizedValue(card.title_i18n);
+      const image = document.createElement("img");
+      image.className = "petal-card-art";
+      image.loading = "lazy";
+      image.width = 520; image.height = 900;
+      const controls = document.createElement("div");
+      controls.className = "petal-card-count";
+      const label = {en:"Petals",cn:"花瓣",jp:"花びら",kr:"꽃잎"}[selectedLanguage] || "Petals";
+      const choices = card.reading.options;
+      let count = petalCardCounts.get(card.reading.key);
+      if (!choices.includes(count)) count = card.reading.count;
+      const update = () => {
+        const path = card.stages[count];
+        image.src = ReaderPublication.url(path.startsWith("assets/") ? `../reader_viewer/${path}` : path);
+        image.alt = `${title.textContent}: ${count}/${card.stages.length - 1}`;
+      };
+      if (choices.length) {
+        const pickerLabel = document.createElement("label");
+        pickerLabel.append(document.createTextNode(label + " "));
+        const select = document.createElement("select");
+        for (const value of choices) {
+          const option = document.createElement("option");
+          option.value = String(value); option.textContent = `${value}/${card.stages.length - 1}`;
+          select.appendChild(option);
+        }
+        select.value = String(count);
+        select.addEventListener("change", () => {
+          const value = Number(select.value);
+          if (!choices.includes(value)) return;
+          count = value; petalCardCounts.set(card.reading.key, count); update();
+        });
+        pickerLabel.appendChild(select); controls.appendChild(pickerLabel);
+      } else {
+        controls.textContent = `${label}: ${count}/${card.stages.length - 1}`;
+      }
+      update(); content.append(title, image, controls);
+      panel.appendChild(content); container.appendChild(panel);
+      return panel;
+    }
+
     function renderCollectionCardPreview(card, container) {
+      if (card.reading) return renderPetalCollectionCard(card, container);
       const panel = document.createElement("details");
       panel.className = "document-block collection-card-preview";
       const heading = document.createElement("summary");
@@ -11545,6 +11862,7 @@
         if (prerequisite && prerequisite.route) {
           const link = document.createElement("a");
           link.href = prerequisiteReadingHref(prerequisite, item);
+          link.addEventListener("click", () => rememberMainQuestReturn(link, block));
           setFormattedText(link, actionText, prerequisite);
           action.appendChild(link);
         } else {
@@ -12221,7 +12539,9 @@
       // The source speaker on a choice is the question's speaker, not its viewpoint.
       const appearance = !configured && playerAppearance?.resolve(model, "think_loop");
       const face = appearance || dialoguePortraitForModel(model, "think_loop");
-      return face ? {portrait:face, name, configured:Boolean(configured || role)} : null;
+      // Choices show the thinking pose's upper body; dialogue keeps its face crop.
+      const portrait = face?.choiceFraming ? {...face, ...face.choiceFraming} : face;
+      return portrait ? {portrait, name, configured:Boolean(configured || role)} : null;
     }
 
     function renderChoiceBlock(
@@ -14338,105 +14658,110 @@
     }
 
     async function loadSelectedStory(assetKey, options = {}) {
-      document.getElementById("activity-result-dialog")?.close();
-      if (logicalNavigation) {
-        if (!groupIndex || groupIndex.group_key !== `${selectedSection}/${selectedCategory}`) {
+      return withContentLoading(async () => {
+        document.getElementById("activity-result-dialog")?.close();
+        if (logicalNavigation) {
+          if (!groupIndex || groupIndex.group_key !== `${selectedSection}/${selectedCategory}`) {
+            await setSelectedGroup(selectedSection, selectedCategory);
+          }
+          activeBeat = beatById.get(options.beatId)
+            || storyBeats.find((beat) => beat.logicalStory.id === String(selectedStoryId))
+            || beatForAsset(assetKey)
+            || storyBeats[0]
+            || null;
+          if (!activeBeat) {
+            throw new Error(`No readable stories were found in ${selectedSection}/${selectedCategory}.`);
+          }
+          const variants = currentStoryVariants(false,activeBeat?.logicalStory?.id);
+          if (variants) {
+            try {
+              const line = variants.selectedLine(activeBeat.logicalStory.id, new StoryRuntime.Session(storyHistory));
+              activeBeat = storyBeats.find(beat => beat.logicalStory.id === line) || activeBeat;
+            } catch (error) { if (!(error instanceof StoryRuntime.Pending)) throw error; }
+          }
+          if (routeCatalogs) {
+            await hydrateLogicalStory(activeBeat.logicalStory);
+            const id = activeBeat.id;
+            await loadGroup(selectedSection, selectedCategory);
+            activeBeat = beatById.get(id);
+          }
+          selectedBeatId = activeBeat.id;
+          selectedStoryId = activeBeat.logicalStory.id;
+          selectedAssetKey = activeBeat.firstAssetKey;
+        } else {
+        const parts = storyParts(assetKey);
+        selectedStoryId = parts.storyId;
+        if (!groupIndex || groupIndex.group_key !== groupKey(selectedSection, selectedCategory)) {
           await setSelectedGroup(selectedSection, selectedCategory);
         }
-        activeBeat = beatById.get(options.beatId)
-          || storyBeats.find((beat) => beat.logicalStory.id === String(selectedStoryId))
-          || beatForAsset(assetKey)
-          || storyBeats[0]
-          || null;
-        if (!activeBeat) {
-          throw new Error(`No readable stories were found in ${selectedSection}/${selectedCategory}.`);
+        if (!storyByKey.has(assetKey)) {
+          await setSelectedGroup(parts.section, parts.category);
         }
-        const variants = currentStoryVariants(false,activeBeat?.logicalStory?.id);
-        if (variants) {
-          try {
-            const line = variants.selectedLine(activeBeat.logicalStory.id, new StoryRuntime.Session(storyHistory));
-            activeBeat = storyBeats.find(beat => beat.logicalStory.id === line) || activeBeat;
-          } catch (error) { if (!(error instanceof StoryRuntime.Pending)) throw error; }
+        activeBeat = beatForAsset(assetKey) || storyBeats[0] || null;
+        selectedBeatId = activeBeat ? activeBeat.id : "";
+        selectedAssetKey = activeBeat ? activeBeat.firstAssetKey : assetKey;
+        const selectedParts = storyParts(selectedAssetKey);
+        selectedStoryId = selectedParts.storyId;
         }
-        if (routeCatalogs) {
-          await hydrateLogicalStory(activeBeat.logicalStory);
-          const id = activeBeat.id;
-          await loadGroup(selectedSection, selectedCategory);
-          activeBeat = beatById.get(id);
+        await ensureRuntimeGroup(groupKey(selectedSection, selectedCategory));
+        const storiesWithMenus = [...(activeBeat?.stories || [])];
+        const menuOwner = String(activeBeat?.logicalStory?.id || "");
+        await ensureStoryRecords([
+          ...(storyRuntimeCatalog?.treatment_steps?.[menuOwner] || []).map(step => step.asset),
+          ...(storyRuntimeCatalog?.menus?.[menuOwner] || []).map(link => storyRuntimeCatalog.choices[String(link.choice_id)]?.asset),
+        ].filter(Boolean));
+        for (const treatment of storyRuntimeCatalog?.treatment_steps?.[menuOwner] || []) {
+          insertTreatmentStory(storiesWithMenus, treatment, manifestStoryByKey.get(treatment.asset));
         }
-        selectedBeatId = activeBeat.id;
-        selectedStoryId = activeBeat.logicalStory.id;
-        selectedAssetKey = activeBeat.firstAssetKey;
-      } else {
-      const parts = storyParts(assetKey);
-      selectedStoryId = parts.storyId;
-      if (!groupIndex || groupIndex.group_key !== groupKey(selectedSection, selectedCategory)) {
-        await setSelectedGroup(selectedSection, selectedCategory);
-      }
-      if (!storyByKey.has(assetKey)) {
-        await setSelectedGroup(parts.section, parts.category);
-      }
-      activeBeat = beatForAsset(assetKey) || storyBeats[0] || null;
-      selectedBeatId = activeBeat ? activeBeat.id : "";
-      selectedAssetKey = activeBeat ? activeBeat.firstAssetKey : assetKey;
-      const selectedParts = storyParts(selectedAssetKey);
-      selectedStoryId = selectedParts.storyId;
-      }
-      await ensureRuntimeGroup(groupKey(selectedSection, selectedCategory));
-      const storiesWithMenus = [...(activeBeat?.stories || [])];
-      const menuOwner = String(activeBeat?.logicalStory?.id || "");
-      await ensureStoryRecords([
-        ...(storyRuntimeCatalog?.treatment_steps?.[menuOwner] || []).map(step => step.asset),
-        ...(storyRuntimeCatalog?.menus?.[menuOwner] || []).map(link => storyRuntimeCatalog.choices[String(link.choice_id)]?.asset),
-      ].filter(Boolean));
-      for (const treatment of storyRuntimeCatalog?.treatment_steps?.[menuOwner] || []) {
-        insertTreatmentStory(storiesWithMenus, treatment, manifestStoryByKey.get(treatment.asset));
-      }
-      for (const link of storyRuntimeCatalog?.menus?.[menuOwner] || []) {
-        const choice = storyRuntimeCatalog.choices[String(link.choice_id)];
-        if (!choice || storiesWithMenus.some(story => story.asset_key === choice.asset)) continue;
-        const predecessor = `${link.line_id}:${link.task_id}:${link.predecessor_step_id}`;
-        const anchor = storiesWithMenus.findLastIndex(story => story.objective_key === predecessor);
-        const menu = manifestStoryByKey.get(choice.asset);
-        if (anchor >= 0 && menu) storiesWithMenus.splice(anchor + 1, 0, {
-          ...menu, objective_key: `${link.line_id}:${link.task_id}:${link.step_id}`,
-        });
-      }
-      activeBeatContexts = activeBeat
-        ? await Promise.all(storiesWithMenus.map((story) => loadStoryContext(story)))
-        : [];
-      const firstContext = activeBeatContexts[0] || await loadStoryContext(storyByKey.get(selectedAssetKey));
-      const interactiveContext = buildInteractiveStoryContext(
-        activeBeatContexts.length ? activeBeatContexts : [firstContext],
-      );
-      storyGraph = interactiveContext.graph;
-      await ensureStoryPresentation(storyGraph, activeBeatContexts);
-      StoryInspections.install(storyGraph,activeBeatContexts,storyRuntimeCatalog,groupIndex?.group_key,logicalNavigation);
-      officialLocale = interactiveContext.officialLocale;
-      cnLocale = interactiveContext.cnLocale;
-      machineLocale = interactiveContext.machineLocale;
-      initialNodeId = options.node || "";
-      fullScriptOverrides = {};
-      fullScriptRoute = null;
-      fullScriptDirty = false;
-      runtimeSeekTarget = initialNodeId && storyGraph.nodes[initialNodeId] ? initialNodeId : "";
-      currentNodeId = (storyGraph.roots || [])[0] || "";
-      timelineItems = [];
-      choiceUndoStack = [];
-      visitedNodeIds = new Set();
-      selectedChoices = {};
-      seenChoiceOptions = {};
-      storySession?.reset();
-      storySession?.useStoryVariant(currentStoryVariants(true)?.get(activeBeat?.logicalStory?.id));
-      runtimeNotice = "";
-      renderStoryOptions();
-      updateHash(false, options.replaceHash !== false);
-      autoRevealUntilPause();
-      render();
-      if (!options.keepScroll) {
-        scrollReaderToTop();
-      }
-      translateMissingStoryText(activeBeatContexts.length ? activeBeatContexts : [firstContext], interactiveContext);
+        for (const link of storyRuntimeCatalog?.menus?.[menuOwner] || []) {
+          const choice = storyRuntimeCatalog.choices[String(link.choice_id)];
+          if (!choice || storiesWithMenus.some(story => story.asset_key === choice.asset)) continue;
+          const predecessor = `${link.line_id}:${link.task_id}:${link.predecessor_step_id}`;
+          const anchor = storiesWithMenus.findLastIndex(story => story.objective_key === predecessor);
+          const menu = manifestStoryByKey.get(choice.asset);
+          if (anchor >= 0 && menu) storiesWithMenus.splice(anchor + 1, 0, {
+            ...menu, objective_key: `${link.line_id}:${link.task_id}:${link.step_id}`,
+          });
+        }
+        activeBeatContexts = activeBeat
+          ? await Promise.all(storiesWithMenus.map((story) => loadStoryContext(story)))
+          : [];
+        const firstContext = activeBeatContexts[0] || await loadStoryContext(storyByKey.get(selectedAssetKey));
+        const interactiveContext = buildInteractiveStoryContext(
+          activeBeatContexts.length ? activeBeatContexts : [firstContext],
+        );
+        storyGraph = interactiveContext.graph;
+        await ensureStoryPresentation(storyGraph, activeBeatContexts);
+        StoryInspections.install(storyGraph,activeBeatContexts,storyRuntimeCatalog,groupIndex?.group_key,logicalNavigation);
+        officialLocale = interactiveContext.officialLocale;
+        cnLocale = interactiveContext.cnLocale;
+        machineLocale = interactiveContext.machineLocale;
+        initialNodeId = options.node || "";
+        fullScriptOverrides = {};
+        fullScriptRoute = null;
+        fullScriptDirty = false;
+        runtimeSeekTarget = initialNodeId && storyGraph.nodes[initialNodeId] ? initialNodeId : "";
+        currentNodeId = (storyGraph.roots || [])[0] || "";
+        timelineItems = [];
+        choiceUndoStack = [];
+        visitedNodeIds = new Set();
+        selectedChoices = {};
+        seenChoiceOptions = {};
+        storySession?.reset();
+        storySession?.useStoryVariant(currentStoryVariants(true)?.get(activeBeat?.logicalStory?.id));
+        runtimeNotice = "";
+        renderStoryOptions();
+        updateHash(false, options.replaceHash !== false);
+        const restored = restoreMainQuestReading(options.returnBookmark);
+        if (!restored || storyGraph.nodes[currentNodeId]?.type === "runtime") autoRevealUntilPause();
+        render();
+        if (restored) {
+          await restoreMainQuestScroll(options.returnBookmark);
+        } else if (!options.keepScroll) {
+          scrollReaderToTop();
+        }
+        translateMissingStoryText(activeBeatContexts.length ? activeBeatContexts : [firstContext], interactiveContext);
+      });
     }
 
     function setInteractionLoading(loading) {
@@ -14448,55 +14773,57 @@
     }
 
     async function openMysticalInteraction(actorId, assetKey, options = {}) {
-      primaryView = "mystical";
-      selectedCharacterId = String(actorId);
-      selectedInteractionAssetKey = assetKey;
-      stopActiveVoice();
-      timeline.replaceChildren();
-      for (const note of storyReader.querySelectorAll("#story-choice-history, .story-return-link")) note.remove();
-      storyHeading.textContent = "";
-      assetLabel.textContent = "";
-      storySubtitle.replaceChildren();
-      storyOverview.hidden = true;
-      translationNotice.classList.remove("visible");
-      restartButton.closest(".reader-actions").hidden = true;
-      document.getElementById("story-sources").replaceChildren();
-      document.getElementById("story-sources").hidden = true;
-      bottomPosition.textContent = "";
-      for (const button of [previousStoryTop, previousStoryBottom, nextStoryTop, nextStoryBottom]) button.disabled = true;
-      currentStoryTitle.textContent = uiText("Loading…");
-      interactionContextTitle.textContent = characterName(mysticalCharacterById.get(String(actorId)));
-      setInteractionLoading(true);
-      if (!options.keepScroll) scrollReaderToTop();
-      try {
-        await ensureCharacterDetail(actorId);
-        await ensureStoryRuntime();
-        const character = mysticalCharacterById.get(String(actorId));
-        const interaction = mysticalInteractionByAsset.get(assetKey);
-        if (!character || !interaction) {
-          await showCharacterProfile(actorId, options.replaceHash !== false);
-          return;
+      return withContentLoading(async () => {
+        primaryView = "mystical";
+        selectedCharacterId = String(actorId);
+        selectedInteractionAssetKey = assetKey;
+        stopActiveVoice();
+        timeline.replaceChildren();
+        for (const note of storyReader.querySelectorAll("#story-choice-history, .story-return-link")) note.remove();
+        storyHeading.textContent = "";
+        assetLabel.textContent = "";
+        storySubtitle.replaceChildren();
+        storyOverview.hidden = true;
+        translationNotice.classList.remove("visible");
+        restartButton.closest(".reader-actions").hidden = true;
+        document.getElementById("story-sources").replaceChildren();
+        document.getElementById("story-sources").hidden = true;
+        bottomPosition.textContent = "";
+        for (const button of [previousStoryTop, previousStoryBottom, nextStoryTop, nextStoryBottom]) button.disabled = true;
+        currentStoryTitle.textContent = uiText("Loading…");
+        interactionContextTitle.textContent = characterName(mysticalCharacterById.get(String(actorId)));
+        setInteractionLoading(true);
+        if (!options.keepScroll) scrollReaderToTop();
+        try {
+          await ensureCharacterDetail(actorId);
+          await ensureStoryRuntime();
+          const character = mysticalCharacterById.get(String(actorId));
+          const interaction = mysticalInteractionByAsset.get(assetKey);
+          if (!character || !interaction) {
+            await showCharacterProfile(actorId, options.replaceHash !== false);
+            return;
+          }
+          logicalNavigation = false;
+          selectedSection = interaction.episode;
+          selectedCategory = "herohub_story";
+          selectedStoryId = String(interaction.story_id);
+          selectedAssetKey = assetKey;
+          currentStoryTitle.textContent = interactionTitle(interaction);
+          interactionContextTitle.textContent = characterName(character);
+          await setSelectedGroup(selectedSection, selectedCategory);
+          await loadSelectedStory(assetKey, {
+            node: options.node || "",
+            keepScroll: options.keepScroll,
+            replaceHash: options.replaceHash !== false,
+          });
+        } catch (error) {
+          storyGraph = null;
+          currentStoryTitle.textContent = uiText("Could not load this content: {error}", {error: error.message});
+          showRouteError(error);
+        } finally {
+          setInteractionLoading(false);
         }
-        logicalNavigation = false;
-        selectedSection = interaction.episode;
-        selectedCategory = "herohub_story";
-        selectedStoryId = String(interaction.story_id);
-        selectedAssetKey = assetKey;
-        currentStoryTitle.textContent = interactionTitle(interaction);
-        interactionContextTitle.textContent = characterName(character);
-        await setSelectedGroup(selectedSection, selectedCategory);
-        await loadSelectedStory(assetKey, {
-          node: options.node || "",
-          keepScroll: options.keepScroll,
-          replaceHash: options.replaceHash !== false,
-        });
-      } catch (error) {
-        storyGraph = null;
-        currentStoryTitle.textContent = uiText("Could not load this content: {error}", {error: error.message});
-        showRouteError(error);
-      } finally {
-        setInteractionLoading(false);
-      }
+      });
     }
 
     async function changeLanguage(language) {
@@ -14507,47 +14834,49 @@
         updateHash();
         return;
       }
-      if (primaryView === "archive") {
-        await ensureArchiveData(archiveKind);
-        savePreferences();
-        renderArchive();
-        updateHash(false, true);
-        return;
-      }
-      if (primaryView === "mystical" && !selectedInteractionAssetKey) {
-        savePreferences();
-        if (selectedCharacterId) {
-          await showCharacterProfile(selectedCharacterId, true);
-        } else {
-          renderCharacterIndex();
+      return withContentLoading(async () => {
+        if (primaryView === "archive") {
+          await ensureArchiveData(archiveKind);
+          savePreferences();
+          renderArchive();
           updateHash(false, true);
+          return;
         }
-        return;
-      }
-      if (primaryView === "mystical" && selectedInteractionAssetKey) {
-        await ensureCharacterDetail(selectedCharacterId);
-      }
-      await ensureStoryBundles(activeBeat?.logicalStory);
-      activeBeatContexts = activeBeat
-        ? await Promise.all((activeBeatContexts.length ? activeBeatContexts.map(context => context.story) : activeBeat.stories).map((story) => loadStoryContext(story)))
-        : [];
-      const firstContext = activeBeatContexts[0] || await loadStoryContext(storyByKey.get(selectedAssetKey));
-      const interactiveContext = buildInteractiveStoryContext(
-        activeBeatContexts.length ? activeBeatContexts : [firstContext],
-      );
-      storyGraph = interactiveContext.graph;
-      await ensureStoryPresentation(storyGraph, activeBeatContexts);
-      StoryInspections.install(storyGraph,activeBeatContexts,storyRuntimeCatalog,groupIndex?.group_key,logicalNavigation);
-      officialLocale = interactiveContext.officialLocale;
-      cnLocale = interactiveContext.cnLocale;
-      machineLocale = interactiveContext.machineLocale;
-      savePreferences();
-      updateHash(false, true);
-      renderSectionOptions();
-      renderCategoryOptions();
-      renderStoryOptions();
-      render();
-      translateMissingStoryText(activeBeatContexts.length ? activeBeatContexts : [firstContext], interactiveContext);
+        if (primaryView === "mystical" && !selectedInteractionAssetKey) {
+          savePreferences();
+          if (selectedCharacterId) {
+            await showCharacterProfile(selectedCharacterId, true, { keepScroll: true });
+          } else {
+            renderCharacterIndex();
+            updateHash(false, true);
+          }
+          return;
+        }
+        if (primaryView === "mystical" && selectedInteractionAssetKey) {
+          await ensureCharacterDetail(selectedCharacterId);
+        }
+        await ensureStoryBundles(activeBeat?.logicalStory);
+        activeBeatContexts = activeBeat
+          ? await Promise.all((activeBeatContexts.length ? activeBeatContexts.map(context => context.story) : activeBeat.stories).map((story) => loadStoryContext(story)))
+          : [];
+        const firstContext = activeBeatContexts[0] || await loadStoryContext(storyByKey.get(selectedAssetKey));
+        const interactiveContext = buildInteractiveStoryContext(
+          activeBeatContexts.length ? activeBeatContexts : [firstContext],
+        );
+        storyGraph = interactiveContext.graph;
+        await ensureStoryPresentation(storyGraph, activeBeatContexts);
+        StoryInspections.install(storyGraph,activeBeatContexts,storyRuntimeCatalog,groupIndex?.group_key,logicalNavigation);
+        officialLocale = interactiveContext.officialLocale;
+        cnLocale = interactiveContext.cnLocale;
+        machineLocale = interactiveContext.machineLocale;
+        savePreferences();
+        updateHash(false, true);
+        renderSectionOptions();
+        renderCategoryOptions();
+        renderStoryOptions();
+        render();
+        translateMissingStoryText(activeBeatContexts.length ? activeBeatContexts : [firstContext], interactiveContext);
+      });
     }
 
     async function refreshReadingContext() {
@@ -14632,35 +14961,41 @@
     }
 
     sectionSelect.addEventListener("change", async () => {
-      selectedSection = sectionSelect.value;
-      renderCategoryOptions();
-      await loadGroup(selectedSection, selectedCategory);
-      const beat = storyBeats[0];
-      if (beat) {
-        selectedStoryId = beat.logicalStory ? beat.logicalStory.id : storyParts(beat.firstAssetKey).storyId;
-        await loadSelectedStory(beat.firstAssetKey, { beatId: beat.id });
-      }
+      return withContentLoading(async () => {
+        selectedSection = sectionSelect.value;
+        renderCategoryOptions();
+        await loadGroup(selectedSection, selectedCategory);
+        const beat = storyBeats[0];
+        if (!beat) throw new Error("No readable stories were found in this category.");
+        if (beat) {
+          selectedStoryId = beat.logicalStory ? beat.logicalStory.id : storyParts(beat.firstAssetKey).storyId;
+          await loadSelectedStory(beat.firstAssetKey, { beatId: beat.id });
+        }
+      }).catch(showRouteError);
     });
 
     categorySelect.addEventListener("change", async () => {
-      selectedCategory = categorySelect.value;
-      await loadGroup(selectedSection, selectedCategory);
-      const beat = storyBeats[0];
-      if (beat) {
-        selectedStoryId = beat.logicalStory ? beat.logicalStory.id : storyParts(beat.firstAssetKey).storyId;
-        await loadSelectedStory(beat.firstAssetKey, { beatId: beat.id });
-      }
+      return withContentLoading(async () => {
+        selectedCategory = categorySelect.value;
+        await loadGroup(selectedSection, selectedCategory);
+        const beat = storyBeats[0];
+        if (!beat) throw new Error("No readable stories were found in this category.");
+        if (beat) {
+          selectedStoryId = beat.logicalStory ? beat.logicalStory.id : storyParts(beat.firstAssetKey).storyId;
+          await loadSelectedStory(beat.firstAssetKey, { beatId: beat.id });
+        }
+      }).catch(showRouteError);
     });
 
     storySelect.addEventListener("change", async () => {
       const beat = beatById.get(storySelect.value);
       await loadSelectedStory(beat ? beat.firstAssetKey : storySelect.value, {
         beatId: beat ? beat.id : "",
-      });
+      }).catch(showRouteError);
     });
 
     languageSelect.addEventListener("change", async () => {
-      await changeLanguage(languageSelect.value);
+      await changeLanguage(languageSelect.value).catch(showRouteError);
     });
 
     modeSelect.addEventListener("change", async () => {
@@ -14723,7 +15058,7 @@
         return;
       }
       if (primaryView === "mystical" && !selectedInteractionAssetKey && selectedCharacterId) {
-        showCharacterProfile(selectedCharacterId, false);
+        showCharacterProfile(selectedCharacterId, false, { keepScroll: true }).catch(showRouteError);
         return;
       }
       renderStoryOptions();
@@ -14744,10 +15079,10 @@
       render();
     });
 
-    previousStoryTop.addEventListener("click", () => navigateStory("previous"));
-    previousStoryBottom.addEventListener("click", () => navigateStory("previous"));
-    nextStoryTop.addEventListener("click", () => navigateStory("next"));
-    nextStoryBottom.addEventListener("click", () => navigateStory("next"));
+    previousStoryTop.addEventListener("click", () => navigateStory("previous").catch(showRouteError));
+    previousStoryBottom.addEventListener("click", () => navigateStory("previous").catch(showRouteError));
+    nextStoryTop.addEventListener("click", () => navigateStory("next").catch(showRouteError));
+    nextStoryBottom.addEventListener("click", () => navigateStory("next").catch(showRouteError));
     storyScroll.addEventListener("scroll", onStoryOutlineScroll, { passive: true });
     window.addEventListener("scroll", onStoryOutlineScroll, { passive: true });
     window.addEventListener("resize", () => {
@@ -14811,7 +15146,10 @@
 
     documentArchiveTab.addEventListener("click", () => {
       if (primaryView === "archive") {
-        return ensureArchiveData("documents").then(returnToArchiveIndex).catch(showLoadError);
+        return withContentLoading(async () => {
+          await ensureArchiveData("documents");
+          returnToArchiveIndex();
+        }).catch(showLoadError);
       }
       window.location.hash = `/archive/${archiveKind}?lang=${encodeURIComponent(selectedLanguage)}&mode=${encodeURIComponent(readerMode)}&gender=${encodeURIComponent(selectedGender)}`;
     });
@@ -14842,10 +15180,10 @@
     });
     profileBack.addEventListener("click", () => showCharacterIndex(false));
     interactionBack.addEventListener("click", () => (
-      showCharacterProfile(selectedCharacterId, false)
+      showCharacterProfile(selectedCharacterId, false).catch(showRouteError)
     ));
 
-    async function openStoryRoute(route) {
+    async function openStoryRoute(route, returnBookmark = null) {
       await ensureStoryNavigation();
       primaryView = "stories";
       selectedInteractionAssetKey = "";
@@ -14873,6 +15211,7 @@
         beatId: beat.id,
         node: route.node || "",
         replaceHash: true,
+        returnBookmark,
       });
       if (primaryView === "stories") lastStoryHash = window.location.hash;
     }
@@ -14887,6 +15226,7 @@
     }
 
     async function openRoute(route) {
+      const returnBookmark = mainQuestBookmarkForRoute(route);
       const revision = ++routeRevision;
       if (route.view === "home") {
         applyRoute(route);
@@ -14895,38 +15235,40 @@
         showHome();
         return;
       }
-      if (primaryView === "home") {
-        homeStatus.textContent = uiText("Loading…");
-        homeStatus.hidden = false;
-      }
-      await ensureReaderData();
-      if (revision !== routeRevision) return;
-      if (route.view !== "archive") await ensureCharacterIndex();
-      if (!route.view || route.view === "stories" || route.interactionId) await ensureStoryNavigation();
-      if (revision !== routeRevision) return;
-      applyRoute(route);
-      applyPreferencesToUi();
-      savePreferences();
-      if (primaryView === "archive") {
-        await showArchive(archiveKind, selectedArchiveId, true);
-        return;
-      }
-      if (primaryView === "mystical") {
-        updatePrimaryShell();
-        if (selectedInteractionAssetKey) {
-          await openMysticalInteraction(
-            selectedCharacterId,
-            selectedInteractionAssetKey,
-            { node: route.node || "", replaceHash: true },
-          );
-        } else if (selectedCharacterId) {
-          await showCharacterProfile(selectedCharacterId, true);
-        } else {
-          showCharacterIndex(true);
+      return withContentLoading(async () => {
+        if (primaryView === "home") {
+          homeStatus.textContent = uiText("Loading…");
+          homeStatus.hidden = false;
         }
-        return;
-      }
-      await openStoryRoute(route);
+        await ensureReaderData();
+        if (revision !== routeRevision) return;
+        if (route.view !== "archive") await ensureCharacterIndex();
+        if (!route.view || route.view === "stories" || route.interactionId) await ensureStoryNavigation();
+        if (revision !== routeRevision) return;
+        applyRoute(route);
+        applyPreferencesToUi();
+        savePreferences();
+        if (primaryView === "archive") {
+          await showArchive(archiveKind, selectedArchiveId, true);
+          return;
+        }
+        if (primaryView === "mystical") {
+          updatePrimaryShell();
+          if (selectedInteractionAssetKey) {
+            await openMysticalInteraction(
+              selectedCharacterId,
+              selectedInteractionAssetKey,
+              { node: route.node || "", replaceHash: true },
+            );
+          } else if (selectedCharacterId) {
+            await showCharacterProfile(selectedCharacterId, true);
+          } else {
+            showCharacterIndex(true);
+          }
+          return;
+        }
+        await openStoryRoute(route, returnBookmark);
+      });
     }
 
     window.addEventListener("hashchange", async () => {

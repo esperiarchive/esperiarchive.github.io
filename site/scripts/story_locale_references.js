@@ -43,7 +43,38 @@
       text: "If they had truly transformed permanently, Rustport could have been overrun by them in no time." },
   ];
 
-  function apply(asset, language, locale) {
+  // Exact cinematic actor identities, cross-checked against DialogueActor,
+  // other dialogue by that actor, and the game's localized speaker names.
+  // Never infer a name from a placeholder actor (e.g. actor 1 / Chris).
+  const cinematicSpeakers = [
+    { source: "黑魔法师", actor: "955", model: "blackmagician",
+      assets: ["timeline/timeline_story_13110830", "timeline/timeline_story_13110880"],
+      names: { en: "Cyran", jp: "ディアグレス", kr: "딜그레이" } },
+    { source: "大主教", actor: "953", model: "zhujiaohuman",
+      assets: ["timeline/timeline_story_13110860"],
+      names: { en: "Hierophant Novik", jp: "ノヴィツキー大主教", kr: "노비츠키 대주교" } },
+    { source: "大公", actor: "936", model: "duke",
+      assets: ["timeline/timeline_story_13110880"],
+      names: { en: "Archduke Sigmund", jp: "ヴァレサ大公", kr: "바레샤 대공" } },
+  ];
+
+  function applySpeakerNames(asset, language, locale, graph) {
+    let result = locale;
+    for (const reference of cinematicSpeakers) {
+      if (!reference.assets.includes(asset) || !reference.names[language]) continue;
+      const key = `speaker:${reference.source}`, row = locale?.speakers?.[key];
+      if (!row || row.source !== reference.source || (row.text && row.text !== reference.source)) continue;
+      const lines = Object.values(graph?.nodes || {}).filter(node => node.speaker_key === key);
+      if (!lines.length || lines.some(node => !["subtitle", "cinematic_dialogue"].includes(node.entry_kind)
+          || String(node.speaker_actor_id) !== reference.actor || node.speaker_actor_model !== reference.model)) continue;
+      if (result === locale) result = { ...locale, speakers: { ...locale.speakers } };
+      result.speakers[key] = { ...row, text: reference.names[language], status: "official_actor_reference" };
+    }
+    return result;
+  }
+
+  function apply(asset, language, locale, graph) {
+    locale = applySpeakerNames(asset, language, locale, graph);
     if (!["en", "jp", "kr"].includes(language) || !locale?.texts) return locale;
     let result = locale;
     for (const reference of references) {
@@ -70,5 +101,5 @@
       license: "CC-BY-SA", licenseUrl: "https://www.fandom.com/licensing" };
   }
 
-  return { apply, credit, references };
+  return { apply, applySpeakerNames, credit, references };
 });

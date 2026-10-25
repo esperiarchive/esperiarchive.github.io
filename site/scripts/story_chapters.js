@@ -36,6 +36,18 @@
         !branch.lines?.length||branch.lines.some(lineVisible)))};
     });
   }
+  function petalReadingPlan(asset){
+    // Main-story order is fixed. These three festival activities may be read
+    // in any order, so only their displayed counts are adjustable.
+    const stages = {
+      'ep3/quest_story_13102200':0, 'ep3/quest_story_13102230':1,
+      'ep3/quest_story_13102300':2, 'ep3/quest_story_13102260':3,
+      'ep3/quest_story_13102340':4, 'ep3/quest_story_13103520':5,
+      'ep3/quest_story_13104130':6, 'ep3/quest_story_13105230':7,
+    };
+    const count=stages[asset];
+    return count===undefined ? null : {key:asset,count,options:count>=2&&count<=4 ? [2,3,4] : []};
+  }
   function collectionCards(source,catalog,story,line,logical){
     const plan=catalog?.placements?.[source.asset_key];
     if(!plan || (line&&plan.owner!==String(line)) || (story.objective_key&&plan.step!==story.objective_key)
@@ -54,8 +66,9 @@
     }
     graph.roots=graph.roots.map(root=>root===plan.before_node?id:root);
     graph.nodes[id]={id,type:'line',entry_kind:'chapter_artwork',source_node_id:plan.source_node_id,
-      chapter_artwork:{...card,kind:'collection_card',card_id:plan.card_id},next:plan.before_node};
+      chapter_artwork:{...card,kind:'collection_card',card_id:plan.card_id,
+        reading: String(plan.card_id)==='1001' ? petalReadingPlan(source.asset_key) : null},next:plan.before_node};
     return graph;
   }
-  return {install,gallery,collectionCards};
+  return {install,gallery,collectionCards,petalReadingPlan};
 });
