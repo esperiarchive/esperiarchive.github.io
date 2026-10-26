@@ -6438,6 +6438,18 @@
       for (const link of homePage.querySelectorAll("[data-home-route]")) {
         link.href = "#" + ReaderUI.sectionHash(routes[link.dataset.homeRoute], preferences);
       }
+      const feedbackUrls = {
+        en: "https://forms.gle/1z4oA9dei1a6DY4H8",
+        jp: "https://forms.gle/d91GZkDYKM3vB3Ev5",
+        kr: "https://forms.gle/mjEznZMVxhFDVuAa6",
+        cn: "https://forms.gle/eQL38eyEURDeYg1bA",
+      };
+
+      const feedbackLink = homePage.querySelector(".home-feedback-link");
+
+      if (feedbackLink) {
+        feedbackLink.href = feedbackUrls[selectedLanguage] || feedbackUrls.en;
+      }
     }
 
     function showHome() {
