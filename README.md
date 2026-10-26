@@ -12,7 +12,7 @@ The Esperia Archive brings the stories, characters, and written records of *AFK 
 
 Revisit a favorite scene, follow a different dialogue choice, or catch up on the letters and conversations you missed along the way.
 
-[Stories](#story-reader) · [Characters](#character-archive) · [Documents & Mail](#documents--mail) · [What's next](#whats-next)
+[Stories](#story-reader) · [Characters](#character-archive) · [Documents & Mail](#documents--mail) · [What's next](#whats-next) · [Contributing](#contributing)
 
 ## Story Reader
 
@@ -58,13 +58,19 @@ The archive uses official localized text wherever available. Missing text may be
 
 Text and voice availability vary by character, story, and language. Some content currently has text in several languages but voice recordings in only one.
 
-Some stories, translations, portraits, and recordings are still incomplete. Contributions of missing material and corrections to machine-translated text are welcome. Please include the story or character name, the language, and a screenshot or reference where possible so the change can be checked against the game.
+Some stories, translations, portraits, and recordings are still incomplete.
 
 ## What's Next
 
 - **Merlin customization**, with individual outfit, hair, and appearance options beyond the current presets.
 - **Further reading improvements**, including spacing, navigation, and loading speed.
 - **More dialogue effects**, bringing additional in-game expressions and scene effects into the reader while keeping the text easy to read.
+
+## Contributing
+
+Found a missing line, a wrong portrait, or something that differs from the game? One screenshot, an existing recording, or a short note can help. Reports in any language are welcome.
+
+See the [contribution guide](CONTRIBUTING.md) for how to send feedback, or browse the [current requests](docs/CURRENT_CHECKS.md) for scenes and official wording that need checking. Pick anything you recognize; partial reports are welcome.
 
 ## Related Repositories
 
