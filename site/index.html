@@ -2410,11 +2410,13 @@
       font-weight: 800;
     }
 
+    .archive-document-image,
     .document-image {
       display: block;
       width: auto;
-      max-width: min(100%, 720px);
-      max-height: 560px;
+      height: auto;
+      max-width: min(100%, 360px);
+      max-height: min(320px, 45svh);
       margin-inline: auto;
       object-fit: contain;
       object-position: center;
@@ -3088,8 +3090,8 @@
 
       .story-outline {
         display: none;
-        top: auto;
-        bottom: calc(max(18px, env(safe-area-inset-bottom)) + 54px);
+        top: calc(max(12px, env(safe-area-inset-top)) + 54px);
+        bottom: auto;
         width: min(280px, calc(100vw - 24px));
         max-height: min(60dvh, calc(100dvh - 110px));
         padding: 14px 10px;
@@ -3110,7 +3112,7 @@
         gap: 8px;
         position: fixed;
         left: 12px;
-        bottom: max(18px, env(safe-area-inset-bottom));
+        top: max(12px, env(safe-area-inset-top));
         min-height: 44px;
         max-width: calc(100vw - 24px);
         padding: 10px 14px;
@@ -3737,13 +3739,17 @@
 
   <link rel="stylesheet" href="styles/dialogue_effects.css?v=f20d39d58efeafb5">
   <script src="scripts/dialogue_color_lookup.js?v=df178e5ff1d61dc3"></script>
-  <script src="scripts/dialogue_effects.js?v=0161c921365c596b"></script>
+  <script src="scripts/dialogue_effects.js?v=b0899998f27194f3"></script>
   <link rel="stylesheet" href="styles/player_appearance.css?v=a3bdcd7a10b7996b">
   <script src="scripts/player_appearance.js?v=5fc40dbc677b74a9"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=1e3a98a0718e90d9"></script>
+  <script src="scripts/reader_ui.js?v=0b410e99ca01da90"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
+  <script src="scripts/reader_story_paths.js?v=6681221ee6bdcc27"></script>
+  <script src="scripts/reader_story_routes.js?v=bbadbe038e6fa3b7"></script>
+  <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
+  <script src="scripts/reader_character_routes.js?v=31c98c442ce8deff"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
   <script src="scripts/story_runtime.js?v=3733550704f6c2ff"></script>
   <script src="scripts/story_results.js?v=30688082fc607173"></script>
@@ -4432,6 +4438,11 @@
       const activeActor = dialogueActorForLine(castState, speakerActorId);
       const effectiveAnimationSet = animationSet || activeActor?.animation_set || "";
       const sourceSpeaker = String(speakerKey || "").match(/(?:^|:)speaker:(.*)$/)?.[1] || "";
+      // Avalon's Dura subtitles use Chris as a timeline stand-in. That model
+      // belongs to Valen and does not identify the character speaking here.
+      if (sourceSpeaker === "艾雅" && lineKey.startsWith("timeline/timeline_story_15110980::")) {
+        return null;
+      }
       const sceneBinding = dialogueSubtitleBindings.get(lineKey);
       const sceneModel = sceneBinding?.source_speaker === sourceSpeaker ? sceneBinding.model : "";
       const authoritativeModel = speakerActorModel
@@ -5471,7 +5482,7 @@
           : source.title_cn || "";
       });
       const unique = [...new Set(titles.filter(Boolean))];
-      return unique.length ? [`Quest: ${unique.join("; ")}`] : [];
+      return unique.length ? [uiText("Quest: {title}", {title: unique.join("; ")})] : [];
     }
 
     function archiveDocumentContextLabels(entry) {
@@ -5485,6 +5496,7 @@
     }
 
     function appendDocumentContext(parent, textdesId) {
+      if (!archiveDebugVisible()) return;
       const entry = archiveDocumentById(textdesId);
       if (!archiveDocumentContextLabels(entry).length) {
         return;
@@ -5862,7 +5874,7 @@
       const media = documentIllustrationFor(resolved.textdesId);
       if (media && media.image) {
         const image = document.createElement("img");
-        image.className = "archive-detail-image";
+        image.className = "archive-detail-image archive-document-image";
         image.src = ReaderPublication.url(`data/${media.image}`);
         image.alt = `${resolved.title} illustration`;
         image.loading = "lazy";
@@ -6429,7 +6441,7 @@
 
     function storySectionHash() {
       const fallback = `#/${collectionRoutePart(DEFAULT_ROUTE.section)}/${DEFAULT_ROUTE.category}/${DEFAULT_ROUTE.storyId}`;
-      return ReaderUI.sectionHash(lastStoryHash || fallback, {lang: selectedLanguage, mode: readerMode, gender: selectedGender});
+      return ReaderUI.sectionHash(ReaderStoryRoutes.canonicalHash(lastStoryHash || fallback), {lang: selectedLanguage, mode: readerMode, gender: selectedGender});
     }
 
     function updateHomeLinks() {
@@ -8348,20 +8360,17 @@
     }
 
     function validMainQuestReturn(value) {
-      if (typeof value !== "string" || value.length > 4000
-          || !/^#\/[^/?#]+\/main\/[^/?#]+(?:\?[^#]*)?$/.test(value)) return "";
-      const query = new URLSearchParams(value.split("?")[1] || "");
-      return query.has("return") ? "" : value;
+      return ReaderStoryRoutes.mainReturn(value);
     }
 
     function prerequisiteReadingHref(prerequisite, item) {
-      if (!logicalNavigation || selectedCategory !== "main" || !prerequisite.route) return prerequisite.route || "";
+      if (!logicalNavigation || selectedCategory !== "main" || !prerequisite.route) return ReaderStoryRoutes.canonicalHash(prerequisite.route || "");
       const params = new URLSearchParams({lang:selectedLanguage,mode:readerMode,gender:selectedGender});
       const node = item.assetKey && item.nodeId?.startsWith("objective_interlude:")
         ? `${item.assetKey}::${item.nodeId}` : item.nodeId;
       if (node) params.set("node", node);
-      const source = `#/${collectionRoutePart(selectedSection)}/main/${encodeURIComponent(selectedStoryId)}?${params}`;
-      const [path, query = ""] = prerequisite.route.split("?");
+      const source = `${ReaderStoryRoutes.path(selectedSection, "main", selectedStoryId)}?${params}`;
+      const [path, query = ""] = ReaderStoryRoutes.canonicalHash(prerequisite.route).split("?");
       const target = new URLSearchParams(query);
       target.set("lang",selectedLanguage); target.set("mode",readerMode); target.set("gender",selectedGender);
       target.set("return",source);
@@ -8480,18 +8489,21 @@
       if (!parts.length || parts[0] === "home") {
         route.view = "home";
       } else if (parts[0] === "mystical-house") {
-        route.view = "mystical";
-        route.characterId = decodeURIComponent(parts[1] || "");
-        route.interactionId = decodeURIComponent(parts[2] || "");
+        const target = ReaderCharacterRoutes.resolve(pathPart);
+        if (!target) throw new Error(uiText("This character or conversation address could not be found."));
+        Object.assign(route, target, {view: "mystical"});
       } else if (parts[0] === "archive") {
         route.view = "archive";
         route.archiveKind = ["documents", "items", "mail"].includes(parts[1]) ? parts[1] : "documents";
         route.archiveId = decodeURIComponent(parts[2] || "");
+      } else if (parts[0] === "stories") {
+        const target = ReaderStoryRoutes.resolve(pathPart);
+        if (!target) throw new Error(uiText("This story address could not be found."));
+        Object.assign(route, target, {view: "stories"});
       } else if (parts.length >= 3) {
         route.view = "stories";
-        route.section = parts[0];
-        route.category = parts[1];
-        route.storyId = parts[2];
+        Object.assign(route, ReaderStoryRoutes.resolve(pathPart)
+          || {section: parts[0], category: parts[1], storyId: parts[2]});
         route.assetKey = assetKeyFromParts(route.section, route.category, route.storyId);
       }
       const params = new URLSearchParams(queryPart);
@@ -8510,7 +8522,7 @@
       if (params.get("tab")) {
         route.profileTab = params.get("tab");
       }
-      if (params.get("group")) {
+      if (params.get("group") && !route.named) {
         const group = groupParts(params.get("group"));
         route.groupSection = group.section;
         route.groupCategory = group.category;
@@ -8562,8 +8574,9 @@
       params.set("mode", readerMode);
       params.set("gender", selectedGender);
       if (primaryView === "stories" && logicalNavigation && selectedCategory === "side" && returnToMainQuest) params.set("return", returnToMainQuest);
-      if (includeNode && currentNodeId) {
-        params.set("node", currentNodeId);
+      const passage = includeNode ? currentNodeId : initialNodeId;
+      if (passage && (primaryView === "stories" || (primaryView === "mystical" && selectedInteractionAssetKey))) {
+        params.set("node", passage);
       }
       let nextHash;
       if (primaryView === "home") {
@@ -8575,19 +8588,12 @@
         }
         nextHash = `#/${routeParts.join("/")}?${params.toString()}`;
       } else if (primaryView === "mystical") {
-        const routeParts = ["mystical-house"];
-        if (selectedCharacterId) {
-          routeParts.push(encodeURIComponent(selectedCharacterId));
-        }
-        if (selectedInteractionAssetKey) {
-          routeParts.push(encodeURIComponent(selectedInteractionAssetKey));
-        }
         if (selectedCharacterId && !selectedInteractionAssetKey && selectedProfileTab !== "lore") {
           params.set("tab", selectedProfileTab);
         }
-        nextHash = `#/${routeParts.join("/")}?${params.toString()}`;
+        nextHash = `${ReaderCharacterRoutes.path(selectedCharacterId, selectedInteractionAssetKey)}?${params.toString()}`;
       } else if (logicalNavigation) {
-        nextHash = `#/${collectionRoutePart(selectedSection)}/${selectedCategory}/${encodeURIComponent(selectedStoryId)}?${params.toString()}`;
+        nextHash = `${ReaderStoryRoutes.path(selectedSection, selectedCategory, selectedStoryId)}?${params.toString()}`;
       } else {
         const parts = storyParts(selectedAssetKey);
         if (groupKey(selectedSection, selectedCategory) !== groupKey(parts.section, parts.category)) {
@@ -11134,7 +11140,7 @@
         block.setAttribute("aria-label", speakerName || uiText("Narration"));
       }
       block.appendChild(text);
-      DialogueEffects.decorate(block, item.effectState, showDebug || readerMode === "debug");
+      DialogueEffects.decorate(block, item.effectState, showDebug || readerMode === "debug", uiText);
       block.appendChild(makeDebugMeta([
         `node=${item.nodeId}`,
         `source=${item.sourceNodeId || ""}`,
@@ -14441,10 +14447,10 @@
       overviewPosition.textContent = position ? uiText("Story {n}", {n: position}) : "";
       setFormattedText(overviewArc, arcTitle);
       setFormattedText(overviewTitle, title || uiText("Story {n}", {n: story.story_id}), story);
-      setFormattedText(overviewSummary, overviewText || uiText("No linked quest summary yet."), story);
+      setFormattedText(overviewSummary, overviewText, story);
       overviewSummary.classList.toggle("empty", !overviewText);
       overviewSummary.hidden = beat?.logicalStory?.sourceType === "letter_collection"
-        || (!overviewText && Boolean(story.reader_appearance_prompt));
+        || !overviewText;
       const logicalMeta = beat && beat.logicalStory;
       const debugVisible = showDebug || readerMode === "debug";
       setOverviewMeta(debugVisible ? [
@@ -14812,8 +14818,12 @@
           const character = mysticalCharacterById.get(String(actorId));
           const interaction = mysticalInteractionByAsset.get(assetKey);
           if (!character || !interaction) {
+            if (options.namedRoute) throw new Error(uiText("This conversation is not available for this character."));
             await showCharacterProfile(actorId, options.replaceHash !== false);
             return;
+          }
+          if (!(character.interaction_asset_keys || []).includes(assetKey)) {
+            throw new Error(uiText("This conversation is not available for this character."));
           }
           logicalNavigation = false;
           selectedSection = interaction.episode;
@@ -15150,10 +15160,7 @@
         showCharacterIndex(false);
         return;
       }
-      const characterPath = selectedCharacterId
-        ? `/${encodeURIComponent(selectedCharacterId)}`
-        : "";
-      window.location.hash = `/mystical-house${characterPath}?lang=${encodeURIComponent(selectedLanguage)}`;
+      window.location.hash = `${ReaderCharacterRoutes.path(selectedCharacterId)}?lang=${encodeURIComponent(selectedLanguage)}`;
     });
 
     documentArchiveTab.addEventListener("click", () => {
@@ -15197,6 +15204,12 @@
 
     async function openStoryRoute(route, returnBookmark = null) {
       await ensureStoryNavigation();
+      // A known address may belong to a newer data release. Never silently
+      // substitute the first story in a collection when that target is absent.
+      if (route.named && !logicalCollectionByKey.get(collectionKeyFromRoute(route.section))
+          ?.categories.get(route.category)?.stories.some(story => story.id === String(route.storyId))) {
+        throw new Error(uiText("This story is not available in this reader's data release."));
+      }
       primaryView = "stories";
       selectedInteractionAssetKey = "";
       updatePrimaryShell();
@@ -15255,6 +15268,10 @@
         await ensureReaderData();
         if (revision !== routeRevision) return;
         if (route.view !== "archive") await ensureCharacterIndex();
+        if (revision !== routeRevision) return;
+        if (route.namedCharacter && !mysticalCharacterById.has(route.characterId)) {
+          throw new Error(uiText("This character is not available in this reader's data release."));
+        }
         if (!route.view || route.view === "stories" || route.interactionId) await ensureStoryNavigation();
         if (revision !== routeRevision) return;
         applyRoute(route);
@@ -15270,7 +15287,7 @@
             await openMysticalInteraction(
               selectedCharacterId,
               selectedInteractionAssetKey,
-              { node: route.node || "", replaceHash: true },
+              { node: route.node || "", replaceHash: true, namedRoute: route.namedCharacter || route.namedInteraction },
             );
           } else if (selectedCharacterId) {
             await showCharacterProfile(selectedCharacterId, true);
@@ -15298,6 +15315,16 @@
       if (primaryView === "home") {
         homeStatus.textContent = uiText("Could not load this content: {error}", {error: error.message});
         homeStatus.hidden = false;
+        return;
+      }
+      if (primaryView === "mystical" && !selectedInteractionAssetKey) {
+        // Address parsing can fail before the loading wrapper starts. Keep
+        // that error visible above the profile instead of in a hidden timeline.
+        storyScroll.dataset.contentState = "error";
+        contentLoading.classList.add("reader-load-error");
+        contentLoading.textContent = uiText("Could not load this content: {error}", {error: error.message});
+        contentLoading.hidden = false;
+        for (const child of storyScroll.children) if (child !== contentLoading) child.inert = true;
         return;
       }
       timeline.innerHTML = "";

@@ -166,12 +166,12 @@
     frame.dataset.communicatorOverlay = tel.signal;
     frame.appendChild(image);
   }
-  function decorate(block, state, debug = false) {
+  function decorate(block, state, debug = false, translate = key => key) {
     const tel = communicator(state);
     if (tel.visible) {
       const indicator = document.createElement("div");
       indicator.className = "dialogue-communicator";
-      indicator.textContent = tel.signal === "bad" ? "Communicator · weak signal" : "Communicator";
+      indicator.textContent = translate(tel.signal === "bad" ? "Communicator · weak signal" : "Communicator");
       block.dataset.communicator = tel.signal;
       block.prepend(indicator);
     }

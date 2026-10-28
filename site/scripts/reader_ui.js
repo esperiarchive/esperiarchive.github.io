@@ -6,6 +6,14 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
   const messages = {
+  "Communicator": {"cn": "通讯器", "jp": "通信機", "kr": "통신기"},
+  "Communicator · weak signal": {"cn": "通讯器 · 信号较弱", "jp": "通信機 · 電波が弱い", "kr": "통신기 · 신호 약함"},
+  "Quest: {title}": {"cn": "任务：{title}", "jp": "クエスト：{title}", "kr": "퀘스트: {title}"},
+  "This character or conversation address could not be found.": {"cn": "找不到此角色或对话地址。", "jp": "このキャラクターまたは会話のアドレスが見つかりません。", "kr": "이 캐릭터 또는 대화 주소를 찾을 수 없습니다."},
+  "This character is not available in this reader's data release.": {"cn": "当前阅读器的数据版本尚未收录此角色。", "jp": "このキャラクターは現在のリーダーのデータには収録されていません。", "kr": "현재 리더의 데이터 버전에는 이 캐릭터가 포함되어 있지 않습니다."},
+  "This conversation is not available for this character.": {"cn": "此角色没有这段对话。", "jp": "このキャラクターにはこの会話がありません。", "kr": "이 캐릭터에게는 해당 대화가 없습니다."},
+  "This story address could not be found.": {"cn": "找不到此故事地址。", "jp": "このストーリーのアドレスが見つかりません。", "kr": "이 스토리 주소를 찾을 수 없습니다."},
+  "This story is not available in this reader's data release.": {"cn": "当前阅读器的数据版本尚未收录此故事。", "jp": "このストーリーは現在のリーダーのデータには収録されていません。", "kr": "현재 리더의 데이터 버전에는 이 스토리가 포함되어 있지 않습니다."},
   "Feedback": {"cn": "反馈", "jp": "フィードバック", "kr": "피드백"},
   "Found a problem, a translation mistake, or something missing?": {"cn": "发现了问题、翻译错误或缺失内容？", "jp": "不具合や翻訳の間違い、掲載されていない内容に気づきましたか？", "kr": "오류나 번역 실수, 빠진 내용을 발견하셨나요?"},
   "Send feedback": {"cn": "发送反馈", "jp": "フィードバックを送る", "kr": "피드백 보내기"},
@@ -926,11 +934,6 @@
     "cn": "图片",
     "jp": "画像",
     "kr": "그림"
-  },
-  "No linked quest summary yet.": {
-    "cn": "暂无关联任务概要。",
-    "jp": "関連クエストのあらすじは未収録です。",
-    "kr": "연결된 퀘스트 요약이 없습니다."
   },
   "These objectives can be completed in either order.": {
     "cn": "这些目标可以按任意顺序完成。",
