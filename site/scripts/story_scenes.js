@@ -18,6 +18,9 @@
     function text(key, value) {
       graph.text_entries[key] = {key, kind: "scene_summary", source_cn: value.source_cn,
         metadata_source: value.source, plot_ids: value.plot_ids || []};
+      if (value.text_i18n._saved) {
+        graph.text_entries[key].saved_translations = structuredClone(value.text_i18n._saved);
+      }
       graph.embedded_locales ||= {};
       for (const lang of ["cn", "en", "jp", "kr"]) {
         const locale = graph.embedded_locales[lang] ||= {texts: {}, speakers: {}};

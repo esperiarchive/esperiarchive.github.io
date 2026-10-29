@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=2313b65ad8903b5c"></script>
+  <script src="scripts/config.js?v=38ddd8c9a79da10a"></script>
   <script src="scripts/reader_publication.js?v=150006c8fa023db6"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <meta charset="utf-8">
@@ -3744,10 +3744,10 @@
   <script src="scripts/player_appearance.js?v=5fc40dbc677b74a9"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=0b410e99ca01da90"></script>
+  <script src="scripts/reader_ui.js?v=305fa17d345a5c93"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
-  <script src="scripts/reader_story_paths.js?v=6681221ee6bdcc27"></script>
-  <script src="scripts/reader_story_routes.js?v=bbadbe038e6fa3b7"></script>
+  <script src="scripts/reader_story_paths.js?v=832f0844fdcc3acd"></script>
+  <script src="scripts/reader_story_routes.js?v=93319dae9c783cc7"></script>
   <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
   <script src="scripts/reader_character_routes.js?v=31c98c442ce8deff"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
@@ -3757,7 +3757,7 @@
   <script src="scripts/story_battles.js?v=08c8c9fce10f8a4d"></script>
   <script src="scripts/story_objectives.js?v=34ba3c39606106b3"></script>
   <script src="scripts/story_locale_references.js?v=4d50cb502dbd8009"></script>
-  <script src="scripts/story_scenes.js?v=845f82d8844776e6"></script>
+  <script src="scripts/story_scenes.js?v=ac54f9821c2db679"></script>
   <script src="scripts/story_chapters.js?v=aa58a593eed587a1"></script>
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
@@ -3796,6 +3796,7 @@
       side: "Side Stories",
       reputation: "Reputation Quests",
       mini: "Mini Stories",
+      starry: "Starry Tales",
       heart_to_heart: "Heart-to-Heart",
       main_story: "Main Story",
       quest_story: "Main Quest",
@@ -3883,7 +3884,7 @@
         model: "general",
         displayName: "Hogan",
         speakerNames: ["Hogan", "霍根", "ホーガン", "호건"],
-        source: "assets/images/dialogue_portraits/playable/38/general/normal.284f05cd71a11699.webp",
+        source: "assets/images/dialogue_portraits/playable/38/general/normal.webp",
         pose: "normal",
         focusX: 0.436968,
         focusYTop: 0.241288,
@@ -3893,7 +3894,7 @@
         model: "mousebro",
         displayName: "Chippy",
         speakerNames: ["Chippy", "满满", "ロンロン", "치피"],
-        source: "assets/images/dialogue_portraits/playable/20/mousebro/normal.aa8ae96e8f0ce364.webp",
+        source: "assets/images/dialogue_portraits/playable/20/mousebro/normal.webp",
         pose: "normal",
         focusX: 0.469356,
         focusYTop: 0.432966,
@@ -4034,7 +4035,7 @@
             const sourceRevision = String(
               row.source_revision || row.sourceRevision || ""
             ).trim().replace(/[^a-zA-Z0-9._-]/g, "");
-            portrait.source = sourceRevision
+            portrait.source = sourceRevision && !baseSource.startsWith("assets/images/")
               ? `${baseSource}?v=${encodeURIComponent(sourceRevision)}`
               : baseSource;
           }
@@ -4840,7 +4841,7 @@
     }
 
     function isLogicalCategory(category) {
-      return ["main", "side", "reputation", "mini", "heart_to_heart", "daily", "exploration"].includes(category);
+      return ["main", "side", "reputation", "mini", "starry", "heart_to_heart", "daily", "exploration"].includes(category);
     }
 
     function collectionDisplayTitle(collection) {
@@ -5017,8 +5018,9 @@
           sourceCollection.order || 99,
           sourceCollection.title,
         );
-        const category = ensureLogicalCategory(collection, "mini", 4);
         for (const sourceStory of sourceCollection.stories || []) {
+          const categoryKey = ReaderStoryRoutes.categoryFor(collection.key, "mini", sourceStory.group_id);
+          const category = ensureLogicalCategory(collection, categoryKey, categoryKey === "starry" ? 4.5 : 4);
           const eventGroup = storyRuntimeCatalog?.letter_collections?.find(letters =>
             letters.collection === collection.key
             && String(letters.event_group?.mini_story_group_id) === String(sourceStory.group_id))?.event_group;
@@ -5030,12 +5032,14 @@
           }
           category.stories.push({
             id: String(sourceStory.group_id),
-            key: `${collection.key}/mini/${sourceStory.group_id}`,
+            key: `${collection.key}/${categoryKey}/${sourceStory.group_id}`,
             order: Number(sourceStory.order) || category.stories.length + 1,
             title: sourceStory.display_title || sourceStory.title || {},
             description: sourceStory.outside_title || {},
             chapterKey: eventGroup?.id || "mini_story",
-            chapterTitle: eventGroup?.title_i18n || { cn: "小故事", en: "Mini Stories", jp: "ミニストーリー", kr: "미니 스토리" },
+            chapterTitle: eventGroup?.title_i18n || (categoryKey === "starry"
+              ? { cn: "星夜逸闻", en: "Starry Tales", jp: "星夜の逸話", kr: "별밤의 이야기" }
+              : { cn: "小故事", en: "Mini Stories", jp: "ミニストーリー", kr: "미니 스토리" }),
             chapterOrder: 0,
             groupOrder: 0,
             assetKeys,
@@ -10258,11 +10262,16 @@
         ? savedTextFallbacks?.texts?.[source]?.[selectedLanguage] || "" : "";
     }
 
+    function machineRowFor(textKey) {
+      const entry = storyGraph.text_entries[textKey];
+      const recap = entry?.kind === "scene_summary" && entry.saved_translations?.[selectedLanguage];
+      return machineLocale?.texts?.[textKey] || (recap && {
+        ...recap, source_graph_cn: recap.source_cn,
+      }) || null;
+    }
+
     function machineTextFor(textKey) {
-      if (!machineLocale || !machineLocale.texts) {
-        return "";
-      }
-      const mt = machineLocale.texts[textKey];
+      const mt = machineRowFor(textKey);
       if (!showMt && mt?.status !== "saved_official_reference") return "";
       if (mt?.source_graph_cn !== undefined) {
         if (mt.source_graph_cn !== storyGraph.text_entries[textKey]?.source_cn) return "";
@@ -10341,7 +10350,7 @@
 
       const mtText = machineTextFor(textKey);
       if (mtText) {
-        const savedRow = machineLocale.texts[textKey];
+        const savedRow = machineRowFor(textKey);
         const reviewed = savedRow?.status === "saved_reviewed_translation";
         const officialReference = savedRow?.status === "saved_official_reference";
         return {

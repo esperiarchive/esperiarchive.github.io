@@ -698,6 +698,10 @@
     "special-events/mini/10": {"path":"stories/special-events/final-verdict"},
     "special-events/mini/11": {"path":"stories/special-events/dreamy-dawn"},
     "special-events/mini/20": {"path":"stories/special-events/firepower-fanatic"},
-    "special-events/mini/21": {"path":"stories/special-events/song-of-the-blizzard"}
+    "special-events/mini/21": {"path":"stories/special-events/song-of-the-blizzard"},
+    "season-8/side/18010213": {"path":"stories/veil-of-memories/everlasting-memories"},
+    "season-8/mini/24": {"path":"stories/veil-of-memories/autumn-legend"},
+    "special-events/mini/23": {"path":"stories/special-events/esperian-case-files"},
+    "special-events/starry/22": {"path":"stories/special-events/where-music-finds-us"}
   }};
 });

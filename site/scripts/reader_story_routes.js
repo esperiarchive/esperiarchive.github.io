@@ -9,22 +9,29 @@
     return String(value).replace(/^season_(\d+)$/, 'season-$1');
   }
 
+  // A reader grouping change must not rename permanent addresses or break bookmarks.
+  function categoryFor(collection, category, id) {
+    return section(collection) === 'special-events' && category === 'mini'
+      && ['8', '10', '11', '20', '21', '22'].includes(String(id)) ? 'starry' : category;
+  }
+
   function create(data) {
     if (data?.schemaVersion !== 1 || !data.stories) throw new Error('Invalid story address registry');
     const byPath = new Map(), byStory = new Map();
-    const categories = new Set(['main', 'side', 'reputation', 'mini', 'heart_to_heart', 'daily', 'exploration']);
+    const categories = new Set(['main', 'side', 'reputation', 'mini', 'starry', 'heart_to_heart', 'daily', 'exploration']);
     const slugPath = /^stories\/[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
     for (const [key, entry] of Object.entries(data.stories)) {
       const parts = key.split('/');
       if (parts.length !== 3 || section(parts[0]) !== parts[0] || !categories.has(parts[1]) || !parts[2]) {
         throw new Error('Invalid story address key: ' + key);
       }
-      const target = {section: parts[0], category: parts[1], storyId: parts[2]};
+      const target = {section: parts[0], category: categoryFor(parts[0], parts[1], parts[2]), storyId: parts[2]};
       for (const path of [entry.path, ...(entry.aliases || [])]) {
         if (!slugPath.test(path) || byPath.has(path)) throw new Error('Invalid or duplicate story address: ' + path);
         byPath.set(path, target);
       }
       byStory.set(key, entry.path);
+      byStory.set(`${target.section}/${target.category}/${target.storyId}`, entry.path);
     }
 
     function resolve(value) {
@@ -39,7 +46,7 @@
       let id;
       try { id = decodeURIComponent(parts[offset + 1]); } catch (_) { return null; }
       if (!id || /[/?#\s]/.test(id)) return null;
-      return {section: section(parts[0]), category: parts[offset], storyId: id};
+      return {section: section(parts[0]), category: categoryFor(parts[0], parts[offset], id), storyId: id};
     }
 
     function path(collection, category, id) {
@@ -61,5 +68,5 @@
     }
     return {resolve, path, canonicalHash, mainReturn};
   }
-  return {...create(registry), create};
+  return {...create(registry), create, categoryFor};
 });
