@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=aa74ea38fff72d13"></script>
+  <script src="scripts/config.js?v=2e357698397acdf1"></script>
   <script src="scripts/reader_publication.js?v=150006c8fa023db6"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <meta charset="utf-8">
@@ -2950,6 +2950,7 @@
       width: 150px;
     }
 
+
     .setting-row input[type="text"] {
       width: 150px;
       min-width: 0;
@@ -3745,24 +3746,25 @@
   <script src="scripts/player_appearance.js?v=5fc40dbc677b74a9"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=305fa17d345a5c93"></script>
+  <script src="scripts/reader_ui.js?v=e70d01e968b0b425"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
   <script src="scripts/reader_story_paths.js?v=832f0844fdcc3acd"></script>
-  <script src="scripts/reader_story_routes.js?v=93319dae9c783cc7"></script>
+  <script src="scripts/reader_story_routes.js?v=91c924c21611357b"></script>
   <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
   <script src="scripts/reader_character_routes.js?v=31c98c442ce8deff"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
   <script src="scripts/story_runtime.js?v=3733550704f6c2ff"></script>
   <script src="scripts/story_results.js?v=30688082fc607173"></script>
-  <script src="scripts/story_activities.js?v=6ec47e6f16c883ca"></script>
+  <script src="scripts/story_activities.js?v=f8845c3b5fbc9432"></script>
+  <script src="scripts/story_encounters.js?v=14a044583a8d3874"></script>
   <script src="scripts/story_battles.js?v=08c8c9fce10f8a4d"></script>
-  <script src="scripts/story_objectives.js?v=34ba3c39606106b3"></script>
+  <script src="scripts/story_objectives.js?v=3c252d14016e19be"></script>
   <script src="scripts/story_locale_references.js?v=4d50cb502dbd8009"></script>
   <script src="scripts/story_scenes.js?v=ac54f9821c2db679"></script>
   <script src="scripts/story_chapters.js?v=aa58a593eed587a1"></script>
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
-  <link rel="stylesheet" href="styles/story_runtime.css?v=c59b52be8ca9366c">
+  <link rel="stylesheet" href="styles/story_runtime.css?v=38345dab04311672">
   <link rel="stylesheet" href="styles/reader_theme.css?v=5017060bf70f8eb3">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
@@ -3795,7 +3797,7 @@
     const CATEGORY_LABELS = {
       main: "Main Story",
       side: "Side Stories",
-      reputation: "Reputation Quests",
+      reputation: "Faction",
       mini: "Mini Stories",
       starry: "Starry Tales",
       heart_to_heart: "Heart-to-Heart",
@@ -3991,6 +3993,13 @@
       return Math.min(maximum, Math.max(minimum, parsed));
     }
 
+    function addDialoguePortraitLineOverride(row) {
+      const key = `${row.asset_key}::${row.graph_node}`;
+      const previous = dialoguePortraitLineOverrides.get(key);
+      dialoguePortraitLineOverrides.set(key,
+        [...(Array.isArray(previous) ? previous : previous ? [previous] : []), row]);
+    }
+
     function installDialoguePortraits(payload) {
         const rows = Array.isArray(payload) ? payload : (payload.portraits || []);
         const indexed = new Map(DIALOGUE_PORTRAITS.map(row => [`${normalizedPortraitModel(row.model)}:${normalizedPortraitPose(row.pose) || "normal"}`, row]));
@@ -4061,7 +4070,7 @@
         }
         for (const row of Array.isArray(payload.line_overrides) ? payload.line_overrides : []) {
           if (row.asset_key && row.graph_node && row.model && row.requested_pose && row.portrait_pose) {
-            dialoguePortraitLineOverrides.set(`${row.asset_key}::${row.graph_node}`, row);
+            addDialoguePortraitLineOverride(row);
           }
         }
     }
@@ -4417,14 +4426,13 @@
     }
 
     function portraitOverrideForLine(lineKey, model, animationSet) {
-      const override = dialoguePortraitLineOverrides.get(lineKey);
-      if (!override
-        || ![override.model, ...(override.models || [])].some(candidate => normalizedPortraitModel(candidate) === normalizedPortraitModel(model))
-        || normalizedPortraitPose(override.requested_pose) !== normalizedPortraitPose(animationSet || "normal")) {
-        return null;
-      }
+      const rows = dialoguePortraitLineOverrides.get(lineKey);
+      const override = (Array.isArray(rows) ? rows : rows ? [rows] : []).findLast(row =>
+        [row.model, ...(row.models || [])].some(candidate => normalizedPortraitModel(candidate) === normalizedPortraitModel(model))
+        && normalizedPortraitPose(row.requested_pose) === normalizedPortraitPose(animationSet || "normal"));
+      if (!override) return null;
       // Use only the reviewed exact target; a missing override must not force normal.
-      return dialoguePortraitByModel.get(normalizedPortraitModel(model))
+      return dialoguePortraitByModel.get(normalizedPortraitModel(override.portrait_model || model))
         ?.get(normalizedPortraitPose(override.portrait_pose)) || null;
     }
 
@@ -4530,7 +4538,7 @@
       return result;
     }
 
-    function dialoguePortraitCast(castState, portrait, speakerName, forceNormal = false, jointSpeakers = []) {
+    function dialoguePortraitCast(castState, portrait, speakerName, forceNormal = false, jointSpeakers = [], lineKey = "") {
       // The last named participant occupies the fixed slot; preceding speakers
       // sit to its left, preserving the written order of the shared name.
       const active = jointSpeakers.at(-1) || { portrait, speakerName };
@@ -4542,10 +4550,10 @@
       }
       for (const actor of guaranteedCastActors(castState)) {
         const model = portraitModelForActor(actor);
-        const castPortrait = dialoguePortraitForModel(
-          model,
-          forceNormal ? "normal" : actor.animation_set,
-        );
+        const requestedPose = forceNormal ? "normal" : actor.animation_set;
+        const castPortrait = (!forceNormal && lineKey
+          ? portraitOverrideForLine(lineKey, model, requestedPose) : null)
+          || dialoguePortraitForModel(model, requestedPose);
         const castModel = normalizedPortraitModel(castPortrait?.model);
         if (!castPortrait || seenModels.has(castModel)) {
           continue;
@@ -4811,7 +4819,7 @@
       if (category === "heart_to_heart") {
         return heartToHeartLabel();
       }
-      return uiText(CATEGORY_LABELS[category] || ({daily: "Daily Quests", exploration: "Exploration"})[category] || category);
+      return uiText(CATEGORY_LABELS[category] || ({daily: "Daily Quests", exploration: "Easter Eggs"})[category] || category);
     }
 
     function heartToHeartLabel(language = selectedLanguage) {
@@ -4859,11 +4867,16 @@
       return localizedValue(collection.title) || EN_COLLECTION_TITLES[collection.key] || collection.key;
     }
 
-    function uniqueAssetKeys(values, includeScopedObjectives = false) {
+    function uniqueAssetKeys(values, includeScopedAssets = false) {
       const seen = new Set();
       return values.filter((value) => {
         if (!value || seen.has(value) || (!manifestStoryByKey.has(value)
-            && !(includeScopedObjectives && value.startsWith("optional/objective_")))) {
+            && !(includeScopedAssets && (value.startsWith("optional/objective_")
+              || value.startsWith("easter_eggs/document_")
+              || /^easter_eggs\/menu_\d+:\d+:\d+(?:__(?:post|entry)_\d+)?$/.test(value)
+              || /^easter_eggs\/repeat_\d+:\d+:\d+:\d+$/.test(value)
+              || /^easter_eggs\/choice_fork_\d+$/.test(value)
+              || /^faction_dailies\/menu_\d+:\d+:\d+$/.test(value))))) {
           return false;
         }
         seen.add(value);
@@ -4941,7 +4954,8 @@
               ? "main"
               : group.story_kind === "reputation_quest"
                 ? "reputation"
-                : group.story_kind === "daily_quest" ? "daily"
+                : group.story_kind === "daily_quest" ? "reputation"
+                  : group.story_kind === "easter_egg" ? "exploration"
                   : group.story_kind === "exploration_activity" ? "exploration" : "side";
             const categoryOrder = categoryKey === "main" ? 1 : categoryKey === "side" ? 2
               : categoryKey === "reputation" ? 3 : categoryKey === "daily" ? 4 : 5;
@@ -4950,11 +4964,11 @@
               const pictureInspection = StoryActivities.pictureStory(storyRuntimeCatalog, sourceStory.line_id);
               const assetKeys = pictureInspection?.ordered_asset_keys
                 || uniqueAssetKeys((sourceStory.assets || []).map((asset) => asset.asset_key),
-                  ["daily_quest", "exploration_activity"].includes(group.story_kind));
+                  ["daily_quest", "exploration_activity", "easter_egg"].includes(group.story_kind));
               if (!assetKeys.length) {
                 continue;
               }
-              if (categoryKey === "reputation") {
+              if (group.story_kind === "reputation_quest") {
                 const campId = String(sourceStory.reputation_camp_id || sourceStory.line_id);
                 let reputationStory = category.stories.find((story) => story.id === campId);
                 if (!reputationStory) {
@@ -4972,6 +4986,8 @@
                     detailPaths: [],
                     outline: [],
                     sourceType: "reputation",
+                    factionId: campId,
+                    factionTitle: sourceStory.reputation_camp_title || sourceStory.title || {},
                     storyKind: group.story_kind,
                   };
                   category.stories.push(reputationStory);
@@ -4993,7 +5009,7 @@
                 id: String(sourceStory.line_id),
                 key: `${collection.key}/${categoryKey}/${sourceStory.line_id}`,
                 order: Number(sourceStory.order) || category.stories.length + 1,
-                title: sourceStory.title || {},
+                title: StoryEncounters.titles(sourceStory.title || {}, group.story_kind),
                 description: sourceStory.description || {},
                 chapterKey: chapter.chapter_key || "",
                 chapterTitle: chapter.title || {},
@@ -5002,6 +5018,8 @@
                 assetKeys,
                 sourceType: "exploration",
                 relatedAssets: sourceStory.related_assets || [],
+                factionId: sourceStory.reputation_camp_id || "",
+                factionTitle: sourceStory.reputation_camp_title || {},
                 detailPaths: sourceStory.detail ? [sourceStory.detail] : [],
                 pictureInspection,
                 storyKind: group.story_kind,
@@ -7764,7 +7782,7 @@
           return { text: "", badge: "" };
         }
 
-        function voicePlayControl(source, label) {
+        function voicePlayControl(source, label, startSeconds = 0) {
           if (!source) {
             const placeholder = document.createElement("span");
             placeholder.className = "voice-play-placeholder";
@@ -7792,6 +7810,11 @@
             }
             stopActiveVoice();
             const audio = new Audio(ReaderPublication.url(source));
+            if (Number.isFinite(startSeconds) && startSeconds > 0) {
+              audio.addEventListener("loadedmetadata", () => {
+                if (startSeconds < audio.duration) audio.currentTime = startSeconds;
+              }, { once: true });
+            }
             activeVoiceAudio = audio;
             activeVoiceButton = button;
             button.classList.add("playing");
@@ -7831,7 +7854,7 @@
             );
             lineText.hidden = Boolean(display.nonDialogue);
             item.append(
-              voicePlayControl(audioSource, labelText),
+              voicePlayControl(audioSource, labelText, entry.audio_start_i18n?.[selectedLanguage] || 0),
               label,
               lineText,
             );
@@ -8704,6 +8727,12 @@
       if (!manifest.story_catalogs && !manifest.story_record_base) return;
       // Letter collections are rendered from runtime cards, not extracted story files.
       const generated = new Set((storyRuntimeCatalog?.letter_collections || []).map(row => row.asset_key));
+      // Materialized document/objective entries already carry their records in
+      // quest details. Revisiting them must not probe an extracted-story bucket.
+      for (const key of assetKeys) {
+        const story = manifestStoryByKey.get(key);
+        if (story?.synthetic_document_binding || story?.synthetic_objective_boundary || story?.daily_menu_greeting || story?.menu_greeting || story?.repeated_plot_source || story?.choice_task_fork_projection) generated.add(key);
+      }
       const paths = [...new Set(assetKeys.filter(key => !generated.has(key)).map(key => manifest.story_record_base
         ? (manifestStoryByKey.has(key) ? `${manifest.story_record_base}${storyCatalogKey(key)}.json` : null)
         : manifest.story_catalogs[storyCatalogKey(key)]).filter(Boolean))];
@@ -8950,7 +8979,7 @@
         const bindings = await routeJson(path);
         // Bindings from every context remain available to a merged story.
         for (const row of bindings.line_overrides || []) {
-          dialoguePortraitLineOverrides.set(`${row.asset_key}::${row.graph_node}`, row);
+          addDialoguePortraitLineOverride(row);
         }
         for (const row of bindings.subtitle_bindings || []) {
           if (row.entry_kind === "subtitle" && row.asset_key && row.graph_node
@@ -8961,6 +8990,12 @@
         loadedPortraitBindings.add(path);
       }));
       const models = new Set(["avatar_01_male", "avatar_01_female"]);
+      for (const [key, value] of dialoguePortraitLineOverrides) {
+        if (!assets.has(key.split("::")[0])) continue;
+        for (const row of Array.isArray(value) ? value : [value]) {
+          if (row.portrait_model) models.add(normalizedPortraitModel(row.portrait_model));
+        }
+      }
       for (const asset of assets) {
         const viewpoint = choiceViewpoints?.assets?.[asset.toLowerCase()];
         if (viewpoint?.model) models.add(viewpoint.model);
@@ -9182,6 +9217,9 @@
       }
       const bindings = await ensureArchiveBindings();
       const needed = ReaderCatalogs.dependencies(contexts, bindings.document_steps, storyRuntimeCatalog);
+      const rewardItems = (activeBeat?.logicalStory?.encounterRewards || []).filter(reward => reward.kind === "item");
+      needed.items = [...new Set([...needed.items, ...rewardItems.map(reward => String(reward.id))])];
+      needed.images = needed.images || rewardItems.some(reward => reward.resource);
       const paths = (kind, ids) => [...new Set(ids.map(id => bindings.archives[kind].entries[id]).filter(Boolean))];
       const documentPaths = paths("documents", needed.documents), itemPaths = paths("items", needed.items);
       const [documents, items, images, fallbacks] = await Promise.all([
@@ -9497,6 +9535,8 @@
       if (story.reader_appearance_prompt) {
         graph = ReaderPlayerAppearance.installPrompt(graph, story.reader_appearance_prompt);
       }
+      // Validate authored end-of-dialogue placement before music wraps the end
+      // with its invisible completion marker.
       if (scenes) {
         graph = StoryScenes.install(graph, scenes.assets?.[assetKey]);
       }
@@ -9530,6 +9570,7 @@
         graph.nodes["runtime:placement:end"] = { id: "runtime:placement:end", type: "end" };
         graph.roots = ["runtime:placement"];
       }
+      graph = StoryEncounters.install(graph, story);
       const embeddedLocale = (base, language) => ({ ...base,
         texts: { ...base.texts, ...graph.embedded_locales?.[language]?.texts },
         speakers: { ...base.speakers, ...graph.embedded_locales?.[language]?.speakers },
@@ -9577,7 +9618,7 @@
       if (hideInternalObjectives(story)) {
         return [];
       }
-      return (story && story[`objective_interludes_${position}`]) || [];
+      return StoryActivities.referenceInterludes(storyRuntimeCatalog, groupIndex?.group_key, story, position);
     }
 
     function mergeNamespacedLocale(contexts, localeName) {
@@ -10174,17 +10215,23 @@
         const availableBeats = readableStoryBeats();
         const chapterGroups = new Map();
         for (const beat of availableBeats) {
-          const chapterKey = beat.logicalStory.chapterKey || "stories";
+          const faction = selectedCategory === "reputation" && beat.logicalStory.factionId;
+          const daily = beat.logicalStory.storyKind === "daily_quest";
+          const chapterKey = faction ? `${faction}/${daily ? "daily" : "story"}` : beat.logicalStory.chapterKey || "stories";
           if (!chapterGroups.has(chapterKey)) {
             chapterGroups.set(chapterKey, {
-              title: localizedValue(beat.logicalStory.chapterTitle),
+              title: faction ? `${localizedValue(beat.logicalStory.factionTitle)} · ${uiText(daily ? "Daily" : "Story")}`
+                : localizedValue(beat.logicalStory.chapterTitle),
               beats: [],
             });
           }
           chapterGroups.get(chapterKey).beats.push(beat);
         }
-        const useGroups = chapterGroups.size > 1 || selectedCategory === "heart_to_heart";
+        const useGroups = chapterGroups.size > 1 || ["heart_to_heart", "reputation"].includes(selectedCategory);
         const chapters = [...chapterGroups.values()];
+        if (selectedCategory === "reputation") chapters.sort((left, right) =>
+          Number(left.beats[0].logicalStory.factionId) - Number(right.beats[0].logicalStory.factionId)
+          || Number(left.beats[0].logicalStory.storyKind === "daily_quest") - Number(right.beats[0].logicalStory.storyKind === "daily_quest"));
         if (selectedCategory === "heart_to_heart") chapters.sort((left, right) =>
           (left.beats[0].logicalStory.locations?.length || Infinity) - (right.beats[0].logicalStory.locations?.length || Infinity));
         for (const chapter of chapters) {
@@ -11178,6 +11225,8 @@
           speakerName,
           cinematicPortrait,
           jointSpeakers,
+          portraitLineKey(item.portraitSourceAsset || selectedAssetKey,
+            item.portraitSourceNode || item.nodeId),
         );
         const row = document.createElement("section");
         row.className = `portrait-dialogue-row dialogue-presentation-${presentationKind}`;
@@ -11594,12 +11643,12 @@
       const media = pictureMedia(catalogEntry, item.pictureRes || item.backgroundRes);
       const name = catalogEntry ? archiveItemField(catalogEntry, "name") : null;
       const pictureName = item.textKey ? resolveText(item.textKey) : null;
-      const title = (name && !name.badge ? name.text.trim() : "")
+      const title = item.displayName || (name && !name.badge ? name.text.trim() : "")
         || (pictureName && !pictureName.badge ? pictureName.text.trim() : "")
         || (selectedLanguage === "cn" ? String(item.descriptionCn || "").trim() : "");
-      const description = resolved
+      const description = item.displayDescription || (resolved
         ? (resolved.description || resolved.comment || "")
-        : "";
+        : "");
       const block = document.createElement("article");
       const itemDomNodeId = domNodeId(item.nodeId);
       block.className = "picture-block";
@@ -11871,6 +11920,7 @@
         && !showDebug
         && readerMode !== "debug"
       ) {
+        renderPhaseReferencesAtObjective(item, container);
         return;
       }
       const block = document.createElement("aside");
@@ -12233,6 +12283,10 @@
         else panel.addEventListener("toggle",()=> {if(panel.open && !sequence.childNodes.length)draw();});
         panel.append(sequence,makeDebugMeta([`source=${entry.asset}`,`helper=${entry.source_record}`,
           `condition=${entry.source_condition}`,`parent=${entry.source_parent_task.RecvCondition}`,
+          ...(entry.source_requests || []).map(request=>`request=${request.step.record_key}; condition=${request.step.ClientFinishCondition}`),
+          ...(entry.display_context?.parallel_inspection_contract ? [
+            `reading_policy=${entry.display_context.parallel_inspection_contract.presentation_policy}`,
+            "native_request_deduplication_claimed=false"] : []),
           ...(entry.display_context ? [
             `placement=${entry.display_context.kind}`,
             ...(entry.display_context.enable_after_step ? [`enabled_after=${entry.display_context.enable_after_step}`] : []),
@@ -12580,6 +12634,7 @@
       interactive = true,
       previousItem = null,
     ) {
+      renderEncounterVisitBoundary(item, container);
       const block = document.createElement("article");
       const itemDomNodeId = item.fullRoute
         ? `${item.fullRoute.nodeKey}:visit:${item.fullRoute.occurrence}`
@@ -12747,6 +12802,17 @@
       return;
     }
 
+    function renderEncounterVisitBoundary(item, container) {
+      const boundary=storyGraph.nodes[item.nodeId]?.encounter_visit_boundary;
+      if(!boundary)return;
+      const separator=document.createElement("hr");
+      separator.className="encounter-visit-boundary";
+      separator.dataset.encounterVisit=boundary.record;
+      const labels={en:"Separate conversation",jp:"別の会話",kr:"다른 대화",cn:"另一段对话"};
+      separator.setAttribute("aria-label",labels[selectedLanguage]||labels.en);
+      container.appendChild(separator);
+    }
+
     function renderTimelineItem(
       item,
       container,
@@ -12754,6 +12820,7 @@
       interactive = true,
       previousItem = null,
     ) {
+      if(item.type!=="choice")renderEncounterVisitBoundary(item,container);
       if(item.type === "inspection") { renderInspection(item,container); return; }
       if(item.type === "inspection_point") {
         renderInspectionPoint(item.asset,item.index,item.replay,container,item.nodeId); return;
@@ -13330,6 +13397,15 @@
           if (mergeNodeId) {
             walk(mergeNodeId, indent, stopNodeId);
           }
+        } else if (node.type === "hidden_branch" && node.random_alternatives) {
+          const options = node.options || [];
+          const merge = nearestChoiceMergeNode(nodeId, options, rendered);
+          const label = ({en:"Possible response",jp:"返答のバリエーション",kr:"가능한 반응",cn:"可能的回应"})[selectedLanguage] || "Possible response";
+          options.forEach((option, index) => {
+            renderBranchLabel(`${label} ${index + 1}`, timeline, indent);
+            walk(option.target, indent, merge || stopNodeId);
+          });
+          if (merge) walk(merge, indent, stopNodeId);
         } else if (node.type === "hidden_branch") {
           const preferredOption = preferredHiddenBranchOption(nodeId);
           if (preferredOption) {
@@ -13684,7 +13760,9 @@
     }
 
     function renderFishingResults(objectiveKey, container,assetKey = "") {
-      const plan = storyRuntimeCatalog?.fishing?.steps?.[objectiveKey];
+      const placement = StoryActivities.fishing(storyRuntimeCatalog,groupIndex?.group_key,assetKey,
+        objectiveKey,"objective",logicalNavigation);
+      const plan = placement || storyRuntimeCatalog?.fishing?.steps?.[objectiveKey];
       if (!plan) return;
       if (!catchSelections) {
         let storage;
@@ -13694,8 +13772,6 @@
       const section = document.createElement("section");
       section.className = "fishing-results";
       section.setAttribute("aria-label", uiText("Fishing results"));
-      const placement = StoryActivities.fishing(storyRuntimeCatalog,groupIndex?.group_key,assetKey,
-        objectiveKey,"objective",logicalNavigation);
       if (plan.parallel && !placement?.archive_scope) {
         const note = document.createElement("p");
         note.className = "story-choice-status";
@@ -14587,8 +14663,48 @@
       while (cursor) { const obsolete = cursor; cursor = cursor.nextSibling; obsolete.remove(); }
     }
 
+    function renderEncounterRewards() {
+      const rewards = activeBeat?.logicalStory?.encounterRewards || [];
+      if (!rewards.length) return;
+      if (readerMode === "interactive" && storyGraph.nodes[currentNodeId]?.type !== "end") return;
+      if (readerMode !== "interactive" && fullScriptRoute?.halted) return;
+      const labels = {
+        en: {heading:"Rewards",title_prefix:"Title prefix",title_suffix:"Title suffix",title_entirety:"Title",item:"Item"},
+        jp: {heading:"報酬",title_prefix:"称号（前半）",title_suffix:"称号（後半）",title_entirety:"称号",item:"アイテム"},
+        kr: {heading:"보상",title_prefix:"칭호 접두사",title_suffix:"칭호 접미사",title_entirety:"칭호",item:"아이템"},
+        cn: {heading:"奖励",title_prefix:"称号前缀",title_suffix:"称号后缀",title_entirety:"称号",item:"物品"},
+      }[selectedLanguage];
+      const block = document.createElement("section");
+      block.className = "encounter-rewards";
+      block.setAttribute("aria-label", labels.heading);
+      for (const reward of rewards) {
+        if (reward.kind === "item") {
+          renderPictureBlock({
+            nodeId: `encounter-reward:${activeBeat.logicalStory.id}:${reward.id}`,
+            itemIds: [reward.id], pictureRes: reward.resource,
+            displayName: localizedValue(reward.name), displayDescription: localizedValue(reward.description),
+          }, block);
+          continue;
+        }
+        const card = document.createElement("section");
+        card.className = "encounter-title-reward document-block";
+        const row = document.createElement("h3");
+        row.className = "document-title";
+        row.style.margin = "0";
+        row.textContent = `${labels[reward.kind]}: ${localizedValue(reward.name)}${reward.count>1 ? ` ×${reward.count}` : ""}`;
+        if ((reward.machine_translation_languages || []).includes(selectedLanguage)) {
+          appendBadge(row, {badge:"MT",status:"machine_translation",title:"Machine translated from Chinese. Official localization is unavailable."});
+        }
+        card.appendChild(row);
+        const description=localizedValue(reward.description);
+        if(description) {const text=document.createElement("div");setFormattedText(text,description);card.appendChild(text);}
+        block.appendChild(card);
+      }
+      timeline.appendChild(block);
+    }
+
     function render() {
-      if (primaryView === "home") return;
+      if (primaryView === "home") { return; }
       renderedPerspectiveEvents = new Set();
       containsMachineTranslation = false;
       renderedBattleSources = new Map();
@@ -14634,6 +14750,7 @@
       try {
         if (readerMode === "full" || readerMode === "debug") renderFullScript();
         else renderInteractive();
+        renderEncounterRewards();
         if (reuseDialogueRows) commitStoryTimeline(displayedTimeline, timeline);
         else displayedTimeline.replaceChildren(...timeline.childNodes);
       } finally {

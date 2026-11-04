@@ -102,6 +102,7 @@
           && transcribedFields.some(field => field.cn === original?.cn && field[language] === original?.[language])))
     ));
     return { description, taskStartObjectives, objectiveTitlePlacements,
+      encounterRewards: quest.encounter_rewards || [],
       recordingLocalization: recordingLocalizationLanguages.length > 0,
       recordingLocalizationLanguages };
   }

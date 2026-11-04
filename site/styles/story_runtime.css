@@ -356,6 +356,17 @@
   margin-top: var(--reader-space-flow);
   padding-top: var(--reader-space-related);
 }
+/* A visit boundary sits midway between conversations. Its gold rule stays
+   visible against encounter cards; each side owns one normal flow gap. */
+.encounter-visit-boundary {
+  box-sizing: border-box; width: 100%; height: 0; min-height: 0;
+  padding: 0; margin: 0; border: 0;
+  border-top: 1px solid var(--accent-2, #d6bd80);
+}
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > .encounter-visit-boundary,
+:is(.timeline, .dialogue-sequence, .cinematic-scene) > .encounter-visit-boundary + :where(:not([hidden]):not(.story-outline-anchor)) {
+  --reader-space-before: var(--reader-space-flow);
+}
 .story-encounter-dialogue { margin-top: var(--reader-space-flow); }
 .story-encounter-dialogue > .dialogue-sequence { margin-top: var(--reader-space-related); }
 .story-sources { margin-top: var(--reader-space-scene); }

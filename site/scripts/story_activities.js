@@ -23,7 +23,14 @@
     for(const [id,line] of Object.entries(source.lines || {})) {
       const quest=quests.get(id);
       const keys=[...new Set((quest?.assets || []).map(a=>a.asset_key).filter(Boolean))];
-      if(keys.length!==line.source_asset_keys.length || !keys.every((key,i)=>key===line.source_asset_keys[i])) continue;
+      // A rebuilt quest may already use the verified inspection order. Keep
+      // its objective/point bindings in that case as well as for the original
+      // layout; unrelated reorderings must still fail the evidence guard.
+      const matches=order=>Array.isArray(order) && keys.length===order.length
+        && keys.every((key,i)=>key===order[i]);
+      if(!matches(line.source_asset_keys) && !matches(line.ordered_asset_keys)) continue;
+      if(line.source_asset_keys.length!==keys.length || new Set(line.source_asset_keys).size!==keys.length
+         || !line.source_asset_keys.every(key=>keys.includes(key))) continue;
       if(line.ordered_asset_keys.length!==keys.length || new Set(line.ordered_asset_keys).size!==keys.length
          || !line.ordered_asset_keys.every(key=>keys.includes(key))) continue;
       if(!line.groups.every(g=>g.members.length && g.members.every(key=>keys.includes(key))
@@ -437,8 +444,138 @@
       &&Array.isArray(cleanup[i].actions)&&(cleanup[i].actions.length>0)===retired.has(regions[i]))
       &&!!c.evidence_file&&/^[0-9a-f]{64}$/.test(c.evidence_sha256||'');
   }
+  function dependencyHelperContext(entry,where) {
+    const c=entry.display_context,q=c?.dependency_contract,path=q?.helper_path;
+    const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+    const sameSource=(a,b)=>equal(Object.fromEntries(Object.entries(a).filter(([k])=>k!=='record_order')),Object.fromEntries(Object.entries(b).filter(([k])=>k!=='record_order')));
+    const actions=(row,field)=>{
+      const text=row?.[field]||'true';if(text==='true')return[];
+      return text.split(' and ').map(part=>{
+        const m=part.match(/^ed\.ActionX\.(AddStates|DelStates|SetFinalStates|C_RunPlot)\(([^()]*)\)$/);
+        if(!m)throw Error('additional helper effect');return[m[1],JSON.parse('['+m[2]+']')];
+      });
+    };
+    const enables=(row,field,id)=>actions(row,field).some(([n,a])=>n==='AddStates'&&equal(a,[id,'Show','Interactive']));
+    try {
+      if(!where||c.kind!=='source_helper_dependency_window'||!Array.isArray(path)||!path.length
+          ||c.step!==where.step||c.anchor_asset!==where.asset||c.position!==where.position||!['objective','before'].includes(c.position)
+          ||c.source_guard!==entry.source_condition||c.parent_guard!==entry.source_parent_task.RecvCondition
+          ||c.source_completion_written!==false||c.native_traversal_order_claimed!==false||c.prerequisites_assumed_complete!==false||c.main_phase_end_claimed!==false
+          ||!c.evidence_file||!/^[0-9a-f]{64}$/.test(c.evidence_sha256||''))return false;
+      const main=q.main_step,task=q.main_task,owner=entry.owner,first=path[0],last=path.at(-1),origin=q.origin;
+      if(main.record_key!==c.step||main.LineID!==owner||task.LineID!==owner||main.TaskID!==task.TaskID
+          ||!equal(last.step,entry.source_step)||!equal(last.task,entry.source_parent_task)||entry.source_record!==last.step.record_key
+          ||q.plot!==entry.asset.split('_').at(-1)||entry.source_condition!==last.step.FinishCondition)return false;
+      if(origin==='named_task_completion'){
+        const prior=q.checkpoint_task,line=q.checkpoint_line,guard=`ed.ConditionX.IsExplTaskFinished(${prior.LineID},${prior.TaskID})`;
+        if(line.LineID!==prior.LineID||first.task.RecvCondition!==guard||main.PreStepList!=='[]')return false;
+        if(prior.LineID===owner){
+          if(Number(task.TaskID)!==Number(prior.TaskID)+1||!['[]',`[${task.TaskID}]`].includes(prior.NextTaskIDs)||!['true',guard].includes(task.RecvCondition))return false;
+        }else if(line.LastTaskID!==prior.TaskID||task.TaskID!=='1'||task.RecvCondition!==guard||q.target_line.LineID!==owner||!['1','2'].includes(q.target_line.LineType))return false;
+      }else if(origin==='named_battle_checkpoint'){
+        const checkpoint=q.checkpoint_step,guard=checkpoint.FinishCondition;
+        if(!/^ed\.ConditionX\.IsWildMonsterKilled\([1-9]\d*\)$/.test(guard)||checkpoint.LineID!==owner||checkpoint.TaskID!==main.TaskID
+            ||checkpoint.ClientFinishCondition!=='true'||first.task.RecvCondition!==guard||main.PreStepList!==`[${checkpoint.StepID}]`)return false;
+      }else if(origin==='existing_helper_continuation'){
+        const base=q.base_reference;
+        if(!helperLifecycleContext(base,where)||q.source_row_equivalence!=='exact_fields_except_capture_record_order'||base.owner!==owner||!sameSource(base.source_step,first.step)||!sameSource(base.source_parent_task,first.task)||path.length<2)return false;
+      }else return false;
+      const seen=new Set();
+      for(let index=0;index<path.length;index++){
+        const item=path[index],h=item.step,parent=item.task,line=item.line,oid=item.region,obj=item.object,key=h.record_key;
+        if(seen.has(key)||key!==`${h.LineID}:${h.TaskID}:${h.StepID}`||line.LineID!==parent.LineID||parent.LineID!==h.LineID
+            ||line.LineType!=='3'||line.Rewards!=='[]'||parent.ActionRewards!=='[]'||parent.TaskID!==h.TaskID||h.Cost!=='[]'||h.ClientFinishCondition!=='true')return false;
+        for(const field of ['RecvAction','ClientRecvActionByMove'])actions(parent,field);
+        for(const field of ['FinishAction','ClientFinishActionByMove'])actions(h,field);
+        if(!index){if(h.PreStepList!=='[]')return false;}
+        else{
+          const previous=path[index-1],p=previous.step;
+          if(p.LineID===h.LineID&&p.TaskID===h.TaskID){if(h.PreStepList!==`[${p.StepID}]`)return false;}
+          else if(h.PreStepList!=='[]'||previous.task.LastStepID!==p.StepID||previous.line.LastTaskID!==p.TaskID
+              ||parent.RecvCondition!==`ed.ConditionX.IsExplTaskFinished(${p.LineID},${p.TaskID})`)return false;
+        }
+        if(oid==null){if(path.length!==1||origin!=='named_task_completion'||h.FinishCondition!=='true'||h.ClientFinishEvents!=='[]')return false;}
+        else{
+          if(!Number.isInteger(oid)||oid<=0||h.FinishCondition!==`ed.ConditionX.IsInRange(${oid})`||h.ClientFinishEvents!==`[Move:${oid}]`
+              ||obj.ID!==String(oid)||obj.ClientType!=='VirtualRange'||obj.InitStates!=='[1]'||obj.FinalStates!=='[]'||obj.ExtraRulesID!=='0')return false;
+          let active=enables(parent,'RecvAction',oid)||path.slice(0,index).some(p=>enables(p.step,'FinishAction',oid));
+          if(!index&&origin==='existing_helper_continuation')active=active||enables(q.base_reference.display_context.source_activation.source_row,'FinishAction',oid);
+          if(!active||!actions(h,'FinishAction').some(([n,a])=>n==='SetFinalStates'&&a.includes(oid)||n==='DelStates'&&a[0]===oid&&a.slice(1).includes('Interactive')))return false;
+        }
+        seen.add(key);
+      }
+      const requests=['FinishAction','ClientFinishActionByMove'].flatMap(f=>actions(last.step,f).filter(([n])=>n==='C_RunPlot').map(([,a])=>a));
+      return equal(requests,[[Number(q.plot)]]);
+    }catch{return false;}
+  }
+  function referenceInterludes(catalog,scope,story,position='before') {
+    const existing=story?.[`objective_interludes_${position}`]||[];
+    if(position!=='before')return existing;
+    const seen=new Set(existing.map(o=>o.objective_key)),added=[];
+    for(const entry of catalog?.route_dialogues?.phase_references||[]) {
+      const d=entry.display_context,source=d?.source_main_step;
+      if(entry.scope!==scope||d?.kind!=='source_helper_lifecycle'||d.position!=='before'||d.anchor_asset!==story?.asset_key
+          ||!source||source.Detail!==''||source.Story!==''||source.PreStepList!=='[]'||seen.has(d.step)
+          ||!phaseReferenceContext(entry,{step:d.step,asset:story.asset_key,position:'before'}))continue;
+      // Preserve the real silent source boundary. No objective title or state
+      // transition is invented merely to expose its configured helper dialogue.
+      added.push({objective_key:d.step,objective_title_i18n:{},objective_summary_i18n:{},objective_position:'before',
+        verified_silent_helper_boundary:true,completion_written:false});seen.add(d.step);
+    }
+    return added.length?[...added,...existing]:existing;
+  }
+  function acknowledgedMenuContext(entry,where) {
+    try {
+      const d=entry.display_context,c=d.acknowledged_helper_contract,sites={17208280:['537','1400637','3','2'],17208290:['538','1400171','4','3'],17208300:['539','1400180','5','4']};
+      const [optionId,stateId,mainId,ackId]=sites[c.plot],task=entry.source_parent_task,h=entry.source_step,main=c.source_main_step,opt=c.menu_option,obj=c.menu_object,steps=c.accounted_source_steps,tasks=c.accounted_source_tasks,enable=c.source_enable_step,end=c.source_retirement_step;
+      const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+      if(!where||d.kind!=='source_menu_acknowledgment_window'||d.position!=='before'||entry.owner!=='17010208'||c.controller!=='17010396'
+          ||d.step!==where.step||d.anchor_asset!==where.asset||d.position!==where.position||entry.asset!==`ep7/quest_story_${c.plot}`||c.named_owner!==entry.owner
+          ||tasks.length!==1||steps.length!==5||!equal(task,tasks[0])||task.RecvCondition!=='ed.ConditionX.IsExplTaskFinished(17010208,2)'
+          ||task.LastStepID!=='5'||task.RecvAction!=='true'||task.ClientRecvActionByMove!=='true'||task.ActionRewards!=='[]'||task.NextTaskIDs!=='[]'
+          ||steps[0].FinishCondition!=='not ed.ConditionX.HasState(513900205,"Changeable")'||steps[0].PreStepList!=='[]'||steps[0].FinishAction!=='true'
+          ||steps[4].PreStepList!=='[2 | 3 | 4]'||steps[4].FinishAction!=='true')return false;
+      for(const [i,[pid,[,oid]]]of Object.entries(sites).entries()){
+        const row=steps[i+1];if(row.record_key!==`17010396:1:${i+2}`||row.PreStepList!=='[1]'||row.FinishCondition!=='true'
+            ||row.ClientFinishCondition!==`ed.ConditionX.C_PlotPlayed(${pid})`||row.FinishAction!==`ed.ActionX.DelStates(${oid},"CMark_1")`)return false;
+      }
+      const guard=(c.plot==='17208300'?'not ed.ConditionX.HasState(513900205,"Changeable") and ':'')+`ed.ConditionX.HasState(${stateId},"CMark_1")`;
+      return steps.every(r=>r.LineID==='17010396'&&r.ClientFinishActionByMove==='true'&&r.Cost==='[]')&&equal(h,steps[Number(ackId)-1])
+        &&main.record_key===`17010208:3:${mainId}`&&main.PreStepList==='[2]'&&main.FinishCondition===`not ed.ConditionX.HasState(${stateId},"CMark_1")`&&main.FinishAction==='true'&&main.ClientFinishActionByMove==='true'
+        &&d.step===main.record_key&&d.anchor_asset==='ep7/quest_story_17208310'&&c.source_anchor_asset.asset_key===d.anchor_asset
+        &&enable.record_key==='17010208:3:2'&&enable.FinishCondition==='ed.ConditionX.IsCardGameVictory(18)'
+        &&[`ed.ActionX.AddStates(${stateId},"CMark_1")`,'ed.ActionX.SetFinalStates(513900205)','ed.ActionX.AddStates(513900120,"Interactive")'].every(v=>enable.FinishAction.includes(v))
+        &&end.record_key==='17010208:3:6'&&end.PreStepList==='[3 | 4 | 5]'&&end.FinishAction.includes('ed.ActionX.SetFinalStates(513900120)')
+        &&obj.ID==='513900120'&&opt.ObjectID===obj.ID&&obj.ClientType==='DataDrivenNpc'&&obj.DialogueMenuID==='513900120'&&obj.ExtraRulesID==='80'
+        &&opt.ID===optionId&&opt.ClickAction===`ed.ActionX.C_RunPlot(${c.plot})`&&opt.ReturnMenu==='false'&&opt.ShowCondition===guard&&entry.source_condition===guard&&d.source_guard===guard
+        &&entry.source_family==='MenuWorldActionOption'&&entry.source_record===optionId&&c.client_visibility_rule.ExtraRulesCondition==='ed.ConditionX.C_CheckFollowTaskByLineID(17010208)'
+        &&d.parent_guard===task.RecvCondition&&c.graph.source_matches===true&&equal(c.source_step,h)&&equal(c.source_task,task)
+        &&['completion_written','native_activation_simulated','sibling_order_claimed','server_acceptance_claimed','menu_click_simulated'].every(k=>c[k]===false)
+        &&['source_completion_written','native_traversal_order_claimed','prerequisites_assumed_complete'].every(k=>d[k]===false)&&!!d.evidence_file&&/^[0-9a-f]{64}$/.test(d.evidence_sha256||'');
+    }catch{return false;}
+  }
   function phaseReferenceContext(entry,context) {
     const c=entry.display_context;
+    if(c?.kind==='source_menu_acknowledgment_window')return acknowledgedMenuContext(entry,context);
+    if(c?.kind==='source_helper_dependency_window')return dependencyHelperContext(entry,context);
+    if(c?.kind==='source_object_inspection_window') {
+      const o=c.source_object||{},h=entry.source_step||{},p=entry.source_parent_task||{},a=c.source_enable_step||{},z=c.source_retirement_step||{},t=c.source_main_task||{};
+      const oid=o.ID,pid=String(entry.asset||'').split('_').at(-1),b=c.default_interaction||{},states=b.states;
+      const initial=String(o.InitStates).match(/\d+/g)||[],final=String(o.FinalStates).match(/\d+/g)||[];
+      const retired=Array.from(String(z.FinishAction).matchAll(/ed\.ActionX\.SetFinalStates\(([\d,\s]+)\)/g)).flatMap(m=>m[1].split(',').map(Number));
+      return !!context&&c.step===context.step&&c.anchor_asset===context.asset&&c.position===context.position&&c.position==='objective'
+        &&c.step===z.record_key&&c.source_guard===entry.source_condition&&c.source_guard===h.ClientFinishCondition&&c.parent_guard===p.RecvCondition
+        &&c.source_completion_written===false&&c.native_traversal_order_claimed===false&&c.prerequisites_assumed_complete===false&&c.sibling_order_claimed===false
+        &&/^\d+$/.test(oid||'')&&o.Type==='26'&&o.ClientType==='SteleTask2'&&o.ExtraRulesID==='0'&&initial.includes('2')&&!initial.includes('7')&&!final.includes('7')
+        &&p.record_key===`${h.LineID}:${h.TaskID}`&&h.PreStepList==='[]'&&p.RecvCondition===`ed.ConditionX.IsExplTaskFinished(${entry.owner},${Number(t.TaskID)-1})`
+        &&t.record_key===`${entry.owner}:${t.TaskID}`&&t.RecvCondition===p.RecvCondition&&a.LineID===entry.owner&&z.LineID===entry.owner&&a.TaskID===t.TaskID&&z.TaskID===t.TaskID
+        &&z.PreStepList===`[${a.StepID}]`&&h.ClientFinishEvents===`[C_InteractObj:${oid}:*]`&&h.FinishCondition==='true'&&h.ClientFinishCondition===`ed.ConditionX.C_ObjInteracted(${oid},"*")`
+        &&h.ClientFinishActionByMove==='true'&&h.Cost==='[]'&&String(h.FinishAction).includes(`ed.ActionX.C_RunPlot(${pid})`)
+        &&String(a.FinishAction).includes(`ed.ActionX.AddStates(${oid},"Interactive")`)&&retired.includes(Number(oid))
+        &&JSON.stringify(b.object)===JSON.stringify(o)&&b.registered_option==='*'&&b.object_type?.ClientType===o.ClientType&&b.object_type?.InteractID==='58'
+        &&states?.length===1&&states[0].source?.Condition==='true'&&JSON.stringify(states[0].admitting_options)==='["47"]'&&states[0].options?.length===1
+        &&states[0].options[0].ID==='47'&&states[0].options[0].ExplInteract==='true'&&!!c.evidence_file&&/^[0-9a-f]{64}$/.test(c.evidence_sha256||'');
+    }
     if(c?.kind==='source_helper_lifecycle')return helperLifecycleContext(entry,context);
     if(c?.kind==='source_cross_task_state_window') {
       const steps=c.source_steps,path=c.source_task_path,regions=c.region_objects,objects=c.source_region_objects,pre=c.helper_prerequisites;
@@ -591,7 +728,7 @@
         const key=node.runtime_scope+':'+node.runtime_choice,seen=reads.get(key)||new Set();reads.set(key,seen);
         const options=node.options.filter(o=>o.guard?.kind==='literal' && o.guard.value===true
           && (o.display_reads||[]).every(index=>seen.has(index)));
-        const chosen=options.find(o=>o.index===decisions[decision]) || (automatic ? options[0] : null);
+        const chosen=options.find(o=>o.index===decisions[decision]) || (automatic ? options.find(o=>!seen.has(o.index+1)) : null);
         if(!chosen)return {items,choice:{node,options,decision}};
         seen.add(chosen.index+1);items.push({node,option:chosen,options,decision});decision++;current=chosen.target;continue;
       }
@@ -617,5 +754,5 @@
     if(!optionalShown)optional();
     return parts;
   }
-  return {objectiveCallbacks,map,fishing,visible,insertFishing,insertStart,insertRoute,inlineDialogues,encounterDialogues,route,presumedRoute,installRoute,presentation,movement,installMovement,completion,installCompletion,pictureCatalog,pictureStory,pictureAsset,phaseReferences,referenceTranscript,hasObjectiveDialogue,routeParts,parallelReadingGroup,parallelReadingOrder};
+  return {referenceInterludes,objectiveCallbacks,map,fishing,visible,insertFishing,insertStart,insertRoute,inlineDialogues,encounterDialogues,route,presumedRoute,installRoute,presentation,movement,installMovement,completion,installCompletion,pictureCatalog,pictureStory,pictureAsset,phaseReferences,referenceTranscript,hasObjectiveDialogue,routeParts,parallelReadingGroup,parallelReadingOrder};
 });

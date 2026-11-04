@@ -11,6 +11,7 @@
 
   // A reader grouping change must not rename permanent addresses or break bookmarks.
   function categoryFor(collection, category, id) {
+    if (category === "daily") return "reputation";
     return section(collection) === 'special-events' && category === 'mini'
       && ['8', '10', '11', '20', '21', '22'].includes(String(id)) ? 'starry' : category;
   }
