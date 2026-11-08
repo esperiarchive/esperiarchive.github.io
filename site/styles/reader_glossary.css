@@ -1,0 +1,38 @@
+.story-archive-page { width: min(1120px, 100%); margin: 0 auto; padding: 40px 28px 72px; }
+.story-archive-page h1, .story-archive-page h2 { font-family: var(--reader-heading-font, var(--reader-font)); font-weight: 600; }
+.story-archive-page h1 { margin: 10px 0 12px; font-size: clamp(30px, 3.5vw, 44px); line-height: 1.2; color: var(--accent); }
+.archive-eyebrow { color: var(--muted); text-transform: uppercase; letter-spacing: .16em; font-size: 12px; }
+.story-archive-heading { margin-bottom: 32px; }
+.archive-back, .archive-term-back { display: inline-block; color: var(--accent); text-decoration: none; font-size: 14px; padding: 7px 0; }
+.story-archive-heading > p { color: var(--muted); max-width: 650px; margin: 0; line-height: 1.7; }
+.archive-lore-toolbar { display: flex; align-items: center; gap: 20px; margin: 0 0 25px; }
+.archive-lore-search { flex: 1; min-width: 0; width: 100%; min-height: 47px; padding: 12px 15px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: var(--button); }
+.archive-result-count { flex-shrink: 0; color: var(--muted); font-size: 13px; margin: 0; }
+.archive-glossary-layout { display: grid; grid-template-columns: minmax(180px,285px) minmax(0,1fr); gap: 32px; align-items: start; }
+.archive-term-list { display: flex; flex-direction: column; gap: 3px; max-height: min(66vh,760px); overflow-y: auto; padding: 3px 9px 8px 3px; scrollbar-width: thin; }
+.archive-term-link { display: block; text-decoration: none; color: var(--ink); border: 1px solid transparent; border-radius: 5px; padding: 11px 13px; font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }
+.archive-term-link:hover { background: rgba(var(--accent-rgb),.04); }
+.archive-term-link[aria-current="page"] { background: rgba(var(--accent-rgb),.09); border-color: rgba(var(--accent-rgb),.32); color: var(--accent); }
+.archive-term-detail { padding: 25px 30px 30px; border: 1px solid var(--line); border-radius: 10px; background: rgba(var(--accent-rgb),.025); min-width: 0; }
+.archive-term-detail h2 { color: var(--accent); font-size: 30px; line-height: 1.3; margin: 12px 0 22px; overflow-wrap: anywhere; }
+.archive-lore-definition { font-size: var(--dialogue-font-size,17px); line-height: 1.9; white-space: pre-line; overflow-wrap: anywhere; margin: 0 0 23px; }
+.archive-lore-definition + .archive-lore-definition { border-top: 1px solid var(--line); padding-top: 22px; }
+.archive-lore-definition:last-child { margin-bottom: 0; }
+.archive-term-welcome { text-align: center; padding-top: 20px; padding-bottom: 40px; }
+.archive-term-welcome .archive-illustration { margin: 0 auto 20px; width: 150px; height: 170px; }
+.archive-term-welcome h2 { font-size: 25px; margin-top: 0; }
+.archive-term-welcome p { color: var(--muted); line-height: 1.7; }
+.archive-term-back { display: none; }
+@media (max-width: 700px) {
+  .story-archive-page { padding: 26px 18px 50px; }
+  .archive-glossary-layout { display: flex; flex-direction: column; gap: 24px; }
+  .archive-term-list { width: 100%; max-height: none; overflow: visible; padding: 0; }
+  .archive-term-detail { width: 100%; padding: 20px; }
+  .archive-term-detail h2 { font-size: 28px; }
+  .has-selected-term .archive-term-detail { order: -1; }
+  .archive-term-welcome { display: none; }
+  .archive-term-back { display: inline-block; margin-bottom: 8px; }
+  .archive-lore-toolbar { gap: 12px; flex-wrap: wrap; }
+  .archive-lore-search { flex-basis: 100%; }
+  .story-archive-heading { margin-bottom: 24px; }
+}

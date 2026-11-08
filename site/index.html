@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=deedf4b04befd635"></script>
+  <script src="scripts/config.js?v=8e33b9351d417469"></script>
   <script src="scripts/reader_publication.js?v=150006c8fa023db6"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <meta charset="utf-8">
@@ -2950,6 +2950,11 @@
       width: 150px;
     }
 
+    .story-music-setting { display: grid; gap: 8px; }
+    .story-music-setting[hidden] { display: none; }
+    .story-music-setting label { display: flex; align-items: center; gap: 8px; }
+    .story-music-setting input[type="range"] { width: 100%; }
+    .story-music-setting small { overflow-wrap: anywhere; }
 
     .setting-row input[type="text"] {
       width: 150px;
@@ -3489,7 +3494,7 @@
           <button id="document-archive-tab" class="primary-tab" type="button" data-i18n="Documents">Documents</button>
         </nav>
       </div>
-      <div id="current-story-title" class="story-title" data-i18n="Loading...">Loading...</div>
+      <div id="current-story-title" class="story-title">Loading...</div>
       <div class="top-actions">
         <select id="language-select" aria-label="Language" data-i18n-aria-label="Language">
           <option value="cn">CN</option>
@@ -3501,13 +3506,14 @@
           <option value="interactive" data-i18n="Interactive">Interactive</option>
           <option value="full" data-i18n="Full Script">Full Script</option>
         </select>
-        <button id="settings-button" type="button" aria-controls="settings-popover" aria-expanded="false" data-i18n="Settings">Settings</button>
+        <button id="settings-button" type="button" aria-controls="settings-popover" aria-expanded="false" aria-label="Settings" data-i18n-aria-label="Settings" data-i18n="Settings">Settings</button>
       </div>
     </header>
 
-    <nav id="story-navigation" class="navrow" aria-label="Story navigation" data-i18n-aria-label="Story navigation">
+    <nav id="story-navigation" class="navrow" aria-label="Story navigation" data-i18n-aria-label="Story navigation" data-expanded="false">
+      <button id="story-navigation-toggle" class="story-navigation-toggle" type="button" aria-expanded="false" aria-controls="story-selectors previous-story-top next-story-top"><span data-i18n="Story navigation">Story navigation</span><span class="navigation-chevron" aria-hidden="true"></span></button>
       <button id="previous-story-top" type="button" aria-label="‹ Previous story" data-i18n-aria-label="‹ Previous story">&lsaquo;&lsaquo;</button>
-      <div class="selector-group">
+      <div id="story-selectors" class="selector-group">
         <div class="selector-shell">
           <label for="section-select" data-i18n="Section">Section</label>
           <select id="section-select"></select>
@@ -3566,11 +3572,13 @@
         </footer>
       </section>
 
+      <section id="story-archive-page" class="story-archive-page" aria-label="Story Archive" data-i18n-aria-label="Story Archive" hidden></section>
+
       <section id="archive-browser" class="archive-browser" hidden>
         <header class="archive-header">
           <div class="mystical-kicker" data-i18n="World Archive">World Archive</div>
           <div class="archive-header-row">
-            <h1 id="archive-heading" class="archive-heading" data-i18n="Documents">Documents</h1>
+            <h1 id="archive-heading" class="archive-heading">Documents</h1>
             <nav class="archive-kind-tabs" aria-label="Archive type" data-i18n-aria-label="Archive type">
               <button id="archive-documents-tab" class="archive-kind-tab active" type="button" data-i18n="Documents">Documents</button>
               <button id="archive-items-tab" class="archive-kind-tab" type="button" data-i18n="Items">Items</button>
@@ -3579,14 +3587,14 @@
           </div>
         </header>
         <div class="archive-toolbar">
-          <input id="archive-search" class="archive-search" type="search" placeholder="Search documents" data-i18n-placeholder="Search documents" autocomplete="off">
+          <input id="archive-search" class="archive-search" type="search" placeholder="Search documents" autocomplete="off">
           <div id="archive-count" class="archive-count"></div>
         </div>
         <nav id="archive-item-categories" class="archive-item-categories" aria-label="Item category" data-i18n-aria-label="Item category" hidden></nav>
         <nav id="archive-mail-filters" class="archive-item-categories" aria-label="Mail collection" data-i18n-aria-label="Mail collection" hidden></nav>
         <div class="archive-layout">
           <div id="archive-list" class="archive-list" aria-label="Archive entries" data-i18n-aria-label="Archive entries"></div>
-          <article id="archive-detail" class="archive-detail"></article>
+          <article id="archive-detail" class="archive-detail" tabindex="0"></article>
         </div>
       </section>
 
@@ -3678,6 +3686,7 @@
           <nav id="story-outline-list" class="story-outline-list"></nav>
         </aside>
         <section id="story-reader" class="story-reader">
+          <a id="story-gallery-back" class="archive-back story-gallery-back" href="#/story-archive/stories" data-i18n="‹ All stories" hidden>‹ All stories</a>
         <div id="interaction-reader-context" class="interaction-reader-context" hidden>
           <button id="interaction-back" class="interaction-back" type="button" data-i18n="‹ Character profile">&lsaquo; Character profile</button>
           <span id="interaction-context-title"></span>
@@ -3758,12 +3767,16 @@
   <link rel="stylesheet" href="styles/dialogue_effects.css?v=f20d39d58efeafb5">
   <script src="scripts/dialogue_color_lookup.js?v=df178e5ff1d61dc3"></script>
   <script src="scripts/dialogue_effects.js?v=b0899998f27194f3"></script>
-  <link rel="stylesheet" href="styles/player_appearance.css?v=a3bdcd7a10b7996b">
-  <script src="scripts/player_appearance.js?v=5fc40dbc677b74a9"></script>
+  <link rel="stylesheet" href="styles/player_appearance.css?v=765ddbc554fda557">
+  <script src="scripts/player_appearance.js?v=93ebad4a406a469b"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=e70d01e968b0b425"></script>
+  <script src="scripts/reader_ui.js?v=c8cfb0f42daeeb7f"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
+  <link rel="stylesheet" href="styles/reader_glossary.css?v=5c22f0148ebdee40">
+  <script src="scripts/reader_glossary.js?v=865ae92c9ce6ed36"></script>
+  <link rel="stylesheet" href="styles/story_archive.css?v=4fe664bdba4fab16">
+  <script src="scripts/story_archive.js?v=5e6be76cc1ded29c"></script>
   <script src="scripts/reader_story_paths.js?v=581d6d923600c9f5"></script>
   <script src="scripts/reader_story_routes.js?v=91c924c21611357b"></script>
   <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
@@ -3782,6 +3795,7 @@
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
   <link rel="stylesheet" href="styles/story_runtime.css?v=38345dab04311672">
   <link rel="stylesheet" href="styles/reader_theme.css?v=5017060bf70f8eb3">
+  <link rel="stylesheet" href="styles/reader_layout.css?v=8209fc4f648018c6">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
     const READER_PUBLIC = Boolean(window.TEA_CONFIG?.public_reader) || document.documentElement.dataset.readerProfile === "public";
@@ -4108,6 +4122,8 @@
     const homeTab = document.getElementById("home-tab");
     const homePage = document.getElementById("home-page");
     const homeStatus = document.getElementById("home-status");
+    const storyArchivePage = document.getElementById("story-archive-page");
+    const storyGalleryBack = document.getElementById("story-gallery-back");
     const storyArchiveTab = document.getElementById("story-archive-tab");
     const mysticalHouseTab = document.getElementById("mystical-house-tab");
     const documentArchiveTab = document.getElementById("document-archive-tab");
@@ -4130,6 +4146,7 @@
     const nextStoryBottom = document.getElementById("next-story-bottom");
     const bottomPosition = document.getElementById("bottom-position");
     const storyNavigation = document.getElementById("story-navigation");
+    const storyNavigationToggle = document.getElementById("story-navigation-toggle");
     const bottomNavigation = document.getElementById("bottom-navigation");
     const storyScroll = document.getElementById("story-scroll");
     const contentLoading = document.getElementById("content-loading");
@@ -4228,6 +4245,8 @@
     let mysticalCharacterById = new Map();
     let mysticalInteractionByAsset = new Map();
     let primaryView = "stories";
+    let storyArchive = null;
+    let storyArchiveRoute = {archivePage: "", glossaryTerm: "", archiveQuery: ""};
     let readerDataLoad = null;
     let routeRevision = 0;
     let returnToMainQuest = "";
@@ -6003,7 +6022,8 @@
       }
       subtitle.textContent = subtitleParts.join(" | ");
       appendArchiveBadge(subtitle, resolved.qualityBadge, "Chinese rarity fallback");
-      archiveDetail.append(kicker, title, subtitle);
+      archiveDetail.append(kicker, title);
+      if (archiveDebugVisible()) archiveDetail.appendChild(subtitle);
 
       const media = archiveItemImage(item);
       if (media && media.image) {
@@ -6352,6 +6372,7 @@
     }
 
     function selectArchiveEntry(kind, id = "", replaceHash = true, overview = false) {
+      const previousEntry = `${archiveKind}/${selectedArchiveId}`;
       primaryView = "archive";
       const nextKind = ["documents", "items", "mail"].includes(kind) ? kind : "documents";
       if (nextKind !== archiveKind) archiveSearch.value = "";
@@ -6363,6 +6384,7 @@
       if (!overview) ensureArchiveSelection();
       updatePrimaryShell();
       renderArchive();
+      if (`${archiveKind}/${selectedArchiveId}` !== previousEntry) archiveDetail.scrollTop = 0;
       updateHash(false, replaceHash);
       // In the stacked layout, an explicit selection should reveal its contents.
       // Browsing a category or refreshing translations should keep the list in view.
@@ -6449,6 +6471,10 @@
 
     function updatePrimaryShell() {
       const homeOpen = primaryView === "home";
+      const storyArchiveOpen = primaryView === "story-archive";
+      storyArchivePage.hidden = !storyArchiveOpen;
+      storyGalleryBack.hidden = primaryView !== "stories";
+      appShell.classList.toggle("story-archive-view", storyArchiveOpen);
       const interactionOpen = primaryView === "mystical" && Boolean(selectedInteractionAssetKey);
       const mysticalBrowse = primaryView === "mystical" && !interactionOpen;
       const archiveBrowse = primaryView === "archive";
@@ -6456,27 +6482,27 @@
       homePage.hidden = !homeOpen;
       homeTab.classList.toggle("active", homeOpen);
       homeTab.setAttribute("aria-selected", String(homeOpen));
-      currentStoryTitle.hidden = homeOpen;
-      storyArchiveTab.classList.toggle("active", primaryView === "stories");
+      currentStoryTitle.hidden = homeOpen || storyArchiveOpen;
+      storyArchiveTab.classList.toggle("active", ["stories", "story-archive"].includes(primaryView));
       mysticalHouseTab.classList.toggle("active", primaryView === "mystical");
       documentArchiveTab.classList.toggle("active", archiveBrowse);
-      storyArchiveTab.setAttribute("aria-selected", String(primaryView === "stories"));
+      storyArchiveTab.setAttribute("aria-selected", String(["stories", "story-archive"].includes(primaryView)));
       mysticalHouseTab.setAttribute("aria-selected", String(primaryView === "mystical"));
       documentArchiveTab.setAttribute("aria-selected", String(archiveBrowse));
       storyNavigation.hidden = primaryView !== "stories";
       const interactionPending = storyReader.getAttribute("aria-busy") === "true"
         || storyScroll.getAttribute("aria-busy") === "true";
-      bottomNavigation.hidden = homeOpen || mysticalBrowse || archiveBrowse || interactionPending;
+      bottomNavigation.hidden = homeOpen || storyArchiveOpen || mysticalBrowse || archiveBrowse || interactionPending;
       archiveBrowser.hidden = !archiveBrowse;
       mysticalBrowser.hidden = !mysticalBrowse;
-      storyContentLayout.hidden = homeOpen || mysticalBrowse || archiveBrowse;
-      storyReader.hidden = homeOpen || mysticalBrowse || archiveBrowse;
-      if (homeOpen || mysticalBrowse || archiveBrowse || interactionOpen) {
+      storyContentLayout.hidden = homeOpen || storyArchiveOpen || mysticalBrowse || archiveBrowse;
+      storyReader.hidden = storyContentLayout.hidden;
+      if (storyContentLayout.hidden || interactionOpen) {
         hideStoryOutline();
       }
       interactionReaderContext.hidden = !interactionOpen;
       modeSelect.disabled = interactionPending;
-      modeSelect.hidden = homeOpen || mysticalBrowse || archiveBrowse;
+      modeSelect.hidden = storyContentLayout.hidden;
     }
 
     function storySectionHash() {
@@ -6486,7 +6512,8 @@
 
     function updateHomeLinks() {
       const preferences = {lang: selectedLanguage, mode: readerMode, gender: selectedGender};
-      const routes = {stories: storySectionHash(), characters: "/mystical-house", documents: "/archive/documents"};
+      const routes = {stories: "/story-archive", characters: "/mystical-house", documents: "/archive/documents"};
+      storyGalleryBack.href = storyArchiveHref("/story-archive/stories");
       for (const link of homePage.querySelectorAll("[data-home-route]")) {
         link.href = "#" + ReaderUI.sectionHash(routes[link.dataset.homeRoute], preferences);
       }
@@ -6515,6 +6542,43 @@
       updateHomeLinks();
       updateHash();
       scrollReaderToTop();
+    }
+
+    function storyArchiveHref(path = "/story-archive", extra = {}) {
+      return "#" + ReaderUI.sectionHash(path, {lang:selectedLanguage, mode:readerMode, gender:selectedGender, ...extra});
+    }
+
+    function archiveCollections() {
+      return logicalCollections.map(collection => {
+        const categories = [...collection.categories.values()];
+        const category = collection.categories.get("main") || categories[0];
+        const first = category?.stories[0];
+        return {key:collection.key, label:collectionDisplayTitle(collection),
+          href:first ? storyArchiveHref(ReaderStoryRoutes.path(collection.key, category.key, first.id)) : "",
+          stories:categories.flatMap(group => group.stories.map(story => ({
+            id:story.id, section:collection.key, category:group.key, title:story.title, description:story.description,
+          })))};
+      }).filter(collection => collection.href);
+    }
+
+    function renderStoryArchive() {
+      const archiveWasOpen = !storyArchivePage.hidden;
+      stopActiveVoice();
+      updatePrimaryShell();
+      const position = storyArchive.render(storyArchiveRoute, selectedLanguage, {
+        active:archiveWasOpen, paneTop:storyScroll.scrollTop, pageTop:window.scrollY,
+        stacked:window.matchMedia("(max-width: 700px)").matches, height:window.innerHeight,
+      });
+      updateHash();
+      if (position) {
+        storyScroll.scrollTo({top:position.paneTop || 0, behavior:"instant"});
+        if (window.matchMedia("(max-width: 900px)").matches) {
+          const list = storyArchivePage.querySelector(".archive-term-list");
+          const top = position.listOffset !== undefined && list
+            ? window.scrollY + list.getBoundingClientRect().top - position.listOffset : position.pageTop;
+          window.scrollTo({top:Math.max(0, top || 0), behavior:"instant"});
+        }
+      } else scrollReaderToTop();
     }
 
     function characterFaction(character) {
@@ -8541,6 +8605,10 @@
         route.view = "archive";
         route.archiveKind = ["documents", "items", "mail"].includes(parts[1]) ? parts[1] : "documents";
         route.archiveId = decodeURIComponent(parts[2] || "");
+      } else if (parts[0] === "story-archive") {
+        const target = ReaderStoryArchive.parse(pathPart);
+        if (!target) throw new Error(uiText("This story address could not be found."));
+        Object.assign(route, target);
       } else if (parts[0] === "stories") {
         const target = ReaderStoryRoutes.resolve(pathPart);
         if (!target) throw new Error(uiText("This story address could not be found."));
@@ -8552,6 +8620,7 @@
         route.assetKey = assetKeyFromParts(route.section, route.category, route.storyId);
       }
       const params = new URLSearchParams(queryPart);
+      if (route.view === "story-archive") route.archiveQuery = (params.get("q") || "").slice(0,250);
       if (params.get("lang")) {
         route.language = params.get("lang");
       }
@@ -8585,7 +8654,11 @@
         : selectedGender;
       if (READER_PUBLIC) selectedGender = publicPlayerGender(selectedGender);
       initialNodeId = route.node || "";
-      if (primaryView === "home") return;
+      if (primaryView === "story-archive") {
+        storyArchiveRoute = {archivePage:route.archivePage || "", glossaryTerm:route.glossaryTerm || "", archiveQuery:route.archiveQuery || ""};
+        return;
+      }
+      if (["home", "story-archive"].includes(primaryView)) return;
       if (primaryView === "mystical") {
         selectedCharacterId = route.characterId || "";
         selectedInteractionAssetKey = route.interactionId || "";
@@ -8626,6 +8699,9 @@
       let nextHash;
       if (primaryView === "home") {
         nextHash = `#/home?${params.toString()}`;
+      } else if (primaryView === "story-archive") {
+        if (storyArchiveRoute.archiveQuery) params.set("q", storyArchiveRoute.archiveQuery);
+        nextHash = `#${ReaderStoryArchive.path(storyArchiveRoute.archivePage, storyArchiveRoute.glossaryTerm)}?${params.toString()}`;
       } else if (primaryView === "archive") {
         const routeParts = ["archive", archiveKind];
         if (selectedArchiveId) {
@@ -15003,6 +15079,7 @@
       selectedLanguage = ReaderUI.language(language);
       applyPreferencesToUi();
       savePreferences();
+      if (primaryView === "story-archive") { renderStoryArchive(); return; }
       if (primaryView === "home") {
         updateHash();
         return;
@@ -15065,6 +15142,7 @@
 
     async function changeMode(mode) {
       if (READER_PUBLIC) mode = publicReadingMode(mode);
+      if (primaryView === "story-archive") { readerMode = mode; savePreferences(); renderStoryArchive(); return; }
       const previousMode = readerMode;
       if (mode !== "interactive" && previousMode === "interactive") {
         const occurrences = {};
@@ -15206,7 +15284,7 @@
     showDebugInput?.addEventListener("change", async () => {
       showDebug = showDebugInput.checked;
       savePreferences();
-      if (primaryView === "home") { applyPreferencesToUi(); return; }
+      if (["home", "story-archive"].includes(primaryView)) { applyPreferencesToUi(); return; }
       if (primaryView === "archive") {
         renderArchive();
         return;
@@ -15225,7 +15303,7 @@
     playerNameInput.addEventListener("input", () => {
       playerName = playerNameInput.value.trim() || "Merlin";
       savePreferences();
-      if (primaryView === "home") return;
+      if (["home", "story-archive"].includes(primaryView)) return;
       if (primaryView === "archive") {
         renderArchive();
         return;
@@ -15243,13 +15321,29 @@
       savePreferences();
       updateHash(false, true);
       updateHomeLinks();
-      if (primaryView === "home") return;
+      if (primaryView === "story-archive") { renderStoryArchive(); return; }
+      if (["home", "story-archive"].includes(primaryView)) return;
       await playerAppearance?.ensure().catch(error => console.warn(error));
       if (primaryView === "archive") {
         renderArchive();
         return;
       }
       render();
+    });
+
+    function setStoryNavigationExpanded(expanded) {
+      storyNavigation.dataset.expanded = String(expanded);
+      storyNavigationToggle.setAttribute("aria-expanded", String(expanded));
+    }
+    storyNavigationToggle.addEventListener("click", () => {
+      setStoryNavigationExpanded(storyNavigation.dataset.expanded !== "true");
+    });
+    storyNavigation.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || !window.matchMedia("(max-width: 900px)").matches
+          || storyNavigation.dataset.expanded !== "true") return;
+      event.preventDefault();
+      setStoryNavigationExpanded(false);
+      storyNavigationToggle.focus({preventScroll:true});
     });
 
     previousStoryTop.addEventListener("click", () => navigateStory("previous").catch(showRouteError));
@@ -15298,11 +15392,8 @@
     });
 
     storyArchiveTab.addEventListener("click", () => {
-      if (primaryView === "stories") {
-        scrollReaderToTop("smooth");
-        return;
-      }
-      window.location.hash = storySectionHash();
+      if (primaryView === "story-archive" && !storyArchiveRoute.archivePage) return scrollReaderToTop("smooth");
+      window.location.hash = storyArchiveHref();
     });
 
     mysticalHouseTab.addEventListener("click", () => {
@@ -15404,6 +15495,21 @@
     async function openRoute(route) {
       const returnBookmark = mainQuestBookmarkForRoute(route);
       const revision = ++routeRevision;
+      if (route.view === "story-archive") {
+        return withContentLoading(async () => {
+          if (["stories", "search"].includes(route.archivePage)) {
+            await ensureReaderData();
+            if (revision !== routeRevision) return;
+            await ensureStoryNavigation();
+          }
+          await storyArchive.prepare(route.archivePage);
+          if (revision !== routeRevision) return;
+          applyRoute(route);
+          applyPreferencesToUi();
+          savePreferences();
+          renderStoryArchive();
+        });
+      }
       if (route.view === "home") {
         applyRoute(route);
         applyPreferencesToUi();
@@ -15500,6 +15606,14 @@
       }
     }
 
+    storyArchive = ReaderStoryArchive.create({
+      root:storyArchivePage, read:routeJson, text:uiText, href:storyArchiveHref,
+      url:value => globalThis.TEA_CONFIG?.data_base ? ReaderPublication.url("data/" + value) : "data/" + value,
+      collections:archiveCollections,
+      storyHref:story => storyArchiveHref(ReaderStoryRoutes.path(story.section, story.category, story.id)),
+      onQuery:query => { storyArchiveRoute.archiveQuery = query; updateHash(); },
+    });
+
     if (typeof ReaderPlayerAppearance !== "undefined") {
       playerAppearance = ReaderPlayerAppearance.create({
         read: routeJson, url: value => ReaderPublication.url(value), gender: () => selectedGender,
@@ -15510,7 +15624,8 @@
             selectedGender = gender; genderSelect.value = gender;
             savePreferences(); updateHash(false, true); updateHomeLinks();
           }
-          if (storyGraph) renderPreservingScroll();
+          if (primaryView === "story-archive") renderStoryArchive();
+          else if (storyGraph) renderPreservingScroll();
           if (chooseGender) document.querySelector(".reader-appearance-prompt button")?.focus({preventScroll:true});
         },
       });

@@ -15,7 +15,7 @@
 .appearance-footer { flex-wrap: wrap; justify-content: flex-end; }
 .appearance-note { flex: 1 1 100%; margin: 0; color: var(--muted, #aeb8c4); font-size: .85em; }
 .appearance-status { padding: 24px 0; }
-#player-appearance-button { width: 100%; margin-top: 12px; }
+#player-appearance-button { width: 100%; margin-top: 12px; font-size: 13px; }
 .choice-body-with-portrait { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: 18px; }
 .choice-body-with-portrait > .choice-options { min-width: 0; }
 .choice-viewpoint { display: flex; flex-direction: column; align-items: center; gap: 6px; }

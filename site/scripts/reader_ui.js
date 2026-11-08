@@ -6,6 +6,37 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
   const messages = {
+  "Glossary": {"jp": "用語集", "kr": "용어집", "cn": "词条"},
+  "Search": {"jp": "検索", "kr": "검색", "cn": "搜索"},
+  "The Esperia Archive": {"jp": "エスペリア・アーカイブ", "kr": "에스페리아 아카이브", "cn": "伊索米亚档案"},
+  "Revisit the chapters and seasons of Esperia.": {"jp": "エスペリアの物語とシーズンをもう一度。", "kr": "에스페리아의 이야기와 시즌을 다시 만나보세요.", "cn": "重温伊索米亚的篇章与赛季。"},
+  "Discover the places, people, and ideas behind the stories.": {"jp": "物語に登場する土地や人々、世界観を知る。", "kr": "이야기 속 장소와 인물, 세계관을 알아보세요.", "cn": "了解故事中的地点、人物与世界观。"},
+  "Find a story or a term from the world of Esperia.": {"jp": "エスペリアの物語や用語を探す。", "kr": "에스페리아의 이야기와 용어를 찾아보세요.", "cn": "查找伊索米亚的故事与词条。"},
+  "Explore the archive": {"jp": "アーカイブを探索", "kr": "아카이브 둘러보기", "cn": "浏览档案"},
+  "Previous archive page": {"jp": "前のアーカイブページ", "kr": "이전 아카이브 페이지", "cn": "上一档案页"},
+  "Next archive page": {"jp": "次のアーカイブページ", "kr": "다음 아카이브 페이지", "cn": "下一档案页"},
+  "Archive pages": {"jp": "アーカイブのページ", "kr": "아카이브 페이지", "cn": "档案页面"},
+  "Open": {"jp": "開く", "kr": "열기", "cn": "打开"},
+  "Choose a chapter of Esperia.": {"jp": "読みたい物語を選んでください。", "kr": "읽고 싶은 에스페리아의 이야기를 선택하세요.", "cn": "选择想要阅读的伊索米亚篇章。"},
+  "Season {number}": {"jp": "シーズン{number}", "kr": "시즌 {number}", "cn": "赛季 {number}"},
+  "Read stories": {"jp": "物語を読む", "kr": "스토리 읽기", "cn": "阅读故事"},
+  "Explore the world and lore of Esperia.": {"jp": "エスペリアの世界と伝承を知る。", "kr": "에스페리아의 세계와 이야기를 알아보세요.", "cn": "探索伊索米亚的世界与传说。"},
+  "Search the glossary": {"jp": "用語集を検索", "kr": "용어집 검색", "cn": "搜索词条"},
+  "Glossary terms": {"jp": "用語一覧", "kr": "용어 목록", "cn": "词条列表"},
+  "All terms": {"jp": "用語一覧", "kr": "모든 용어", "cn": "全部词条"},
+  "From the game's loading screens.": {"jp": "ゲームのロード画面より。", "kr": "게임 로딩 화면에서 발췌.", "cn": "摘自游戏加载画面。"},
+  "Term not found": {"jp": "用語が見つかりません", "kr": "용어를 찾을 수 없습니다", "cn": "未找到词条"},
+  "A world of stories": {"jp": "物語が紡ぐ世界", "kr": "이야기로 이루어진 세계", "cn": "故事中的世界"},
+  "Choose a term to learn more about Esperia.": {"jp": "用語を選んで、エスペリアについて詳しく見てみましょう。", "kr": "용어를 선택해 에스페리아에 대해 알아보세요.", "cn": "选择一个词条，进一步了解伊索米亚。"},
+  "{count} terms": {"jp": "{count}件の用語", "kr": "용어 {count}개", "cn": "{count}个词条"},
+  "No matching terms.": {"jp": "一致する用語がありません。", "kr": "일치하는 용어가 없습니다.", "cn": "没有匹配的词条。"},
+  "Find stories by title and search the glossary in any of the four languages.": {"jp": "4つの言語で、物語のタイトルや用語集を検索できます。", "kr": "네 가지 언어로 스토리 제목과 용어집을 검색할 수 있습니다.", "cn": "使用四种语言搜索故事标题和词条。"},
+  "Search stories and glossary": {"jp": "物語・用語集を検索", "kr": "스토리와 용어집 검색", "cn": "搜索故事和词条"},
+  "Enter a story title, place, or lore term.": {"jp": "物語のタイトル、地名、用語を入力してください。", "kr": "스토리 제목이나 장소, 용어를 입력하세요.", "cn": "输入故事标题、地名或词条。"},
+  "{count} results": {"jp": "{count}件の検索結果", "kr": "검색 결과 {count}개", "cn": "{count}条结果"},
+  "No matching stories or terms.": {"jp": "一致する物語や用語がありません。", "kr": "일치하는 스토리나 용어가 없습니다.", "cn": "没有匹配的故事或词条。"},
+  "Show more": {"jp": "もっと見る", "kr": "더 보기", "cn": "显示更多"},
+  "‹ All stories": {"jp": "‹ 物語一覧", "kr": "‹ 모든 스토리", "cn": "‹ 全部故事"},
   "Communicator": {"cn": "通讯器", "jp": "通信機", "kr": "통신기"},
   "Communicator · weak signal": {"cn": "通讯器 · 信号较弱", "jp": "通信機 · 電波が弱い", "kr": "통신기 · 신호 약함"},
   "Quest: {title}": {"cn": "任务：{title}", "jp": "クエスト：{title}", "kr": "퀘스트: {title}"},
@@ -1801,7 +1832,7 @@
     "jp": "任意です。設定からいつでも変更できます。",
     "kr": "선택 사항입니다. 설정에서 언제든 변경할 수 있습니다."
   },
-  "Merlin appearance": {
+  "Merlin Appearance": {
     "cn": "梅林外观",
     "jp": "マーリンの外見",
     "kr": "멀린 외형"

@@ -61,7 +61,7 @@
     }
     const button = document.createElement('button');
     button.type = 'button'; button.id = 'player-appearance-button';
-    button.dataset.i18n = 'Merlin appearance'; button.textContent = text('Merlin appearance');
+    button.dataset.i18n = 'Merlin Appearance'; button.textContent = text('Merlin Appearance');
     mount.appendChild(button);
     const dialog = document.createElement('dialog');
     dialog.className = 'player-appearance-dialog'; dialog.id = 'player-appearance-dialog';
@@ -80,7 +80,7 @@
       const token = ++generation;
       dialog.replaceChildren();
       const header = element('header', 'appearance-header');
-      const title = element('h2', '', text('Merlin appearance')); title.id = 'player-appearance-title';
+      const title = element('h2', '', text('Merlin Appearance')); title.id = 'player-appearance-title';
       const exit = element('button', '', text('Close')); exit.type = 'button'; exit.onclick = close;
       header.append(title, exit); dialog.append(header);
       const status = element('p', 'appearance-status', text('Loading…'));
