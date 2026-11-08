@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=2e357698397acdf1"></script>
+  <script src="scripts/config.js?v=deedf4b04befd635"></script>
   <script src="scripts/reader_publication.js?v=150006c8fa023db6"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <meta charset="utf-8">
@@ -3024,7 +3024,7 @@
 
       .topbar {
         position: static;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 8px;
       }
 
@@ -3059,8 +3059,24 @@
       .top-actions {
         grid-column: auto;
         grid-row: auto;
-        justify-content: flex-start;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 4.75em minmax(0, 1fr) max-content;
+        align-items: stretch;
+        gap: 6px;
+        width: 100%;
+        font-size: clamp(12px, 3.5vw, 14px);
+      }
+
+      .top-actions select {
+        min-width: 0;
+        width: 100%;
+        padding-inline: 10px 30px;
+        background-position: right 10px center;
+      }
+
+      .top-actions > button {
+        min-height: 38px;
+        padding-inline: 10px;
       }
 
       .navrow {
@@ -3748,7 +3764,7 @@
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
   <script src="scripts/reader_ui.js?v=e70d01e968b0b425"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
-  <script src="scripts/reader_story_paths.js?v=f105c7b3a2bc6e07"></script>
+  <script src="scripts/reader_story_paths.js?v=581d6d923600c9f5"></script>
   <script src="scripts/reader_story_routes.js?v=91c924c21611357b"></script>
   <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
   <script src="scripts/reader_character_routes.js?v=31c98c442ce8deff"></script>
@@ -4815,11 +4831,11 @@
       return section;
     }
 
-    function categoryLabel(category) {
+    function categoryLabel(category, language = selectedLanguage) {
       if (category === "heart_to_heart") {
-        return heartToHeartLabel();
+        return heartToHeartLabel(language);
       }
-      return uiText(CATEGORY_LABELS[category] || ({daily: "Daily Quests", exploration: "Easter Eggs"})[category] || category);
+      return ReaderUI.text(CATEGORY_LABELS[category] || ({daily: "Daily Quests", exploration: "Easter Eggs"})[category] || category, language);
     }
 
     function heartToHeartLabel(language = selectedLanguage) {
@@ -8904,7 +8920,7 @@
         objective_title_i18n: logicalStory.title,
         objective_summary_i18n: logicalStory.description,
         chapter_title_i18n: logicalStory.chapterTitle,
-        arc_title_i18n: { en: categoryLabel(selectedCategory) },
+        arc_title_i18n: Object.fromEntries(["cn", "en", "jp", "kr"].map(language => [language, categoryLabel(selectedCategory, language)])),
         logical_story_key: logicalStory.key,
       });
       return {
@@ -9395,7 +9411,7 @@
           group_key: `${selectedSection}/${selectedCategory}`,
           metadata: {
             collection_title_i18n: collection.title,
-            story_kind_title_i18n: { en: categoryLabel(selectedCategory) },
+            story_kind_title_i18n: Object.fromEntries(["cn", "en", "jp", "kr"].map(language => [language, categoryLabel(selectedCategory, language)])),
           },
         };
         sequences = { sequences: [] };
@@ -10432,9 +10448,15 @@
       };
     }
 
+    function isBlackScreenSpeaker(name) {
+      return /^(?:black[ _-]?screen|黑屏|黒画面|ブラックスクリーン|블랙\s*스크린|암전)$/i
+        .test(String(name || "").replace(/^speaker:/, "").trim());
+    }
+
     function visibleSpeakerName(name, source = "") {
       const value = String(name || "").trim();
       // These are presentation labels in the source, not character names.
+      if (isBlackScreenSpeaker(value) || isBlackScreenSpeaker(source)) return "";
       const subtitleLabels = /^(?:subtitles?|(?:black[ -]?screen )subtitles?|字幕|黑屏字幕|黒画面字幕|자막|블랙 스크린 자막)$/i;
       if (subtitleLabels.test(value) || subtitleLabels.test(String(source || "").trim())) return "";
       // Exact Japanese LanguageDb labels can legitimately equal Chinese.
@@ -11047,11 +11069,11 @@
       return renderNodePrefix ? `${renderNodePrefix}::${nodeId}` : nodeId;
     }
 
-    function dialoguePresentationKind(dialogueFrameType, entryKind = "") {
+    function dialoguePresentationKind(dialogueFrameType, entryKind = "", speakerSource = "") {
       const normalized = String(dialogueFrameType || entryKind || "")
         .replace(/[\s_-]+/g, "")
         .toLowerCase();
-      if (normalized === "blackscene") {
+      if (normalized === "blackscene" || isBlackScreenSpeaker(speakerSource)) {
         return "blackscene";
       }
       if (normalized === "aside" || normalized === "narration") {
@@ -11132,6 +11154,7 @@
       const presentationKind = dialoguePresentationKind(
         item.dialogueFrameType,
         item.entryKind,
+        storyGraph.speaker_entries[item.speakerKey]?.source || item.speakerKey,
       );
       const cacheKey = typeof dialogueRowPool !== "undefined" && dialogueRowPool
         ? JSON.stringify([item, resolved, speakerName, itemDomNodeId, selectedLanguage,
@@ -11539,6 +11562,12 @@
     }
 
     function appendCinematicSubtitle(container, block, speakerName, speakerSource) {
+      if (isBlackScreenSpeaker(speakerSource)) {
+        block.classList.add("dialogue-presentation-blackscene");
+        block.setAttribute("aria-label", uiText("Black screen text"));
+        appendDialoguePresentation(container, block, "blackscene");
+        return;
+      }
       const portrait = dialoguePortraitForLine(speakerName, "normal", null, "0", "",
         speakerSource ? `speaker:${speakerSource}` : "");
       if (!portrait) {
@@ -12249,15 +12278,11 @@
             const view=StoryActivities.referenceTranscript(dialogue,decisions,automatic);
             for(const {node,option,options,decision} of view.items) {
               if(option) {
-                if(automatic) renderChoiceBlock({nodeId:node.id,options,selectedOption:option,
+                renderChoiceBlock({nodeId:`${node.id}:visit:${decision}`,options,selectedOption:option,
                   onSelect:chosen=>{
                     const prefix=view.items.filter(item=>item.option && item.decision<decision).map(item=>item.option.index);
                     decisions.splice(0,Infinity,...prefix,chosen.index);draw();
                   }},sequence,0,true);
-                else {
-                  const selected=document.createElement("p");selected.className="story-choice-status";
-                  setFormattedText(selected,resolveText(option.text_key).text);sequence.appendChild(selected);
-                }
               } else if(node.type==="picture")renderTimelineItem(nodeToPicture(node.id),sequence,0,false);
               else if(node.type==="cinematic")renderTimelineItem(nodeToCinematic(node.id),sequence,0,false);
               else {
@@ -12265,12 +12290,9 @@
                 renderTimelineItem(item,sequence,0,false);
               }
             }
-            if(view.choice)for(const option of view.choice.options) {
-              const button=document.createElement("button");button.type="button";button.className="choice-option";
-              setFormattedText(button,resolveText(option.text_key).text);
-              button.addEventListener("click",()=> {decisions.splice(view.choice.decision,Infinity,option.index);draw();});
-              sequence.appendChild(button);
-            }
+            if(view.choice) renderChoiceBlock({nodeId:`${view.choice.node.id}:visit:${view.choice.decision}`,
+              options:view.choice.options,
+              onSelect:option=> {decisions.splice(view.choice.decision,Infinity,option.index);draw();}},sequence,0,true);
             if(decisions.length && !automatic) {
               const reset=document.createElement("button");reset.type="button";reset.textContent=uiText("Restart");
               reset.addEventListener("click",()=> {decisions.length=0;draw();});sequence.appendChild(reset);
@@ -12639,7 +12661,8 @@
       const itemDomNodeId = item.fullRoute
         ? `${item.fullRoute.nodeKey}:visit:${item.fullRoute.occurrence}`
         : domNodeId(item.nodeId);
-      block.className = item.fullRoute ? "choice-block full-script-choice" : "choice-block";
+      block.className = item.fullRoute || (item.onSelect && readerMode !== "interactive")
+        ? "choice-block full-script-choice" : "choice-block";
       block.dataset.nodeId = itemDomNodeId;
       if (Number.isInteger(item.timelineIndex)) {
         block.dataset.timelineIndex = String(item.timelineIndex);
