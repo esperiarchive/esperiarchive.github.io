@@ -138,10 +138,11 @@
           window.append(image, caption);art.append(window);
         } else art.append(icon("events"));
         const number = /^season_(\d+)$/.exec(collection.key);
-        card.append(art, element("span", "archive-season-kicker", number ? text("Season {number}", {number:number[1]})
-          : text(collection.key === "base_campaign" ? "Starter Story" : "Special Events")));
-        if (!cover) card.append(element("h2", "", collection.label));
-        card.append(element("span", "archive-season-open", text("Read stories") + " →"));
+        const kicker = !cover ? collection.label : number
+          ? text("Season {number}", {number:number[1]})
+          : text(collection.key === "base_campaign" ? "Starter Story" : "Special Events");
+        card.append(art, element("span", "archive-season-kicker", kicker),
+          element("span", "archive-season-open", text("Read stories") + " →"));
         grid.append(card);
       }
       root.append(grid);
@@ -203,9 +204,10 @@
           if (rect && (!state.term || (rect.bottom > 0 && rect.top < viewport.height))) {
             glossaryListViewport = {listOffset:rect.top};
           }
-          position = null; // Reveal the definition in the stacked mobile layout.
+          position = {termHeading:true};
         } else position = glossaryListViewport || viewport;
       }
+      if (!continuingGlossary && viewport.stacked && nextState.page === "glossary" && nextState.term) position = {termHeading:true};
       state = nextState;
       root.replaceChildren();root.dataset.page = state.page || "entrance";
       if (!state.page) renderLanding();

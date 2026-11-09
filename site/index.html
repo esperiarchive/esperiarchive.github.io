@@ -2,8 +2,9 @@
 <html lang="en" data-reader-profile="public">
 <head>
   <script src="scripts/config.js?v=8e33b9351d417469"></script>
-  <script src="scripts/reader_publication.js?v=150006c8fa023db6"></script>
+  <script src="scripts/reader_publication.js?v=eb599883086aba68"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
+  <script>ReaderPublication.preloadRoute();</script>
   <meta charset="utf-8">
   <link rel="stylesheet" href="styles/reader_fonts.css?v=9004be14383b99e4">
   <link rel="stylesheet" href="styles/reader_home.css?v=b0b0de43b7b49e73">
@@ -3776,7 +3777,7 @@
   <link rel="stylesheet" href="styles/reader_glossary.css?v=5c22f0148ebdee40">
   <script src="scripts/reader_glossary.js?v=865ae92c9ce6ed36"></script>
   <link rel="stylesheet" href="styles/story_archive.css?v=4fe664bdba4fab16">
-  <script src="scripts/story_archive.js?v=5e6be76cc1ded29c"></script>
+  <script src="scripts/story_archive.js?v=efe6183150f7c397"></script>
   <script src="scripts/reader_story_paths.js?v=581d6d923600c9f5"></script>
   <script src="scripts/reader_story_routes.js?v=91c924c21611357b"></script>
   <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
@@ -3795,7 +3796,7 @@
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
   <link rel="stylesheet" href="styles/story_runtime.css?v=38345dab04311672">
   <link rel="stylesheet" href="styles/reader_theme.css?v=5017060bf70f8eb3">
-  <link rel="stylesheet" href="styles/reader_layout.css?v=8209fc4f648018c6">
+  <link rel="stylesheet" href="styles/reader_layout.css?v=694cb4f5d752fd47">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
     const READER_PUBLIC = Boolean(window.TEA_CONFIG?.public_reader) || document.documentElement.dataset.readerProfile === "public";
@@ -6466,6 +6467,7 @@
         archiveSearch.value = "";
         storyScroll.scrollTo({ top: 0 });
         selectArchiveEntry(kind, id, replaceHash, !id);
+        warmArchiveNeighbours(kind);
       });
     }
 
@@ -6542,6 +6544,7 @@
       updateHomeLinks();
       updateHash();
       scrollReaderToTop();
+      whenIdle(() => primaryView === "home" && warmBootstrap());
     }
 
     function storyArchiveHref(path = "/story-archive", extra = {}) {
@@ -6570,7 +6573,10 @@
         stacked:window.matchMedia("(max-width: 700px)").matches, height:window.innerHeight,
       });
       updateHash();
-      if (position) {
+      if (position?.termHeading) {
+        storyScroll.scrollTo({top:0, behavior:"instant"});
+        storyArchivePage.querySelector(".archive-term-detail h2")?.scrollIntoView({block:"start", behavior:"instant"});
+      } else if (position) {
         storyScroll.scrollTo({top:position.paneTop || 0, behavior:"instant"});
         if (window.matchMedia("(max-width: 900px)").matches) {
           const list = storyArchivePage.querySelector(".archive-term-list");
@@ -7590,7 +7596,9 @@
       ];
       // Catalog offsets count Unicode code points, including supplementary
       // characters. Array.from keeps CN/JP/KR and emoji offsets aligned.
-      const characters = Array.from(text);
+      // Keep sprite positions in the offset array so existing tooltip ranges still line up.
+      const characters = text.split(/(<\/?sprite(?=[\s/>])[^<>]*>)/i)
+        .flatMap((part, index) => index % 2 ? Array.from(part, () => "") : Array.from(part));
       const validSpans = spans.filter(span => Number.isInteger(span.start) && Number.isInteger(span.end)
         && span.start >= 0 && span.end > span.start && span.end <= characters.length
         && (span.power_type || glossary[span.tooltip_key]));
@@ -7609,6 +7617,7 @@
       }
       for (const run of runs) {
         const content = characters.slice(run.start, run.end).join("");
+        if (!content) continue;
         const span = run.span;
         if (!span) {
           target.appendChild(document.createTextNode(content));
@@ -9017,14 +9026,17 @@
     const routeEntity = ReaderCatalogs.entities(routeJson);
     const storyBundles = ReaderCatalogs.bundles(routeJson);
 
+    function storyBundleDescriptors(index, story) {
+      const keys = story.detailPaths?.length ? story.detailPaths : [story.key];
+      return keys.map(key => index.stories[key]).filter(Boolean);
+    }
+
     async function ensureStoryBundles(story) {
       if (!routeCatalogs?.story_bundles || !story) return;
       try {
         const index = await routeJson(routeCatalogs.story_bundles);
         if (index.schema_version !== 1) throw new Error("Unsupported story bundle index");
-        const keys = story.detailPaths?.length ? story.detailPaths : [story.key];
-        const descriptors = keys.map(key => index.stories[key]).filter(Boolean);
-        await storyBundles.prepare(descriptors, selectedLanguage);
+        await storyBundles.prepare(storyBundleDescriptors(index, story), selectedLanguage);
       } catch (error) {
         // Older data releases and interrupted bundle downloads remain readable
         // through the original per-file paths. Failed pack requests can retry.
@@ -9279,6 +9291,130 @@
       ]);
       buildArchiveItemIndex();
       documentsByExplorationStep = explorationDocumentIndex(documentCatalog);
+    }
+
+    // All speculative requests use the publication queue. Ordinary loaders keep
+    // their own caches and can fetch immediately when the reader navigates.
+    function whenIdle(task) {
+      if (!ReaderPublication.canWarm()) return;
+      const run = () => {
+        if (ReaderPublication.canWarm()) Promise.resolve().then(task).catch(() => {});
+      };
+      if (typeof requestIdleCallback === "function") requestIdleCallback(run, {timeout: 4000});
+      else setTimeout(run, 1500);
+    }
+
+    function warmPaths(paths, unmetered = false) {
+      return Promise.all([...new Set(paths.filter(Boolean))].map(path => ReaderPublication.warm(path, unmetered)));
+    }
+
+    function warmCatalog(path, unmetered = false) {
+      return path ? ReaderPublication.warmJson(`data/${path}`, unmetered) : Promise.resolve(null);
+    }
+
+    async function warmBootstrap(unmetered = false) {
+      if (routeCatalogs && manifest) return routeCatalogs;
+      const routes = await warmCatalog("catalogs/navigation/routes.json", unmetered);
+      if (routes?.bootstrap) await warmCatalog(routes.bootstrap, unmetered);
+      return routes;
+    }
+
+    async function warmArchive(kind, routes) {
+      const unmetered = kind !== "mail";
+      if (!routes || !ReaderPublication.canWarm(unmetered)) return;
+      const bindings = archiveBindings || await warmCatalog(routes.archives, unmetered);
+      const path = bindings?.archives?.[kind]?.index;
+      if (!path) return;
+      const language = selectedLanguage;
+      const catalog = await warmCatalog(path, unmetered);
+      if (!catalog) return;
+      const base = path.slice(0, path.lastIndexOf("/") + 1);
+      const paths = [...new Set([language, "cn"])].map(locale =>
+        catalog.locales?.[locale] ? `data/${base}${catalog.locales[locale]}` : null);
+      if (kind === "mail" && routes.characters) paths.push(`data/${routes.characters}`);
+      const warmed = await warmPaths(paths, unmetered);
+      return warmed.every(Boolean);
+    }
+
+    function warmArchiveNeighbours(kind) {
+      whenIdle(async () => {
+        for (const other of ["mail", "documents", "items"]) {
+          if (primaryView !== "archive" || archiveKind !== kind) return;
+          if (other !== kind) await warmArchive(other, routeCatalogs);
+        }
+      });
+    }
+
+    async function warmStoryBundles(index, story, language) {
+      const covered = new Set();
+      if (index?.schema_version !== 1 || !index.stories) return covered;
+      const paths = new Set(storyBundleDescriptors(index, story).flatMap(row =>
+        [...row.core, ...(row.locales?.[language] || [])]));
+      await Promise.all([...paths].map(async path => {
+        const pack = await warmCatalog(path);
+        if (pack?.schema_version === 1 && pack.resources && !Array.isArray(pack.resources)) {
+          for (const name of Object.keys(pack.resources)) covered.add(name);
+        }
+      }));
+      return covered;
+    }
+
+    async function warmNextStory() {
+      const beat = currentBeat();
+      if (!beat || primaryView !== "stories") return;
+      const available = readableStoryBeats(), index = available.findIndex(entry => entry.id === beat.id);
+      const next = index >= 0 ? available[index + 1] : null, story = next?.logicalStory;
+      if (!next?.firstAssetKey) return;
+      const language = selectedLanguage;
+      const stillCurrent = () => primaryView === "stories" && currentBeat()?.id === beat.id && selectedLanguage === language;
+      const [bundles, portraits] = await Promise.all([
+        story ? warmCatalog(routeCatalogs?.story_bundles) : null,
+        warmCatalog(routeCatalogs?.portraits),
+      ]);
+      if (!stillCurrent()) return;
+      const covered = await warmStoryBundles(bundles, story, language);
+      if (!stillCurrent()) return;
+      const owner = String(story?.id || "");
+      const keys = [...new Set([next.firstAssetKey, ...(story?.assetKeys || []),
+        ...(next.stories || []).map(row => row.asset_key)].filter(Boolean))].slice(0, 40);
+      const paths = [
+        ...(story?.detailPaths || []).map(path => `data/${path}`),
+        ...[storyRuntimeCatalog?.route_story_groups?.[owner], storyRuntimeCatalog?.route_dialogue_stories?.[owner]]
+          .map(path => owner && path ? `data/${path}` : null),
+      ];
+      for (const key of keys) {
+        const runtime = storyRuntimeCatalog?.graphs?.[key], scene = storyRuntimeCatalog?.scene_summaries?.assets?.[key];
+        const binding = portraits?.asset_bindings?.[key];
+        if (binding) paths.push(`data/${binding}`);
+        if (manifest?.story_record_base && manifestStoryByKey.has(key)) {
+          paths.push(`data/${manifest.story_record_base}${storyCatalogKey(key)}.json`);
+        }
+        paths.push(runtime ? `data/runtime/${runtime.path}?v=${runtime.sha256}` : graphPathFor(key),
+          localePathFor(key, language), language === "cn" ? null : localePathFor(key, "cn"),
+          scene ? `data/${scene}` : null);
+      }
+      await warmPaths(paths.filter(path => path && !storyBundles.has(path)
+        && !covered.has(path.replace(/^(?:\.\.\/reader_data\/|data\/)/, "").split("?")[0])));
+    }
+
+    function installHomeWarming() {
+      const warmers = {
+        stories: () => warmCatalog("story_archive/index.json"),
+        characters: async () => warmCatalog((await warmBootstrap())?.characters),
+        documents: async () => warmArchive("documents", await warmBootstrap(true)),
+      };
+      const started = new Set();
+      for (const link of homePage.querySelectorAll("[data-home-route]")) {
+        const route = link.dataset.homeRoute;
+        const start = () => {
+          if (started.has(route) || !warmers[route] || !ReaderPublication.canWarm(route === "documents")) return;
+          started.add(route);
+          warmers[route]().then(warmed => {
+            if (!warmed) started.delete(route);
+          }).catch(() => started.delete(route));
+        };
+        for (const type of ["pointerenter", "focus", "touchstart"]) link.addEventListener(type, start, {passive: true});
+      }
     }
 
     async function ensureRelatedItemDocuments(item) {
@@ -15006,6 +15142,7 @@
           scrollReaderToTop();
         }
         translateMissingStoryText(activeBeatContexts.length ? activeBeatContexts : [firstContext], interactiveContext);
+        whenIdle(warmNextStory);
       });
     }
 
@@ -15630,6 +15767,7 @@
         },
       });
     }
+    installHomeWarming();
     boot();
   </script>
 </body>
