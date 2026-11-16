@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=8e33b9351d417469"></script>
-  <script src="scripts/reader_publication.js?v=eb599883086aba68"></script>
+  <script src="scripts/config.js?v=177dbfee3b63b035"></script>
+  <script src="scripts/reader_publication.js?v=f3c439a882556b73"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <script>ReaderPublication.preloadRoute();</script>
   <meta charset="utf-8">
@@ -3490,9 +3490,9 @@
         <div class="app-title">The Esperia Archive</div>
         <nav class="primary-tabs" aria-label="Reader sections" data-i18n-aria-label="Reader sections">
           <button id="home-tab" class="primary-tab" type="button" data-i18n="Home">Home</button>
-          <button id="story-archive-tab" class="primary-tab active" type="button" data-i18n="Story Archive">Story Archive</button>
+          <button id="story-archive-tab" class="primary-tab active" type="button" data-i18n="Story">Story</button>
           <button id="mystical-house-tab" class="primary-tab" type="button" data-i18n="Characters">Characters</button>
-          <button id="document-archive-tab" class="primary-tab" type="button" data-i18n="Documents">Documents</button>
+          <button id="document-archive-tab" class="primary-tab" type="button" data-i18n="World">World</button>
         </nav>
       </div>
       <div id="current-story-title" class="story-title">Loading...</div>
@@ -3554,8 +3554,8 @@
           </a>
           <a class="home-card" data-home-route="documents" href="#/archive/documents">
             <img class="home-icon" data-home-src="assets/home/mail.png" width="80" height="80" alt="" decoding="async"><svg class="home-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
-            <h2 data-i18n="Documents &amp; Mail">Documents &amp; Mail</h2>
-            <p data-i18n="Discover letters, journals, and the little details that fill out the world.">Discover letters, journals, and the little details that fill out the world.</p>
+            <h2 data-i18n="World Archive">World Archive</h2>
+            <p data-i18n="Discover the documents, creatures, and details that bring Esperia to life.">Discover the documents, creatures, and details that bring Esperia to life.</p>
           </a>
         </div>
         <section class="home-feedback" aria-labelledby="home-feedback-heading">
@@ -3584,6 +3584,8 @@
               <button id="archive-documents-tab" class="archive-kind-tab active" type="button" data-i18n="Documents">Documents</button>
               <button id="archive-items-tab" class="archive-kind-tab" type="button" data-i18n="Items">Items</button>
               <button id="archive-mail-tab" class="archive-kind-tab" type="button" data-i18n="Mail">Mail</button>
+              <button id="archive-fish-tab" class="archive-kind-tab" type="button" data-i18n="Fish">Fish</button>
+              <button id="archive-enemies-tab" class="archive-kind-tab" type="button" data-i18n="Enemies">Enemies</button>
             </nav>
           </div>
         </header>
@@ -3593,6 +3595,7 @@
         </div>
         <nav id="archive-item-categories" class="archive-item-categories" aria-label="Item category" data-i18n-aria-label="Item category" hidden></nav>
         <nav id="archive-mail-filters" class="archive-item-categories" aria-label="Mail collection" data-i18n-aria-label="Mail collection" hidden></nav>
+        <div id="world-archive-filters" class="world-filters" hidden></div>
         <div class="archive-layout">
           <div id="archive-list" class="archive-list" aria-label="Archive entries" data-i18n-aria-label="Archive entries"></div>
           <article id="archive-detail" class="archive-detail" tabindex="0"></article>
@@ -3772,7 +3775,9 @@
   <script src="scripts/player_appearance.js?v=93ebad4a406a469b"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=c8cfb0f42daeeb7f"></script>
+  <script src="scripts/reader_ui.js?v=329fd5015b0bc0c4"></script>
+  <link rel="stylesheet" href="styles/world_archive.css?v=cec953d64ee098ee">
+  <script src="scripts/world_archive.js?v=9d06f53c16affb8b"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
   <link rel="stylesheet" href="styles/reader_glossary.css?v=5c22f0148ebdee40">
   <script src="scripts/reader_glossary.js?v=865ae92c9ce6ed36"></script>
@@ -6178,6 +6183,7 @@
     }
 
     function renderArchiveList() {
+      if (ReaderWorldArchive.kinds.includes(archiveKind)) return worldArchive.renderList(archiveKind, selectedArchiveId);
       const previousScrollTop = archiveList.scrollTop;
       const selectionKey = `${archiveKind}:${selectedArchiveId}`;
       const selectionChanged = archiveList.dataset.selectionKey !== selectionKey;
@@ -6312,6 +6318,7 @@
     }
 
     function renderArchiveDetail() {
+      if (ReaderWorldArchive.kinds.includes(archiveKind)) return; // Rendered by the gallery controller.
       if (archiveKind === "mail") {
         const entry = archiveMailById(selectedArchiveId);
         if (entry) {
@@ -6336,6 +6343,14 @@
     }
 
     function renderArchive() {
+      const worldKind = ReaderWorldArchive.kinds.includes(archiveKind);
+      if (worldKind) archiveBrowser.dataset.worldKind = archiveKind;
+      else { delete archiveBrowser.dataset.worldKind; worldArchive.reset(); }
+      for (const kind of ReaderWorldArchive.kinds) {
+        const button = document.getElementById(`archive-${kind}-tab`);
+        button.classList.toggle("active", kind === archiveKind);
+        button.setAttribute("aria-selected", String(kind === archiveKind));
+      }
       archiveDocumentsTab.classList.toggle("active", archiveKind === "documents");
       archiveItemsTab.classList.toggle("active", archiveKind === "items");
       archiveDocumentsTab.setAttribute("aria-selected", String(archiveKind === "documents"));
@@ -6344,14 +6359,19 @@
       archiveMailTab.setAttribute("aria-selected", String(archiveKind === "mail"));
       renderArchiveItemCategories();
       renderArchiveMailFilters();
-      archiveHeading.textContent = uiText({documents: "Documents", items: "Items", mail: "Mail"}[archiveKind]);
-      archiveSearch.placeholder = uiText({documents: "Search documents", items: "Search items", mail: "Search mail"}[archiveKind]);
-      currentStoryTitle.textContent = uiText({documents: "Document Archive", items: "Item Archive", mail: "Mail Archive"}[archiveKind]);
-      renderArchiveList();
-      renderArchiveDetail();
+      archiveHeading.textContent = uiText({documents: "Documents", items: "Items", mail: "Mail", fish: "Fish", enemies: "Enemies"}[archiveKind]);
+      archiveSearch.placeholder = uiText({documents: "Search documents", items: "Search items", mail: "Search mail", fish: "Search fish", enemies: "Search enemies"}[archiveKind]);
+      currentStoryTitle.textContent = uiText({documents: "Document Archive", items: "Item Archive", mail: "Mail Archive", fish: "Fish Archive", enemies: "Enemy Archive"}[archiveKind]);
+      if (worldKind) worldArchive.render(archiveKind, selectedArchiveId);
+      else { renderArchiveList(); renderArchiveDetail(); }
     }
 
     function ensureArchiveSelection() {
+      if (ReaderWorldArchive.kinds.includes(archiveKind)) {
+        const entry = worldArchive.find(archiveKind, selectedArchiveId);
+        if (entry) selectedArchiveId = entry.slug;
+        return;
+      }
       if (archiveKind === "mail") {
         const visible = visibleMailEntries();
         if (!visible.includes(archiveMailById(selectedArchiveId))) {
@@ -6375,7 +6395,7 @@
     function selectArchiveEntry(kind, id = "", replaceHash = true, overview = false) {
       const previousEntry = `${archiveKind}/${selectedArchiveId}`;
       primaryView = "archive";
-      const nextKind = ["documents", "items", "mail"].includes(kind) ? kind : "documents";
+      const nextKind = ["documents", "items", "mail", "fish", "enemies"].includes(kind) ? kind : "documents";
       if (nextKind !== archiveKind) archiveSearch.value = "";
       archiveKind = nextKind;
       selectedArchiveId = String(id || "");
@@ -8612,7 +8632,7 @@
         Object.assign(route, target, {view: "mystical"});
       } else if (parts[0] === "archive") {
         route.view = "archive";
-        route.archiveKind = ["documents", "items", "mail"].includes(parts[1]) ? parts[1] : "documents";
+        route.archiveKind = ["documents", "items", "mail", "fish", "enemies"].includes(parts[1]) ? parts[1] : "documents";
         route.archiveId = decodeURIComponent(parts[2] || "");
       } else if (parts[0] === "story-archive") {
         const target = ReaderStoryArchive.parse(pathPart);
@@ -8677,7 +8697,7 @@
         return;
       }
       if (primaryView === "archive") {
-        archiveKind = ["documents", "items", "mail"].includes(route.archiveKind) ? route.archiveKind : "documents";
+        archiveKind = ["documents", "items", "mail", "fish", "enemies"].includes(route.archiveKind) ? route.archiveKind : "documents";
         selectedArchiveId = route.archiveId || "";
         return;
       }
@@ -9024,6 +9044,12 @@
 
     const routeJson = ReaderCatalogs.create(path => loadJson(`data/${path}`));
     const routeEntity = ReaderCatalogs.entities(routeJson);
+    const worldArchive = ReaderWorldArchive.create({
+      list: archiveList, detail: archiveDetail, count: archiveCount, search: archiveSearch,
+      filters: document.getElementById("world-archive-filters"),
+      language: () => selectedLanguage, load: (path, language) => routeEntity(path, language),
+      format: setFormattedText, select: selectArchiveEntry,
+    });
     const storyBundles = ReaderCatalogs.bundles(routeJson);
 
     function storyBundleDescriptors(index, story) {
@@ -9270,6 +9296,7 @@
     }
 
     async function ensureArchiveData(kind) {
+      if (ReaderWorldArchive.kinds.includes(kind)) return worldArchive.ensure(kind);
       if (kind === "mail") await ensureCharacterIndex();
       if (routeCatalogs) {
         const bindings = await ensureArchiveBindings();
@@ -15519,6 +15546,9 @@
       archiveDetail.textContent = uiText("Could not open mail: {error}", {error:error.message});
       console.error(error);
     }));
+    for (const kind of ReaderWorldArchive.kinds) {
+      document.getElementById(`archive-${kind}-tab`).addEventListener("click", () => showArchive(kind, "", false).catch(showLoadError));
+    }
     archiveSearch.addEventListener("input", () => {
       renderArchiveList();
     });

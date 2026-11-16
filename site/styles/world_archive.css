@@ -1,0 +1,55 @@
+.world-filters { display: flex; flex-wrap: wrap; gap: 12px; padding-bottom: 16px; flex-shrink: 0; }
+.world-collection-tabs { display: flex; flex-wrap: wrap; flex-basis: 100%; gap: 8px; }
+.world-filter { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.world-filter-label { color: var(--muted); font-size: 0.85em; }
+.world-filter select { max-width: min(320px, 58vw); min-height: 36px; padding: 5px 28px 5px 10px; }
+/* Card width follows the reader font, with room for two to four columns.
+   The percentage bounds account for the 8px gaps and keep sparse search
+   results at the same width as a full list. */
+.world-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(clamp(calc((100% - 24px) / 4), calc(6em - 12px), calc((100% - 8px) / 2)), 1fr));
+  grid-auto-rows: max-content; gap: 8px; align-content: start;
+}
+.world-card { display: flex; flex-direction: column; align-items: center; justify-content: start; gap: 4px;
+  width: 100%; min-width: 0; min-height: 128px; padding: 8px 6px; text-align: center; background: rgba(var(--ink-rgb), 0.045);
+  border: 1px solid var(--line); border-radius: 6px; color: var(--ink); }
+.world-card > * { flex-shrink: 0; }
+.world-card:hover, .world-card:focus-visible { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
+.world-card.active { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.14); }
+.world-card-image { display: block; width: min(100%, 60px); height: 60px; object-fit: contain; }
+.world-card-name { font-size: 0.9em; line-height: 1.25; overflow-wrap: anywhere; }
+.world-card-meta { font-size: 0.7em; color: var(--muted); line-height: 1.3; }
+.world-card-grid > .archive-list-empty { grid-column: 1 / -1; }
+.world-detail-meta { color: var(--muted); margin: 8px 0; font-size: 0.85em; line-height: 1.5; }
+.world-fish-art { display: block; width: min(100%, 300px); height: min(28vh, 260px); min-height: 130px; object-fit: contain; margin: 20px auto; }
+.world-variants { display: flex; gap: 8px; margin: 16px 0 8px; }
+.world-description { line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.world-enemy-header, .world-skill-header { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+.world-enemy-art { width: 100px; height: 100px; object-fit: contain; flex-shrink: 0; }
+.world-stats { margin-top: 24px; }
+.world-stats h3, .world-skill-heading { margin: 0 0 10px; color: var(--accent); }
+.world-stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.world-stat-grid > div { padding: 12px; background: rgba(var(--ink-rgb), 0.045); border: 1px solid var(--line); border-radius: 6px; }
+.world-stat-grid dt { color: var(--muted); font-size: 0.8em; }
+.world-stat-grid dd { margin: 5px 0 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.world-stat-note { font-size: 0.8em; line-height: 1.5; color: var(--muted); margin: 12px 0 24px; }
+.world-skill { border: 1px solid var(--line); border-radius: 6px; padding: 18px; margin: 12px 0; }
+.world-skill-image { width: 56px; height: 56px; object-fit: contain; flex-shrink: 0; }
+.world-skill-header { gap: 12px; }
+.world-skill-header h4 { margin: 0; font-size: 1.05em; color: var(--accent); }
+.world-skill-header p { margin: 4px 0 0; }
+@media (min-width: 901px) {
+  .archive-browser[data-world-kind] .archive-layout { grid-template-columns: minmax(280px, 35%) minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .archive-header-row { flex-wrap: wrap; gap: 12px; }
+  .archive-kind-tabs { flex-wrap: wrap; }
+  .archive-kind-tab { padding-inline: 8px; font-size: 13px; }
+  .world-filters { gap: 8px; }
+  .world-filter { flex: 1 1 140px; flex-direction: column; align-items: stretch; gap: 4px; }
+  .world-filter select { width: 100%; max-width: 100%; font-size: 14px; }
+  .world-detail { scroll-margin-top: 18px; }
+  .world-enemy-art { width: 80px; height: 80px; }
+  .world-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .world-fish-art { max-height: 220px; }
+}

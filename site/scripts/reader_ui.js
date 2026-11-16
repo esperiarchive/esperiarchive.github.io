@@ -6,6 +6,14 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
   const messages = {
+  "World": {"cn": "世界", "jp": "世界", "kr": "세계"},
+  "Fish": {"cn": "鱼类", "jp": "魚", "kr": "물고기"},
+  "Enemies": {"cn": "敌人", "jp": "敵", "kr": "적"},
+  "Fish Archive": {"cn": "鱼类图鉴", "jp": "魚図鑑", "kr": "물고기 도감"},
+  "Enemy Archive": {"cn": "敌人图鉴", "jp": "敵図鑑", "kr": "적 도감"},
+  "Search fish": {"cn": "搜索鱼类", "jp": "魚を検索", "kr": "물고기 검색"},
+  "Search enemies": {"cn": "搜索敌人", "jp": "敵を検索", "kr": "적 검색"},
+  "Discover the documents, creatures, and details that bring Esperia to life.": {"cn": "探索文献、生物与各种细节，感受鲜活的伊索米亚。", "jp": "文献や生き物、さまざまな記録を通じてエスペリアの世界を知る。", "kr": "문헌과 생물, 다양한 기록을 통해 에스페리아의 세계를 알아보세요."},
   "Glossary": {"jp": "用語集", "kr": "용어집", "cn": "词条"},
   "Search": {"jp": "検索", "kr": "검색", "cn": "搜索"},
   "The Esperia Archive": {"jp": "エスペリア・アーカイブ", "kr": "에스페리아 아카이브", "cn": "伊索米亚档案"},

@@ -167,6 +167,13 @@
       if (!routes) return;
       const bootstrap = routes.bootstrap ? preloadJson(data(routes.bootstrap)) : Promise.resolve(null);
       if (view === "archive") {
+        if (["fish", "enemies"].includes(parts[1])) {
+          const catalog = await preloadJson(data("world_archive/" + parts[1] + ".json"));
+          const entity = catalog?.browser_entity;
+          if (entity?.core) preload(data(entity.core));
+          if (entity?.locales?.[language]) preload(data(entity.locales[language]));
+          return;
+        }
         const kind = ["documents", "items", "mail"].includes(parts[1]) ? parts[1] : "documents";
         if (kind === "mail" && routes.characters) preload(data(routes.characters));
         const [manifest, bindings] = await Promise.all([bootstrap,
