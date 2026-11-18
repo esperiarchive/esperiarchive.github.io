@@ -6,13 +6,40 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
   const messages = {
+  "Event Stories": {"cn":"活动剧情","jp":"イベントストーリー","kr":"이벤트 스토리"},
   "World": {"cn": "世界", "jp": "世界", "kr": "세계"},
-  "Fish": {"cn": "鱼类", "jp": "魚", "kr": "물고기"},
-  "Enemies": {"cn": "敌人", "jp": "敵", "kr": "적"},
-  "Fish Archive": {"cn": "鱼类图鉴", "jp": "魚図鑑", "kr": "물고기 도감"},
-  "Enemy Archive": {"cn": "敌人图鉴", "jp": "敵図鑑", "kr": "적 도감"},
-  "Search fish": {"cn": "搜索鱼类", "jp": "魚を検索", "kr": "물고기 검색"},
-  "Search enemies": {"cn": "搜索敌人", "jp": "敵を検索", "kr": "적 검색"},
+  "Fish": {
+    "cn": "鱼类",
+    "jp": "魚類",
+    "kr": "어류"
+  },
+  "Enemies": {
+    "cn": "敌人",
+    "jp": "敵",
+    "kr": "적군"
+  },
+  "Fish Archive": {
+    "cn": "鱼类",
+    "jp": "魚類",
+    "kr": "어류",
+    "en": "Fish"
+  },
+  "Enemy Archive": {
+    "cn": "敌人",
+    "jp": "敵",
+    "kr": "적군",
+    "en": "Enemies"
+  },
+  "Search fish": {
+    "cn": "搜索鱼类",
+    "jp": "魚類を検索",
+    "kr": "어류 검색"
+  },
+  "Search enemies": {
+    "cn": "搜索敌人",
+    "jp": "敵を検索",
+    "kr": "적군 검색"
+  },
   "Discover the documents, creatures, and details that bring Esperia to life.": {"cn": "探索文献、生物与各种细节，感受鲜活的伊索米亚。", "jp": "文献や生き物、さまざまな記録を通じてエスペリアの世界を知る。", "kr": "문헌과 생물, 다양한 기록을 통해 에스페리아의 세계를 알아보세요."},
   "Glossary": {"jp": "用語集", "kr": "용어집", "cn": "词条"},
   "Search": {"jp": "検索", "kr": "검색", "cn": "搜索"},
@@ -47,7 +74,11 @@
   "‹ All stories": {"jp": "‹ 物語一覧", "kr": "‹ 모든 스토리", "cn": "‹ 全部故事"},
   "Communicator": {"cn": "通讯器", "jp": "通信機", "kr": "통신기"},
   "Communicator · weak signal": {"cn": "通讯器 · 信号较弱", "jp": "通信機 · 電波が弱い", "kr": "통신기 · 신호 약함"},
-  "Quest: {title}": {"cn": "任务：{title}", "jp": "クエスト：{title}", "kr": "퀘스트: {title}"},
+  "Quest: {title}": {
+    "cn": "任务：{title}",
+    "jp": "ミッション：{title}",
+    "kr": "퀘스트: {title}"
+  },
   "This character or conversation address could not be found.": {"cn": "找不到此角色或对话地址。", "jp": "このキャラクターまたは会話のアドレスが見つかりません。", "kr": "이 캐릭터 또는 대화 주소를 찾을 수 없습니다."},
   "This character is not available in this reader's data release.": {"cn": "当前阅读器的数据版本尚未收录此角色。", "jp": "このキャラクターは現在のリーダーのデータには収録されていません。", "kr": "현재 리더의 데이터 버전에는 이 캐릭터가 포함되어 있지 않습니다."},
   "This conversation is not available for this character.": {"cn": "此角色没有这段对话。", "jp": "このキャラクターにはこの会話がありません。", "kr": "이 캐릭터에게는 해당 대화가 없습니다."},
@@ -181,7 +212,7 @@
   },
   "Category": {
     "cn": "分类",
-    "jp": "カテゴリ",
+    "jp": "分類",
     "kr": "분류"
   },
   "Daily": {"cn":"日常","jp":"デイリー","kr":"일일"},
@@ -202,7 +233,7 @@
   },
   "Reputation Quests": {
     "cn": "声望任务",
-    "jp": "名声クエスト",
+    "jp": "名声ミッション",
     "kr": "명성 퀘스트"
   },
   "Starry Tales": {
@@ -210,14 +241,10 @@
     "jp": "星夜の逸話",
     "kr": "별밤의 이야기"
   },
-  "Mini Stories": {
-    "cn": "小故事",
-    "jp": "ミニストーリー",
-    "kr": "미니 스토리"
-  },
+  "Mini Stories": {"cn": "活动剧情", "jp": "イベントストーリー", "kr": "이벤트 스토리", "en": "Event Stories"},
   "Main Quest": {
     "cn": "主线任务",
-    "jp": "メインクエスト",
+    "jp": "メインミッション",
     "kr": "메인 퀘스트"
   },
   "Event/Env Story": {
@@ -237,7 +264,7 @@
   },
   "Daily Quests": {
     "cn": "日常任务",
-    "jp": "デイリークエスト",
+    "jp": "デイリーミッション",
     "kr": "일일 퀘스트"
   },
   "Exploration": {
@@ -328,7 +355,7 @@
   },
   "Materials": {
     "cn": "材料",
-    "jp": "素材",
+    "jp": "材料",
     "kr": "재료"
   },
   "Hero Development": {
@@ -353,7 +380,7 @@
   },
   "All": {
     "cn": "全部",
-    "jp": "すべて",
+    "jp": "全て",
     "kr": "전체"
   },
   "Collectible letters": {
@@ -588,8 +615,8 @@
   },
   "Hero Focus": {
     "cn": "英雄专精",
-    "jp": "英雄の覚醒",
-    "kr": "영웅 집중"
+    "jp": "天賦の才",
+    "kr": "영웅 마스터리"
   },
   "Basic Attack": {
     "cn": "普通攻击",
@@ -652,12 +679,12 @@
     "kr": "공격력"
   },
   "Physical DEF": {
-    "cn": "物理防御",
+    "cn": "护甲",
     "jp": "物理防御",
     "kr": "물리 방어력"
   },
   "Magic DEF": {
-    "cn": "魔法防御",
+    "cn": "魔抗",
     "jp": "魔法防御",
     "kr": "마법 방어력"
   },
@@ -669,7 +696,7 @@
   "Healing": {
     "cn": "治愈",
     "jp": "治療",
-    "kr": "치유"
+    "kr": "치료"
   },
   "Attack Speed": {
     "cn": "攻击速度",
@@ -694,7 +721,7 @@
   "Haste": {
     "cn": "急速",
     "jp": "速度",
-    "kr": "가속"
+    "kr": "급속"
   },
   "Block": {
     "cn": "格挡",
@@ -717,9 +744,9 @@
     "kr": "피해 유형"
   },
   "Range": {
-    "cn": "攻击距离",
-    "jp": "攻撃範囲",
-    "kr": "공격 범위"
+    "cn": "射程",
+    "jp": "射程",
+    "kr": "사정거리"
   },
   "Melee": {
     "cn": "近战",
@@ -1024,7 +1051,7 @@
   "Enemies": {
     "cn": "敌人",
     "jp": "敵",
-    "kr": "적"
+    "kr": "적군"
   },
   "Available after viewing the other options": {
     "cn": "查看其他选项后解锁",
@@ -1072,9 +1099,9 @@
     "kr": "물고기 획득"
   },
   "Fish": {
-    "cn": "鱼",
-    "jp": "魚",
-    "kr": "물고기"
+    "cn": "鱼类",
+    "jp": "魚類",
+    "kr": "어류"
   },
   "Alchemy complete": {
     "cn": "炼金完成",
@@ -1283,22 +1310,22 @@
   },
   "Focus +{n}": {
     "cn": "专精 +{n}",
-    "jp": "覚醒 +{n}",
-    "kr": "집중 +{n}"
+    "jp": "天賦の才 +{n}",
+    "kr": "마스터리 +{n}"
   },
   "Refinement {n}": {
-    "cn": "精炼 {n}",
-    "jp": "精錬 {n}",
-    "kr": "정련 {n}"
+    "cn": "精炼{n}级",
+    "jp": "精錬Lv.{n}",
+    "kr": "제련 {n}레벨"
   },
   "Cooldown {n}s": {
     "cn": "冷却 {n}秒",
-    "jp": "クールタイム {n}秒",
+    "jp": "CD {n}秒",
     "kr": "쿨타임 {n}초"
   },
   "Energy {n}": {
     "cn": "能量 {n}",
-    "jp": "エネルギー {n}",
+    "jp": "SP {n}",
     "kr": "에너지 {n}"
   },
   "{n} upgrades": {
@@ -1498,7 +1525,7 @@
   },
   "Battle": {
     "cn": "战斗",
-    "jp": "バトル",
+    "jp": "戦闘",
     "kr": "전투"
   },
   "Encounter": {
@@ -1632,9 +1659,9 @@
     "kr": " (최대)"
   },
   "Levels +0 to +25 · Refinement 1–4": {
-    "cn": "等级 +0 至 +25 · 精炼 1–4",
-    "jp": "レベル +0～+25 · 精錬1～4",
-    "kr": "레벨 +0~+25 · 정련 1~4"
+    "cn": "等级 +0 至 +25 · 精炼1–4级",
+    "jp": "レベル +0～+25 · 精錬Lv.1～4",
+    "kr": "레벨 +0~+25 · 제련 1~4레벨"
   },
   "Unit {n} · Skill shard {shard}": {
     "cn": "单位 {n} · 技能分片 {shard}",
@@ -1710,7 +1737,7 @@
   },
   "No exact normal-equipment data is available for this class.": {
     "cn": "该职业没有精确的常规装备数据。",
-    "jp": "このクラスの正確な通常装備データはありません。",
+    "jp": "この職業の正確な通常装備データはありません。",
     "kr": "해당 직업의 정확한 일반 장비 데이터가 없습니다."
   },
   "Include PvE growth term": {

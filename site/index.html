@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=177dbfee3b63b035"></script>
+  <script src="scripts/config.js?v=a96b0460150b97ba"></script>
   <script src="scripts/reader_publication.js?v=f3c439a882556b73"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <script>ReaderPublication.preloadRoute();</script>
@@ -3775,16 +3775,16 @@
   <script src="scripts/player_appearance.js?v=93ebad4a406a469b"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=329fd5015b0bc0c4"></script>
+  <script src="scripts/reader_ui.js?v=61570b4b92be703b"></script>
   <link rel="stylesheet" href="styles/world_archive.css?v=cec953d64ee098ee">
-  <script src="scripts/world_archive.js?v=9d06f53c16affb8b"></script>
+  <script src="scripts/world_archive.js?v=4b6d8247b4363ae1"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
   <link rel="stylesheet" href="styles/reader_glossary.css?v=5c22f0148ebdee40">
   <script src="scripts/reader_glossary.js?v=865ae92c9ce6ed36"></script>
-  <link rel="stylesheet" href="styles/story_archive.css?v=4fe664bdba4fab16">
-  <script src="scripts/story_archive.js?v=efe6183150f7c397"></script>
+  <link rel="stylesheet" href="styles/story_archive.css?v=41cedb832d101e92">
+  <script src="scripts/story_archive.js?v=dd4ecea8ec717879"></script>
   <script src="scripts/reader_story_paths.js?v=581d6d923600c9f5"></script>
-  <script src="scripts/reader_story_routes.js?v=91c924c21611357b"></script>
+  <script src="scripts/reader_story_routes.js?v=b864568374229c15"></script>
   <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
   <script src="scripts/reader_character_routes.js?v=31c98c442ce8deff"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
@@ -3834,7 +3834,7 @@
       main: "Main Story",
       side: "Side Stories",
       reputation: "Faction",
-      mini: "Mini Stories",
+      mini: "Event Stories",
       starry: "Starry Tales",
       heart_to_heart: "Heart-to-Heart",
       main_story: "Main Story",
@@ -5099,7 +5099,7 @@
             chapterKey: eventGroup?.id || "mini_story",
             chapterTitle: eventGroup?.title_i18n || (categoryKey === "starry"
               ? { cn: "星夜逸闻", en: "Starry Tales", jp: "星夜の逸話", kr: "별밤의 이야기" }
-              : { cn: "小故事", en: "Mini Stories", jp: "ミニストーリー", kr: "미니 스토리" }),
+              : { cn: "活动剧情", en: "Event Stories", jp: "イベントストーリー", kr: "이벤트 스토리" }),
             chapterOrder: 0,
             groupOrder: 0,
             assetKeys,
@@ -5139,12 +5139,12 @@
           const chapter = collection.categories.get("side")?.stories.find(story => story.id === id);
           if (chapter) category.stories.push({...chapter,
             key:`${collection.key}/mini/${id}`, order:index + 1,
-            chapterTitle:event.title, chapterOrder:100, groupOrder:0});
+            chapterKey:event.id, chapterTitle:event.title, chapterOrder:100, groupOrder:0});
         }
         for (const [index, patient] of event.patients.entries()) {
           category.stories.push({id:`patient-${patient.id}`, key:`${collection.key}/mini/patient-${patient.id}`,
             order:index+1,title:patient.title,description:{en:"Optional patient encounter"},
-            chapterKey:event.id,chapterTitle:{en:"Potion Panacea · Patient encounters"},
+            chapterKey:event.id+"-patients",chapterTitle:{en:"Potion Panacea · Patient encounters"},
             chapterOrder:101,groupOrder:0,assetKeys:[patient.asset],sourceType:"activity"});
         }
       }
@@ -5184,6 +5184,7 @@
         });
       }
 
+      ReaderStoryRoutes.relocateEvents(collectionMap);
       logicalCollections = [...collectionMap.values()]
         .filter((collection) => [...collection.categories.values()].some((category) => category.stories.length))
         .sort((left, right) => left.order - right.order || left.key.localeCompare(right.key));
@@ -9391,7 +9392,8 @@
       if (!beat || primaryView !== "stories") return;
       const available = readableStoryBeats(), index = available.findIndex(entry => entry.id === beat.id);
       const next = index >= 0 ? available[index + 1] : null, story = next?.logicalStory;
-      if (!next?.firstAssetKey) return;
+      // Letter collections already live in the runtime catalog, without graph files.
+      if (!next?.firstAssetKey || story?.sourceType === "letter_collection") return;
       const language = selectedLanguage;
       const stillCurrent = () => primaryView === "stories" && currentBeat()?.id === beat.id && selectedLanguage === language;
       const [bundles, portraits] = await Promise.all([

@@ -7,31 +7,31 @@
   const kinds = ["fish", "enemies"];
   const jobs = {1: "Tank", 2: "Warrior", 3: "Mage", 4: "Support", 5: "Marksman", 6: "Rogue"};
   const messages = {
-    "Fish": ["鱼类", "魚", "물고기"], "Enemies": ["敌人", "敵", "적"],
-    "Search fish": ["搜索鱼类", "魚を検索", "물고기 검색"],
-    "Search enemies": ["搜索敌人", "敵を検索", "적 검색"],
-    "Fish Archive": ["鱼类图鉴", "魚図鑑", "물고기 도감"],
-    "Enemy Archive": ["敌人图鉴", "敵図鑑", "적 도감"],
+    "Fish": ["鱼类", "魚類", "어류"], "Enemies": ["敌人", "敵", "적군"],
+    "Search fish": ["搜索鱼类", "魚類を検索", "어류 검색"],
+    "Search enemies": ["搜索敌人", "敵を検索", "적군 검색"],
+    "Fish Archive": ["鱼类", "魚類", "어류"],
+    "Enemy Archive": ["敌人", "敵", "적군"],
     "All seasons": ["全部赛季", "全シーズン", "모든 시즌"],
     "All locations": ["全部地点", "すべての場所", "모든 지역"],
-    "All classes": ["全部职业", "全クラス", "모든 직업"],
+    "All classes": ["全部职业", "全ての職業", "모든 직업"],
     "Season": ["赛季", "シーズン", "시즌"], "Location": ["地点", "場所", "지역"],
-    "Class": ["职业", "クラス", "직업"], "Other": ["其他", "その他", "기타"],
+    "Class": ["职业", "職業", "직업"], "Other": ["其他", "その他", "기타"],
     "Fish King": ["鱼王", "キングフィッシュ", "피쉬킹"],
     "Regions": ["地区", "地域", "지역"], "Events": ["活动", "イベント", "이벤트"],
     "Fish category": ["鱼类分类", "魚の分類", "물고기 분류"],
     "Event fish": ["活动鱼类", "イベントの魚", "이벤트 물고기"],
-    "Normal": ["普通", "通常", "일반"], "Rare variant": ["异色", "珍種", "희귀종"],
-    "Normal and rare": ["普通与异色", "通常種・珍種", "일반종 및 희귀종"],
-    "Tank": ["坦克", "タンク", "탱커"], "Warrior": ["战士", "ウォリアー", "워리어"],
-    "Mage": ["法师", "メイジ", "메이지"], "Support": ["辅助", "サポート", "서포터"],
-    "Marksman": ["射手", "アーチャー", "아처"], "Rogue": ["游侠", "ローグ", "로그"],
+    "Normal": ["普通", "通常", "일반"], "Rare variant": ["异色鱼", "異色の魚", "레어 피쉬"],
+    "Normal and rare": ["普通与异色鱼", "通常の魚・異色の魚", "일반 물고기 및 레어 피쉬"],
+    "Tank": ["坦克", "タンク", "탱커"], "Warrior": ["战士", "ファイター", "전사"],
+    "Mage": ["法师", "メイジ", "마법사"], "Support": ["辅助", "サポート", "서포터"],
+    "Marksman": ["射手", "アーチャー", "사수"], "Rogue": ["游侠", "レンジャー", "레인저"],
     "Physical": ["物理", "物理", "물리"], "Magic": ["魔法", "魔法", "마법"],
-    "Melee": ["近战", "近接", "근접"], "Ranged": ["远程", "遠隔", "원거리"],
+    "Melee": ["近战", "近接", "근접"], "Ranged": ["远程", "遠距離", "원거리"],
     "Base stats": ["基础属性", "基礎ステータス", "기본 능력치"],
     "HP": ["生命值", "HP", "HP"], "ATK": ["攻击力", "攻撃力", "공격력"],
-    "Physical DEF": ["物理护甲", "物理防御", "물리 방어력"],
-    "Magic DEF": ["魔法抗性", "魔法防御", "마법 방어력"],
+    "Physical DEF": ["护甲", "物理防御", "물리 방어력"],
+    "Magic DEF": ["魔抗", "魔法防御", "마법 방어력"],
     "Level {level} · {quality}": ["等级 {level} · {quality}", "Lv. {level} · {quality}", "레벨 {level} · {quality}"],
     "Before equipment and battle modifiers. Enemy stats vary by encounter.": [
       "未计入装备与战斗修正。敌人属性随战斗而变化。",
@@ -47,7 +47,10 @@
     "Chinese name: {name}": ["中文名称：{name}", "中国語名：{name}", "중국어 이름: {name}"],
   };
   function text(key, language, values = {}) {
-    let value = messages[key]?.[{cn: 0, jp: 1, kr: 2}[language]] || key;
+    // Shared game concepts use the same vocabulary as character profiles.
+    const common = new Set(["Class", "Tank", "Warrior", "Mage", "Support", "Marksman", "Rogue", "HP", "ATK", "Physical DEF", "Magic DEF", "Skills"]);
+    const shared = common.has(key) && globalThis.ReaderUI?.messages?.[key]?.[language];
+    let value = shared || messages[key]?.[{cn: 0, jp: 1, kr: 2}[language]] || key;
     return value.replace(/\{(\w+)\}/g, (match, name) => values[name] ?? match);
   }
   function localized(value, language) { return value?.[language] || value?.en || value?.cn || ""; }
