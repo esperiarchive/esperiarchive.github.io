@@ -375,3 +375,8 @@
   color: var(--accent-2);
   font-size: calc(15px * var(--reader-font-ratio));
 }
+
+/* Keep the first storyline option clear of its disclosure heading. */
+.story-choice-history[open] > summary { margin-bottom: var(--reader-space-related, 12px); }
+.story-patient-picker > label { display: block; margin-bottom: var(--reader-space-related, 12px); color: var(--accent-2, #d6bd80); font-size: calc(14px * var(--reader-font-ratio)); font-weight: 800; line-height: 1.4; }
+.story-patient-picker > select { box-sizing: border-box; width: min(440px, 100%); max-width: 100%; font: inherit; font-size: calc(14px * var(--reader-font-ratio)); }

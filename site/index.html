@@ -6,7 +6,7 @@
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <script>ReaderPublication.preloadRoute();</script>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="styles/reader_fonts.css?v=9004be14383b99e4">
+  <link rel="stylesheet" href="styles/reader_fonts.css?v=3d7f7cc1c1c07abe">
   <link rel="stylesheet" href="styles/reader_home.css?v=b0b0de43b7b49e73">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Esperia Archive</title>
@@ -409,7 +409,7 @@
     }
 
     .archive-browser {
-      width: min(1180px, 100%);
+      width: min(1120px, 100%);
       min-width: 0;
       margin: 0 auto;
     }
@@ -781,7 +781,7 @@
     .mystical-header {
       display: grid;
       gap: 8px;
-      padding: 8px 0 24px;
+      padding: 8px 0 20px;
       border-bottom: 1px solid var(--line);
     }
 
@@ -812,11 +812,11 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      padding: 20px 0;
+      padding: 18px 0;
     }
 
     .character-search {
-      width: min(420px, 100%);
+      width: min(480px, 100%);
       min-height: 42px;
       padding: 8px 12px;
       border: 1px solid var(--line);
@@ -941,6 +941,41 @@
     .interaction-back {
       width: fit-content;
       margin-bottom: 18px;
+    }
+
+    /* One back-link style for profiles, conversations and stories. */
+    .profile-back,
+    .interaction-back,
+    .archive-back {
+      display: inline-block;
+      min-height: 0;
+      padding: 7px 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: var(--accent);
+      font-size: 14px;
+      line-height: 1.3;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .profile-back:hover:not(:disabled),
+    .interaction-back:hover:not(:disabled),
+    .archive-back:hover {
+      border-color: transparent;
+      outline: none;
+      background: none;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .profile-back:focus-visible,
+    .interaction-back:focus-visible,
+    .archive-back:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 5px;
+      background: none;
     }
 
     .profile-hero {
@@ -1840,10 +1875,11 @@
     }
 
     .asset-label {
-      color: var(--accent);
-      font-size: calc(13px * var(--reader-font-ratio));
+      color: var(--accent-2);
+      font-size: calc(12px * var(--reader-font-ratio));
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
     }
 
     .story-heading {
@@ -2674,7 +2710,7 @@
     }
 
     .text-link-large {
-      color: #c28bea;
+      color: var(--link-large, #c28bea);
     }
 
     .text-color {
@@ -2979,9 +3015,6 @@
     .reader-actions,
     .profile-tabs,
     .archive-kind-tabs,
-    .profile-back,
-    .interaction-back,
-    .archive-back,
     .archive-search,
     .character-search,
     .base-stat-controls,
@@ -3163,7 +3196,8 @@
 
       .mystical-heading,
       .profile-name,
-      .archive-heading {
+      .archive-heading,
+      .story-archive-heading h1 {
         font-size: calc(27px * var(--reader-font-ratio));
       }
 
@@ -3538,11 +3572,11 @@
           <p class="home-kicker" data-i18n="AFK Journey · Unofficial fan archive">AFK Journey · Unofficial fan archive</p>
           <h1 id="home-heading">The Esperia Archive</h1>
           <p class="home-intro" data-i18n="Revisit the stories, characters, and lore of Esperia.">Revisit the stories, characters, and lore of Esperia.</p>
-          <a class="home-browse" data-home-route="stories" href="#/base/main/10010100"><span data-i18n="Browse stories">Browse stories</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a>
+          <a class="home-browse" data-home-route="stories" href="#/story-archive"><span data-i18n="Browse stories">Browse stories</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a>
         </header>
         <p id="home-status" class="home-status" role="status" hidden></p>
         <div class="home-cards">
-          <a class="home-card" data-home-route="stories" href="#/base/main/10010100">
+          <a class="home-card" data-home-route="stories" href="#/story-archive">
             <img class="home-icon" data-home-src="assets/home/stories.png" width="80" height="80" alt="" decoding="async"><svg class="home-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
             <h2 data-i18n="Stories">Stories</h2>
             <p data-i18n="Follow storylines, explore dialogue choices, and revisit your favorite scenes.">Follow storylines, explore dialogue choices, and revisit your favorite scenes.</p>
@@ -3775,18 +3809,18 @@
   <script src="scripts/player_appearance.js?v=93ebad4a406a469b"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=61570b4b92be703b"></script>
+  <script src="scripts/reader_ui.js?v=a18691b1997cac31"></script>
   <link rel="stylesheet" href="styles/world_archive.css?v=cec953d64ee098ee">
   <script src="scripts/world_archive.js?v=4b6d8247b4363ae1"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
-  <link rel="stylesheet" href="styles/reader_glossary.css?v=5c22f0148ebdee40">
-  <script src="scripts/reader_glossary.js?v=865ae92c9ce6ed36"></script>
-  <link rel="stylesheet" href="styles/story_archive.css?v=41cedb832d101e92">
-  <script src="scripts/story_archive.js?v=dd4ecea8ec717879"></script>
-  <script src="scripts/reader_story_paths.js?v=581d6d923600c9f5"></script>
-  <script src="scripts/reader_story_routes.js?v=b864568374229c15"></script>
-  <script src="scripts/reader_character_paths.js?v=22de7058ee7a9dc0"></script>
-  <script src="scripts/reader_character_routes.js?v=31c98c442ce8deff"></script>
+  <link rel="stylesheet" href="styles/reader_glossary.css?v=4b3723ec42a3c8a9">
+  <script src="scripts/reader_glossary.js?v=ced38dae0e2db22b"></script>
+  <link rel="stylesheet" href="styles/story_archive.css?v=080965462cc5e996">
+  <script src="scripts/story_archive.js?v=132d91ac214762cf"></script>
+  <script src="scripts/reader_story_paths.js?v=fdbe042a83094c07"></script>
+  <script src="scripts/reader_story_routes.js?v=256d812e5e4d78b5"></script>
+  <script src="scripts/reader_character_paths.js?v=8baf294f0707477b"></script>
+  <script src="scripts/reader_character_routes.js?v=e60e48540f469236"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
   <script src="scripts/story_runtime.js?v=3733550704f6c2ff"></script>
   <script src="scripts/story_results.js?v=30688082fc607173"></script>
@@ -3799,9 +3833,9 @@
   <script src="scripts/story_chapters.js?v=aa58a593eed587a1"></script>
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
-  <link rel="stylesheet" href="styles/story_runtime.css?v=38345dab04311672">
-  <link rel="stylesheet" href="styles/reader_theme.css?v=5017060bf70f8eb3">
-  <link rel="stylesheet" href="styles/reader_layout.css?v=694cb4f5d752fd47">
+  <link rel="stylesheet" href="styles/story_runtime.css?v=88e65f15e34eb01c">
+  <link rel="stylesheet" href="styles/reader_theme.css?v=381e6634532b9336">
+  <link rel="stylesheet" href="styles/reader_layout.css?v=dd952099d8e78b88">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
     const READER_PUBLIC = Boolean(window.TEA_CONFIG?.public_reader) || document.documentElement.dataset.readerProfile === "public";
@@ -6485,6 +6519,10 @@
     async function showArchive(kind, id = "", replaceHash = true) {
       return withContentLoading(async () => {
         await ensureArchiveData(kind);
+        const exists = !id || (kind === "fish" && id === "events")
+          || (kind === "documents" ? archiveDocumentById(id) : kind === "mail" ? archiveMailById(id)
+            : kind === "items" ? archiveItemById.has(String(id)) : worldArchive.find(kind, id));
+        if (!exists) throw Object.assign(new Error("Unknown archive entry"), {code:"INVALID_READER_ROUTE"});
         archiveSearch.value = "";
         storyScroll.scrollTo({ top: 0 });
         selectArchiveEntry(kind, id, replaceHash, !id);
@@ -6529,8 +6567,9 @@
     }
 
     function storySectionHash() {
-      const fallback = `#/${collectionRoutePart(DEFAULT_ROUTE.section)}/${DEFAULT_ROUTE.category}/${DEFAULT_ROUTE.storyId}`;
-      return ReaderUI.sectionHash(ReaderStoryRoutes.canonicalHash(lastStoryHash || fallback), {lang: selectedLanguage, mode: readerMode, gender: selectedGender});
+      const fallback = ReaderStoryRoutes.path(DEFAULT_ROUTE.section, DEFAULT_ROUTE.category, DEFAULT_ROUTE.storyId);
+      const current = ReaderStoryRoutes.resolve(lastStoryHash) ? lastStoryHash : fallback;
+      return ReaderUI.sectionHash(ReaderStoryRoutes.canonicalHash(current), {lang: selectedLanguage, mode: readerMode, gender: selectedGender});
     }
 
     function updateHomeLinks() {
@@ -8355,7 +8394,7 @@
 
     function beatLabel(beat) {
       if (beat.logicalStory) {
-        const title = localizedValue(beat.logicalStory.title) || uiText("Story {n}", {n: beat.logicalStory.id});
+        const title = localizedValue(beat.logicalStory.readingGroup?.title || beat.logicalStory.title) || uiText("Story {n}", {n: beat.logicalStory.id});
         if (!showDebug && readerMode !== "debug") {
           return title;
         }
@@ -8503,13 +8542,13 @@
     }
 
     function prerequisiteReadingHref(prerequisite, item) {
-      if (!logicalNavigation || selectedCategory !== "main" || !prerequisite.route) return ReaderStoryRoutes.canonicalHash(prerequisite.route || "");
+      if (!logicalNavigation || selectedCategory !== "main" || !prerequisite.route) return ReaderStoryRoutes.referenceHash(prerequisite.route || "");
       const params = new URLSearchParams({lang:selectedLanguage,mode:readerMode,gender:selectedGender});
       const node = item.assetKey && item.nodeId?.startsWith("objective_interlude:")
         ? `${item.assetKey}::${item.nodeId}` : item.nodeId;
       if (node) params.set("node", node);
       const source = `${ReaderStoryRoutes.path(selectedSection, "main", selectedStoryId)}?${params}`;
-      const [path, query = ""] = ReaderStoryRoutes.canonicalHash(prerequisite.route).split("?");
+      const [path, query = ""] = ReaderStoryRoutes.referenceHash(prerequisite.route).split("?");
       const target = new URLSearchParams(query);
       target.set("lang",selectedLanguage); target.set("mode",readerMode); target.set("gender",selectedGender);
       target.set("return",source);
@@ -8625,31 +8664,38 @@
       const [pathPart, queryPart = ""] = rawHash.split("?");
       const parts = pathPart.split("/").filter(Boolean);
       const route = {};
-      if (!parts.length || parts[0] === "home") {
+      if (!parts.length || (parts.length === 1 && parts[0] === "home")) {
         route.view = "home";
       } else if (parts[0] === "mystical-house") {
         const target = ReaderCharacterRoutes.resolve(pathPart);
-        if (!target) throw new Error(uiText("This character or conversation address could not be found."));
+        if (!target) throw Object.assign(new Error(uiText("This character or conversation address could not be found.")), {code:"INVALID_READER_ROUTE"});
         Object.assign(route, target, {view: "mystical"});
       } else if (parts[0] === "archive") {
         route.view = "archive";
-        route.archiveKind = ["documents", "items", "mail", "fish", "enemies"].includes(parts[1]) ? parts[1] : "documents";
-        route.archiveId = decodeURIComponent(parts[2] || "");
+        if (parts.length > 3 || !["documents", "items", "mail", "fish", "enemies"].includes(parts[1])) {
+          throw Object.assign(new Error(uiText("This story address could not be found.")), {code:"INVALID_READER_ROUTE"});
+        }
+        route.archiveKind = parts[1];
+        try { route.archiveId = decodeURIComponent(parts[2] || ""); }
+        catch (_) { throw Object.assign(new Error(uiText("This story address could not be found.")), {code:"INVALID_READER_ROUTE"}); }
       } else if (parts[0] === "story-archive") {
         const target = ReaderStoryArchive.parse(pathPart);
-        if (!target) throw new Error(uiText("This story address could not be found."));
+        if (!target) throw Object.assign(new Error(uiText("This story address could not be found.")), {code:"INVALID_READER_ROUTE"});
         Object.assign(route, target);
       } else if (parts[0] === "stories") {
         const target = ReaderStoryRoutes.resolve(pathPart);
-        if (!target) throw new Error(uiText("This story address could not be found."));
+        if (!target) throw Object.assign(new Error(uiText("This story address could not be found.")), {code:"INVALID_READER_ROUTE"});
         Object.assign(route, target, {view: "stories"});
-      } else if (parts.length >= 3) {
-        route.view = "stories";
-        Object.assign(route, ReaderStoryRoutes.resolve(pathPart)
-          || {section: parts[0], category: parts[1], storyId: parts[2]});
+      } else if (typeof READER_PUBLIC !== "undefined" && !READER_PUBLIC && parts.length === 3
+          && /^(?:ep\d+|mn\d*|timeline|base_campaign)$/.test(parts[0]) && /^[a-z0-9_]+_story$/.test(parts[1])) {
+        // Direct source-graph inspection belongs to the research reader.
+        Object.assign(route, {view:"stories", section:parts[0], category:parts[1], storyId:parts[2]});
         route.assetKey = assetKeyFromParts(route.section, route.category, route.storyId);
+      } else {
+        throw Object.assign(new Error(uiText("This story address could not be found.")), {code:"INVALID_READER_ROUTE"});
       }
       const params = new URLSearchParams(queryPart);
+      if (params.has("patient")) route.patient = params.get("patient");
       if (route.view === "story-archive") route.archiveQuery = (params.get("q") || "").slice(0,250);
       if (params.get("lang")) {
         route.language = params.get("lang");
@@ -8744,6 +8790,7 @@
         }
         nextHash = `${ReaderCharacterRoutes.path(selectedCharacterId, selectedInteractionAssetKey)}?${params.toString()}`;
       } else if (logicalNavigation) {
+        if (/^patient-\d+$/.test(String(selectedStoryId))) params.set("patient", String(selectedStoryId).replace(/^patient-/, ""));
         nextHash = `${ReaderStoryRoutes.path(selectedSection, selectedCategory, selectedStoryId)}?${params.toString()}`;
       } else {
         const parts = storyParts(selectedAssetKey);
@@ -10461,9 +10508,9 @@
 
     function readableStoryBeats() {
       const variants = currentStoryVariants();
-      if (!variants) return storyBeats;
-      const session = new StoryRuntime.Session(storyHistory);
-      return storyBeats.filter(beat => variants.visible(beat.logicalStory.id, session));
+      const session = variants ? new StoryRuntime.Session(storyHistory) : null;
+      const available = variants ? storyBeats.filter(beat => variants.visible(beat.logicalStory.id, session)) : storyBeats;
+      return ReaderStoryRoutes.readingEntries(available, selectedStoryId);
     }
 
     function renderStoryOptions() {
@@ -14204,6 +14251,27 @@
       if (ids.length) storyHistory.invalidate(ids);
     }
 
+    function renderPatientStoryChoice() {
+      document.getElementById("story-patient-picker")?.remove();
+      const group = activeBeat?.logicalStory?.readingGroup;
+      if (group?.kind !== "patients") return;
+      const panel = document.createElement("section");
+      panel.id = "story-patient-picker"; panel.className = "story-choice-history story-patient-picker";
+      const label = document.createElement("label");
+      label.htmlFor = "story-patient-select"; label.textContent = uiText("Choose a patient");
+      const select = document.createElement("select"); select.id = "story-patient-select";
+      for (const beat of storyBeats.filter(beat => beat.logicalStory?.readingGroup?.key === group.key)) {
+        const option = document.createElement("option"); option.value = beat.id;
+        option.textContent = localizedValue(beat.logicalStory.title);
+        option.selected = beat.id === activeBeat.id; select.appendChild(option);
+      }
+      select.addEventListener("change", async () => {
+        const beat = beatById.get(select.value);
+        if (beat) await loadSelectedStory(beat.firstAssetKey, {beatId:beat.id, replaceHash:false}).catch(showRouteError);
+      });
+      panel.append(label, select); timeline.before(panel);
+    }
+
     function renderEndingStoryChoice(variant) {
       const panel = document.createElement("details");panel.id = "story-choice-history";panel.className = "story-choice-history";
       const heading = document.createElement("summary");
@@ -14229,6 +14297,7 @@
     function renderStoryChoiceHistory() {
       renderStoryReturnLinks();
       document.getElementById("story-choice-history")?.remove();
+      renderPatientStoryChoice();
       if (!storyHistory) return;
       const readingVariant = currentStoryVariants(true)?.get(activeBeat?.logicalStory?.id);
       if (readingVariant?.directReading) {renderEndingStoryChoice(readingVariant);return;}
@@ -14822,7 +14891,7 @@
     function updateStoryChrome() {
       const beat = currentBeat();
       const story = (beat && beat.representativeStory) || storyByKey.get(selectedAssetKey);
-      const title = storyTitleFromEntry(story);
+      const title = localizedValue(beat?.logicalStory?.readingGroup?.title) || storyTitleFromEntry(story);
       const summary = storySummary(story);
       const arcTitle = storyArcTitle(story);
       const position = beat && Number.isInteger(beat.sequenceIndex)
@@ -15190,7 +15259,7 @@
         selectedInteractionAssetKey = assetKey;
         stopActiveVoice();
         timeline.replaceChildren();
-        for (const note of storyReader.querySelectorAll("#story-choice-history, .story-return-link")) note.remove();
+        for (const note of storyReader.querySelectorAll("#story-choice-history, #story-patient-picker, .story-return-link")) note.remove();
         storyHeading.textContent = "";
         assetLabel.textContent = "";
         storySubtitle.replaceChildren();
@@ -15615,11 +15684,19 @@
 
     async function openStoryRoute(route, returnBookmark = null) {
       await ensureStoryNavigation();
+      const entries = logicalCollectionByKey.get(collectionKeyFromRoute(route.section))
+        ?.categories.get(route.category)?.stories || [];
+      const patients = entries.filter(story => story.readingGroup?.kind === "patients" && story.readingGroup.key === String(route.storyId));
+      if (patients.length) {
+        const patient = route.patient === undefined ? patients[0] : patients.find(story => story.id === `patient-${route.patient}`);
+        if (!patient) throw Object.assign(new Error(uiText("This story is not available in this reader's data release.")), {code:"INVALID_READER_ROUTE"});
+        route = {...route, storyId:patient.id}; selectedStoryId = patient.id;
+      }
       // A known address may belong to a newer data release. Never silently
       // substitute the first story in a collection when that target is absent.
       if (route.named && !logicalCollectionByKey.get(collectionKeyFromRoute(route.section))
           ?.categories.get(route.category)?.stories.some(story => story.id === String(route.storyId))) {
-        throw new Error(uiText("This story is not available in this reader's data release."));
+        throw Object.assign(new Error(uiText("This story is not available in this reader's data release.")), {code:"INVALID_READER_ROUTE"});
       }
       primaryView = "stories";
       selectedInteractionAssetKey = "";
@@ -15672,6 +15749,9 @@
             await ensureStoryNavigation();
           }
           await storyArchive.prepare(route.archivePage);
+          if (route.glossaryTerm && !storyArchive.hasTerm(route.glossaryTerm)) {
+            throw Object.assign(new Error("Unknown glossary term"), {code:"INVALID_READER_ROUTE"});
+          }
           if (revision !== routeRevision) return;
           applyRoute(route);
           applyPreferencesToUi();
@@ -15696,7 +15776,7 @@
         if (route.view !== "archive") await ensureCharacterIndex();
         if (revision !== routeRevision) return;
         if (route.namedCharacter && !mysticalCharacterById.has(route.characterId)) {
-          throw new Error(uiText("This character is not available in this reader's data release."));
+          throw Object.assign(new Error(uiText("This character is not available in this reader's data release.")), {code:"INVALID_READER_ROUTE"});
         }
         if (!route.view || route.view === "stories" || route.interactionId) await ensureStoryNavigation();
         if (revision !== routeRevision) return;
@@ -15738,6 +15818,10 @@
     });
 
     function showRouteError(error) {
+      if (error?.code === "INVALID_READER_ROUTE") {
+        routeRevision += 1; primaryView = "home"; selectedInteractionAssetKey = "";
+        applyPreferencesToUi(); showHome(); return;
+      }
       if (primaryView === "home") {
         homeStatus.textContent = uiText("Could not load this content: {error}", {error: error.message});
         homeStatus.hidden = false;
@@ -15779,7 +15863,8 @@
       root:storyArchivePage, read:routeJson, text:uiText, href:storyArchiveHref,
       url:value => globalThis.TEA_CONFIG?.data_base ? ReaderPublication.url("data/" + value) : "data/" + value,
       collections:archiveCollections,
-      storyHref:story => storyArchiveHref(ReaderStoryRoutes.path(story.section, story.category, story.id)),
+      storyHref:story => storyArchiveHref(ReaderStoryRoutes.path(story.section, story.category, story.id),
+        /^patient-\d+$/.test(String(story.id)) ? {patient:String(story.id).replace(/^patient-/, "")} : {}),
       onQuery:query => { storyArchiveRoute.archiveQuery = query; updateHash(); },
     });
 

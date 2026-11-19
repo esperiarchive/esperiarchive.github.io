@@ -9,7 +9,7 @@
     return String(value).replace(/^season_(\d+)$/, 'season-$1');
   }
 
-  // A reader grouping change must not rename permanent addresses or break bookmarks.
+  // Source identifiers are mapped to their current collection and category.
   function categoryFor(collection, category, id) {
     if (category === "daily") return "reputation";
     return section(collection) === 'special-events' && category === 'mini'
@@ -17,6 +17,21 @@
   }
 
   const eventTitles = {cn:'活动剧情', en:'Event Stories', jp:'イベントストーリー', kr:'이벤트 스토리'};
+  const patientTitles = {cn:'健康大作战 · 患者诊疗', en:'Potion Panacea · Patient encounters',
+    jp:'健康大作戦 · 患者との出会い', kr:'건강 프로젝트 · 환자와의 만남'};
+
+  // Keep separate patient graphs behind one navigation entry and group URL.
+  // Selecting a patient replaces that navigation slot in place.
+  function readingEntries(entries, selected = '') {
+    const result = [], groups = new Map();
+    for (const entry of entries) {
+      const story = entry.logicalStory || entry, group = story.readingGroup?.key;
+      if (!group) { result.push(entry); continue; }
+      if (!groups.has(group)) { groups.set(group, result.length); result.push(entry); }
+      else if (String(story.id) === String(selected)) result[groups.get(group)] = entry;
+    }
+    return result;
+  }
   function eventChapter(collection, story) {
     const season = /^season_(\d+)$/.exec(collection.key);
     const named = story.chapterTitle?.en && !['Mini Stories', 'Event Stories', 'Starry Tales'].includes(story.chapterTitle.en);
@@ -60,6 +75,8 @@
           if (origin === target && story.sourceCollection) { category.stories.push(story); continue; }
           category.stories.push({...story, key:`special_events/${key}/${story.id}`,
             sourceCollection:origin.key, sourceCollectionTitle:origin.title,
+            ...(story.chapterKey === 'potion_panacea-patients'
+              ? {readingGroup:{key:'potion_panacea-patients', kind:'patients', title:patientTitles}} : {}),
             ...(key === 'mini' ? {chapterKey:`${origin.key}/${story.chapterKey || 'events'}`,
               chapterTitle:eventChapter(origin, story),
               chapterOrder:(/^season_(\d+)$/.exec(origin.key)?.[1] || 99) * 1000 + (story.chapterOrder || 0)} : {})});
@@ -80,11 +97,10 @@
     const byPath = new Map(), byStory = new Map();
     const categories = new Set(['main', 'side', 'reputation', 'mini', 'starry', 'heart_to_heart', 'daily', 'exploration']);
     const slugPath = /^stories\/[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
-    const eventCopies = new Set(Object.keys(data.stories).filter(key => key.split('/')[1] === 'mini')
-      .map(key => { const [collection, , id] = key.split('/'); return `${section(collection)}/${id}`; }));
+    const eventIds = new Set(Object.keys(data.stories).filter(key => ['mini', 'starry'].includes(key.split('/')[1])).map(key => key.split('/')[2]));
     function targetFor(collection, category, id) {
       collection = section(collection);
-      if (category === 'side' && eventCopies.has(`${collection}/${id}`)) category = 'mini';
+      if (category === 'side' && eventIds.has(String(id))) category = 'mini';
       if (['mini', 'starry'].includes(category)) collection = 'special-events';
       return {section:collection, category:categoryFor(collection, category, id), storyId:String(id)};
     }
@@ -94,7 +110,7 @@
         throw new Error('Invalid story address key: ' + key);
       }
       const target = targetFor(parts[0], parts[1], parts[2]);
-      for (const path of [entry.path, ...(entry.aliases || [])]) {
+      for (const path of [entry.path]) {
         if (!slugPath.test(path) || byPath.has(path)) throw new Error('Invalid or duplicate story address: ' + path);
         byPath.set(path, target);
       }
@@ -104,25 +120,17 @@
     }
 
     function resolve(value) {
-      const path = String(value).split('?')[0].replace(/^#?\/?/, '');
-      const target = byPath.get(path);
-      if (target) return {...target, named: true};
-      const parts = path.split('/');
-      // Keep both historical collection/category/id and collection/chapter/category/id links.
-      const offset = parts.length === 4 ? 2 : 1;
-      if (![3, 4].includes(parts.length) || !categories.has(parts[offset])
-          || !/^(?:base|base_campaign|special-events|special_events|season[-_]\d+)$/.test(parts[0])) return null;
-      let id;
-      try { id = decodeURIComponent(parts[offset + 1]); } catch (_) { return null; }
-      if (!id || /[/?#\s]/.test(id)) return null;
-      return targetFor(parts[0], parts[offset], id);
+      const name = String(value).split('?')[0].replace(/^#?\/?/, '');
+      const target = byPath.get(name);
+      return target ? {...target, named:true} : null;
     }
 
     function path(collection, category, id) {
+      if (/^patient-\d+$/.test(String(id))) { collection = 'special-events'; category = 'mini'; id = 'potion_panacea-patients'; }
       const key = `${section(collection)}/${category}/${id}`;
       const target = targetFor(collection, category, id);
       return '#/' + (byStory.get(`${target.section}/${target.category}/${target.storyId}`) || byStory.get(key)
-        || `${target.section}/${target.category}/${encodeURIComponent(id)}`);
+        || 'home');
     }
 
     function canonicalHash(value) {
@@ -132,12 +140,23 @@
       return path(route.section, route.category, route.storyId) + (queryAt < 0 ? '' : String(value).slice(queryAt));
     }
 
+    // Game catalogs store source IDs, not public URLs. Convert those references
+    // at link creation; the browser accepts only the resulting current URL.
+    function referenceHash(value) {
+      if (resolve(value)) return canonicalHash(value);
+      const [name, query] = String(value).replace(/^#\/?/, '').split('?');
+      const parts = name.split('/');
+      if (parts.length !== 3 || !/^(?:base|base_campaign|special[-_]events|season[-_]\d+)$/.test(parts[0])) return value;
+      const current = path(parts[0], parts[1], parts[2]);
+      return current + (query ? '?' + query : '');
+    }
+
     function mainReturn(value) {
       if (typeof value !== 'string' || value.length > 4000 || !value.startsWith('#/') || value.slice(1).includes('#')) return '';
       const target = resolve(value);
       return target?.category === 'main' && !new URLSearchParams(value.split('?')[1] || '').has('return') ? value : '';
     }
-    return {resolve, path, canonicalHash, mainReturn, targetFor};
+    return {resolve, path, canonicalHash, referenceHash, mainReturn, targetFor};
   }
-  return {...create(registry), create, categoryFor, relocateEvents};
+  return {...create(registry), create, categoryFor, relocateEvents, readingEntries};
 });

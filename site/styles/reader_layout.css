@@ -10,7 +10,9 @@
 
   .home-view .story-scroll,
   .story-archive-view .story-scroll,
-  .story-scroll:has(> .archive-browser:not([hidden])) { padding-block: 18px; }
+  .story-scroll:has(> .archive-browser:not([hidden])),
+  .story-scroll:has(> .mystical-browser:not([hidden])) { padding-block: 18px; }
+
 
   .home-page { min-height: 100%; display: flex; flex-direction: column; justify-content: center; gap: clamp(14px, 2.2vh, 28px); }
   .home-hero { padding: 0; }
@@ -24,14 +26,14 @@
   .home-footer { margin-top: 0; padding-top: 10px; }
   .home-footer p { margin: 3px 0; }
 
-  .story-archive-page { padding: 8px 20px 16px; }
-  .story-archive-heading { margin-bottom: 18px; }
-  .story-archive-page h1 { font-size: clamp(30px, 3vw, 38px); }
+  .story-archive-page { padding: 0 0 18px; }
+  .story-archive-page[data-page="entrance"] { padding: 8px 20px 16px; }
+  .archive-entrance-heading h1 { font-size: calc(clamp(30px, 3vw, 38px) * var(--reader-font-ratio)); }
   .story-archive-page[data-page="entrance"] { min-height: 500px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
   .archive-carousel { margin-block: 8px 12px; width: 100%; }
   .archive-portal { padding: 0 20px 12px; }
   .archive-portal .archive-illustration { height: clamp(150px, 25vh, 240px); }
-  .archive-portal h2 { font-size: clamp(32px, 3.5vw, 44px); }
+  .archive-portal h2 { font-size: calc(clamp(32px, 3.5vw, 44px) * var(--reader-font-ratio)); }
   .archive-open { padding-top: 12px; }
 
   .archive-season-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 10px; }
@@ -39,7 +41,7 @@
   .archive-season-art { height: clamp(130px, min(calc((100dvh - 430px) / 2), 16vw), 240px); }
   .archive-season-card .archive-window-title { font-size: clamp(14px, 1.35vw, 20px); }
   .archive-season-card[data-collection="base_campaign"] .archive-window-title { font-size: clamp(13px, 1.2vw, 18px); }
-  .archive-season-card h2 { font-size: 18px; margin: 4px 0; }
+  .archive-season-card h2 { font-size: calc(18px * var(--reader-font-ratio)); margin: 4px 0; }
 
   .story-archive-page:is([data-page="glossary"], [data-page="search"]) {
     height: 100%; min-height: 360px; display: flex; flex-direction: column;
@@ -99,14 +101,14 @@
   .app-shell.story-archive-view:has(.story-archive-page[data-page="entrance"]:not([hidden])) { height: 100dvh; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
   .story-archive-view .story-scroll:has(> .story-archive-page[data-page="entrance"]:not([hidden])) { min-height: 0; padding: 0; overflow: auto; }
   .story-archive-page[data-page="entrance"] { height: 100%; min-height: 0; padding: clamp(8px, 2dvh, 18px) 12px max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
-  .archive-entrance-heading .archive-eyebrow { margin: 0 0 6px; font-size: 10px; }
-  .archive-entrance-heading h1 { margin: 0 0 8px; font-size: clamp(24px, 6.5vw, 32px); }
+  .archive-entrance-heading .archive-eyebrow { margin: 0 0 6px; }
+  .archive-entrance-heading h1 { margin: 0 0 8px; font-size: calc(clamp(24px, 6.5vw, 32px) * var(--reader-font-ratio)); }
   .story-archive-page[data-page="entrance"] .archive-carousel { min-height: 0; height: 100%; margin: 0; }
   .archive-portal-slot { min-height: 0; height: 100%; }
   .archive-portal { min-height: 0; padding: 8px 4px 14px; display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; justify-items: center; gap: 8px; }
   .archive-portal .archive-illustration { width: min(100%, 250px); height: 100%; min-height: 0; max-height: 35dvh; align-self: center; }
-  .archive-portal h2 { margin: 0; font-size: clamp(26px, 7.5vw, 36px); }
-  .archive-portal-description { font-size: 14px; line-height: 1.5; }
+  .archive-portal h2 { margin: 0; font-size: calc(clamp(26px, 7.5vw, 36px) * var(--reader-font-ratio)); }
+  .archive-portal-description { font-size: calc(14px * var(--reader-font-ratio)); line-height: 1.5; }
   .archive-open { margin: 0; padding: 2px 6px; }
 }
 

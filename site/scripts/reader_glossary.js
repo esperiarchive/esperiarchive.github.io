@@ -32,7 +32,7 @@
     function value(locales) { return locales?.[state.language] || locales?.en || ""; }
     function heading(label, description) {
       const header = element("header", "story-archive-heading");
-      header.append(link("‹ " + text("Story Archive"), href(path())), element("h1", "", text(label)));
+      header.append(link("‹ " + text("Story Archive"), href(path()), "mystical-kicker archive-kicker-link"), element("h1", "", text(label)));
       if (description) header.append(element("p", "", text(description)));
       root.append(header);
     }

@@ -39,7 +39,7 @@
       const source = illustrations[kind] || illustrations.stories;
       if (source?.presentation === "portrait") node.classList.add("archive-portrait");
       if (source) {
-        const image = element("img"); image.src = ReaderPublication.url(url(source.image)); image.alt = "";
+        const image = element("img"); image.src = url(source.image); image.alt = "";
         image.width = source.width; image.height = source.height; image.decoding = "async";
         node.append(image);
       }
@@ -66,7 +66,7 @@
     }
     function heading(label, description) {
       const header = element("header", "story-archive-heading");
-      header.append(link("‹ " + text("Story Archive"), href(path())), element("h1", "", text(label)));
+      header.append(link("‹ " + text("Story Archive"), href(path()), "mystical-kicker archive-kicker-link"), element("h1", "", text(label)));
       if (description) header.append(element("p", "", text(description)));
       root.append(header);
     }
@@ -133,18 +133,17 @@
           const window = element("figure", "archive-season-window");
           if (cover.presentation === "portrait") window.classList.add("archive-portrait");
           window.style.aspectRatio = cover.presentation === "portrait" ? "3 / 4" : `${cover.width} / ${cover.height}`;
-          const image = element("img"); image.src = ReaderPublication.url(url(cover.image)); image.alt = ""; image.width = cover.width; image.height = cover.height; image.loading = "lazy";
+          const image = element("img"); image.src = url(cover.image); image.alt = ""; image.width = cover.width; image.height = cover.height; image.loading = "lazy";
           image.addEventListener("error", () => {window.hidden = true; art.append(icon("stories"));}, {once:true});
           const caption = element("figcaption", "archive-window-caption");
           caption.append(element("h2", "archive-window-title", collection.label));
           window.append(image, caption);art.append(window);
         } else art.append(icon("events"));
         const number = /^season_(\d+)$/.exec(collection.key);
-        const kicker = !cover ? collection.label : number
-          ? text("Season {number}", {number:number[1]})
-          : text(collection.key === "base_campaign" ? "Starter Story" : "Special Events");
-        card.append(art, element("span", "archive-season-kicker", kicker),
-          element("span", "archive-season-open", text("Read stories") + " →"));
+        card.append(art, element("span", "archive-season-kicker", number ? text("Season {number}", {number:number[1]})
+          : text(collection.key === "base_campaign" ? "Starter Story" : "Special Events")));
+        if (!cover) card.append(element("h2", "", collection.label));
+        card.append(element("span", "archive-season-open", text("Read stories") + " →"));
         grid.append(card);
       }
       root.append(grid);
@@ -219,7 +218,7 @@
       if (continuingGlossary) root.querySelector(".archive-term-list").scrollTop = listScrollTop;
       return position;
     }
-    return {prepare,render};
+    return {prepare,render,hasTerm:id => Boolean(glossary?.entries.some(entry => entry.id === id))};
   }
   return {create,parse,path,matches};
 });

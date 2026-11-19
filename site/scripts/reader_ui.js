@@ -6,6 +6,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
   const messages = {
+  "Choose a patient": {"cn":"选择患者","jp":"患者を選択","kr":"환자 선택"},
   "Event Stories": {"cn":"活动剧情","jp":"イベントストーリー","kr":"이벤트 스토리"},
   "World": {"cn": "世界", "jp": "世界", "kr": "세계"},
   "Fish": {
