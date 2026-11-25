@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=a96b0460150b97ba"></script>
-  <script src="scripts/reader_publication.js?v=f3c439a882556b73"></script>
+  <script src="scripts/config.js?v=a82623ef8536cb26"></script>
+  <script src="scripts/reader_publication.js?v=0b04c337808e8c4d"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <script>ReaderPublication.preloadRoute();</script>
   <meta charset="utf-8">
@@ -3524,9 +3524,10 @@
         <div class="app-title">The Esperia Archive</div>
         <nav class="primary-tabs" aria-label="Reader sections" data-i18n-aria-label="Reader sections">
           <button id="home-tab" class="primary-tab" type="button" data-i18n="Home">Home</button>
-          <button id="story-archive-tab" class="primary-tab active" type="button" data-i18n="Story">Story</button>
+          <button id="story-archive-tab" class="primary-tab" type="button" data-i18n="Story">Story</button>
           <button id="mystical-house-tab" class="primary-tab" type="button" data-i18n="Characters">Characters</button>
           <button id="document-archive-tab" class="primary-tab" type="button" data-i18n="World">World</button>
+          <button id="cosmetics-tab" class="primary-tab" type="button" data-i18n="Cosmetics" hidden>Cosmetics</button>
         </nav>
       </div>
       <div id="current-story-title" class="story-title">Loading...</div>
@@ -3567,6 +3568,7 @@
 
     <main id="story-scroll" class="story-scroll">
       <div id="content-loading" class="reader-loading" role="status" hidden></div>
+      <iframe id="cosmetics-frame" title="Merlin’s wardrobe" hidden></iframe>
       <section id="home-page" class="home-page" aria-labelledby="home-heading" hidden>
         <header class="home-hero">
           <p class="home-kicker" data-i18n="AFK Journey · Unofficial fan archive">AFK Journey · Unofficial fan archive</p>
@@ -3805,24 +3807,25 @@
   <link rel="stylesheet" href="styles/dialogue_effects.css?v=f20d39d58efeafb5">
   <script src="scripts/dialogue_color_lookup.js?v=df178e5ff1d61dc3"></script>
   <script src="scripts/dialogue_effects.js?v=b0899998f27194f3"></script>
-  <link rel="stylesheet" href="styles/player_appearance.css?v=765ddbc554fda557">
-  <script src="scripts/player_appearance.js?v=93ebad4a406a469b"></script>
+  <link rel="stylesheet" href="styles/player_appearance.css?v=bbe2920c2c85b962">
+  <script src="scripts/appearance_store.js?v=de0b5603743f1028"></script>
+  <script src="scripts/player_appearance.js?v=a5ef37abc860b257"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=a18691b1997cac31"></script>
+  <script src="scripts/reader_ui.js?v=e855de1ba4c2919f"></script>
   <link rel="stylesheet" href="styles/world_archive.css?v=cec953d64ee098ee">
   <script src="scripts/world_archive.js?v=4b6d8247b4363ae1"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
   <link rel="stylesheet" href="styles/reader_glossary.css?v=4b3723ec42a3c8a9">
   <script src="scripts/reader_glossary.js?v=ced38dae0e2db22b"></script>
-  <link rel="stylesheet" href="styles/story_archive.css?v=080965462cc5e996">
-  <script src="scripts/story_archive.js?v=132d91ac214762cf"></script>
-  <script src="scripts/reader_story_paths.js?v=fdbe042a83094c07"></script>
+  <link rel="stylesheet" href="styles/story_archive.css?v=98169a197d6c77e2">
+  <script src="scripts/story_archive.js?v=8b819dcb7f4e890c"></script>
+  <script src="scripts/reader_story_paths.js?v=64bec758a5c3c344"></script>
   <script src="scripts/reader_story_routes.js?v=256d812e5e4d78b5"></script>
-  <script src="scripts/reader_character_paths.js?v=8baf294f0707477b"></script>
+  <script src="scripts/reader_character_paths.js?v=3b0fd5a2f9f137d2"></script>
   <script src="scripts/reader_character_routes.js?v=e60e48540f469236"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
-  <script src="scripts/story_runtime.js?v=3733550704f6c2ff"></script>
+  <script src="scripts/story_runtime.js?v=9a1bbdf5a750aa41"></script>
   <script src="scripts/story_results.js?v=30688082fc607173"></script>
   <script src="scripts/story_activities.js?v=f8845c3b5fbc9432"></script>
   <script src="scripts/story_encounters.js?v=14a044583a8d3874"></script>
@@ -3834,8 +3837,8 @@
   <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
   <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
   <link rel="stylesheet" href="styles/story_runtime.css?v=88e65f15e34eb01c">
-  <link rel="stylesheet" href="styles/reader_theme.css?v=381e6634532b9336">
-  <link rel="stylesheet" href="styles/reader_layout.css?v=dd952099d8e78b88">
+  <link rel="stylesheet" href="styles/reader_theme.css?v=7d56085553e391e5">
+  <link rel="stylesheet" href="styles/reader_layout.css?v=44e52eb4384de05a">
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
     const READER_PUBLIC = Boolean(window.TEA_CONFIG?.public_reader) || document.documentElement.dataset.readerProfile === "public";
@@ -4167,6 +4170,24 @@
     const storyArchiveTab = document.getElementById("story-archive-tab");
     const mysticalHouseTab = document.getElementById("mystical-house-tab");
     const documentArchiveTab = document.getElementById("document-archive-tab");
+    const cosmeticsTab = document.getElementById("cosmetics-tab");
+    const cosmeticsFrame = document.getElementById("cosmetics-frame");
+    const classicWardrobeUrl = new URL("../avatar_creator/index.html", document.baseURI);
+    const betaWardrobeUrl = new URL("../wardrobe3d/index.html", document.baseURI);
+    let cosmeticsUrl = classicWardrobeUrl, hasClassic = false, hasBeta = false;
+    async function installedEditor(url) {
+      const response = await ReaderPublication.fetch(url, {method:"HEAD"});
+      return response.ok && response.headers.get("X-TEA-Wardrobe") === "1";
+    }
+    // Private servers mark installed editors with a header. Static public hosts cannot, so a
+    // public build offers each editor whose library its config names; 3D also reads the 2D catalogue.
+    const wardrobeConfig = window.TEA_CONFIG || {};
+    const cosmeticsAvailable = location.protocol === "file:" ? Promise.resolve(false)
+      : (wardrobeConfig.public_reader
+        ? Promise.resolve([!!wardrobeConfig.wardrobe_2d_base, !!(wardrobeConfig.wardrobe_2d_base && wardrobeConfig.wardrobe_3d_base)])
+        : Promise.all([classicWardrobeUrl, betaWardrobeUrl].map(url => installedEditor(url).catch(() => false))))
+        .then(([classic, beta]) => { hasClassic = classic; hasBeta = beta; return classic || beta; });
+    cosmeticsAvailable.then(available => { cosmeticsTab.hidden = !available; });
     const currentStoryTitle = document.getElementById("current-story-title");
     const languageSelect = document.getElementById("language-select");
     const modeSelect = document.getElementById("mode-select");
@@ -4291,6 +4312,8 @@
     let routeRevision = 0;
     let returnToMainQuest = "";
     const mainQuestBookmarks = new Map();
+    const LAST_READ_KEY = "tea-last-read-v1";
+    let lastReadTimer = 0, backToTop = null;
     const petalCardCounts = new Map();
     let archiveKind = "documents";
     let selectedArchiveId = "";
@@ -6462,7 +6485,7 @@
         for (const child of storyScroll.children) if (child !== contentLoading) child.inert = true;
         contentLoadingControls = new Map([
           languageSelect, modeSelect, sectionSelect, categorySelect, storySelect,
-          homeTab, storyArchiveTab, mysticalHouseTab, documentArchiveTab,
+          homeTab, storyArchiveTab, mysticalHouseTab, documentArchiveTab, cosmeticsTab,
         ].map(control => [control, control.disabled]));
         for (const control of contentLoadingControls.keys()) control.disabled = true;
         storyNavigation.inert = true;
@@ -6532,6 +6555,7 @@
 
     function updatePrimaryShell() {
       const homeOpen = primaryView === "home";
+      const cosmeticsOpen = primaryView === "cosmetics";
       const storyArchiveOpen = primaryView === "story-archive";
       storyArchivePage.hidden = !storyArchiveOpen;
       storyGalleryBack.hidden = primaryView !== "stories";
@@ -6540,23 +6564,30 @@
       const mysticalBrowse = primaryView === "mystical" && !interactionOpen;
       const archiveBrowse = primaryView === "archive";
       appShell.classList.toggle("home-view", homeOpen);
+      appShell.classList.toggle("cosmetics-view", cosmeticsOpen);
+      if (!cosmeticsOpen) appShell.classList.remove("wardrobe-expanded");
       homePage.hidden = !homeOpen;
       homeTab.classList.toggle("active", homeOpen);
       homeTab.setAttribute("aria-selected", String(homeOpen));
-      currentStoryTitle.hidden = homeOpen || storyArchiveOpen;
+      currentStoryTitle.hidden = homeOpen || cosmeticsOpen || storyArchiveOpen;
       storyArchiveTab.classList.toggle("active", ["stories", "story-archive"].includes(primaryView));
       mysticalHouseTab.classList.toggle("active", primaryView === "mystical");
       documentArchiveTab.classList.toggle("active", archiveBrowse);
       storyArchiveTab.setAttribute("aria-selected", String(["stories", "story-archive"].includes(primaryView)));
       mysticalHouseTab.setAttribute("aria-selected", String(primaryView === "mystical"));
       documentArchiveTab.setAttribute("aria-selected", String(archiveBrowse));
+      cosmeticsTab.classList.toggle("active", cosmeticsOpen);
+      cosmeticsTab.setAttribute("aria-selected", String(cosmeticsOpen));
+      cosmeticsFrame.hidden = !cosmeticsOpen;
+      if (!cosmeticsOpen && cosmeticsFrame.hasAttribute("src")) unloadWardrobe();
       storyNavigation.hidden = primaryView !== "stories";
       const interactionPending = storyReader.getAttribute("aria-busy") === "true"
         || storyScroll.getAttribute("aria-busy") === "true";
-      bottomNavigation.hidden = homeOpen || storyArchiveOpen || mysticalBrowse || archiveBrowse || interactionPending;
+      bottomNavigation.hidden = homeOpen || cosmeticsOpen || storyArchiveOpen || mysticalBrowse || archiveBrowse || interactionPending;
       archiveBrowser.hidden = !archiveBrowse;
       mysticalBrowser.hidden = !mysticalBrowse;
-      storyContentLayout.hidden = homeOpen || storyArchiveOpen || mysticalBrowse || archiveBrowse;
+      storyContentLayout.hidden = homeOpen || cosmeticsOpen || storyArchiveOpen || mysticalBrowse || archiveBrowse;
+      updateBackToTop();
       storyReader.hidden = storyContentLayout.hidden;
       if (storyContentLayout.hidden || interactionOpen) {
         hideStoryOutline();
@@ -6604,6 +6635,7 @@
       updateHomeLinks();
       updateHash();
       scrollReaderToTop();
+      // Home itself needs no data; the small route catalogs make any first click faster.
       whenIdle(() => primaryView === "home" && warmBootstrap());
     }
 
@@ -6616,17 +6648,20 @@
         const categories = [...collection.categories.values()];
         const category = collection.categories.get("main") || categories[0];
         const first = category?.stories[0];
-        return {key:collection.key, label:collectionDisplayTitle(collection),
+        const entry = {key:collection.key, label:collectionDisplayTitle(collection),
           href:first ? storyArchiveHref(ReaderStoryRoutes.path(collection.key, category.key, first.id)) : "",
           stories:categories.flatMap(group => group.stories.map(story => ({
             id:story.id, section:collection.key, category:group.key, title:story.title, description:story.description,
           })))};
+        entry.lastRead = lastReadLink(entry);
+        return entry;
       }).filter(collection => collection.href);
     }
 
     function renderStoryArchive() {
       const archiveWasOpen = !storyArchivePage.hidden;
       stopActiveVoice();
+      storyMusic?.stop();
       updatePrimaryShell();
       const position = storyArchive.render(storyArchiveRoute, selectedLanguage, {
         active:archiveWasOpen, paneTop:storyScroll.scrollTop, pageTop:window.scrollY,
@@ -6645,6 +6680,71 @@
           window.scrollTo({top:Math.max(0, top || 0), behavior:"instant"});
         }
       } else scrollReaderToTop();
+    }
+
+    let wardrobeSession = null, wardrobeReady = false, wardrobeNoticeTimer;
+    function wardrobeMessage(message) { cosmeticsFrame.contentWindow?.postMessage(message, location.origin); }
+    function wardrobeReturnPoint() {
+      return {view:primaryView === "cosmetics" ? "home" : primaryView,
+        hash:primaryView === "cosmetics" ? "#/home" : location.hash,
+        initialNode:initialNodeId,paneTop:storyScroll.scrollTop,pageTop:window.scrollY};
+    }
+    function chooseWardrobe(seed, beta = !!seed?.recipe?.wardrobe3d || !hasClassic) {
+      const next = beta && hasBeta ? betaWardrobeUrl : classicWardrobeUrl;
+      if (cosmeticsUrl !== next) {
+        cosmeticsUrl = next;
+        unloadWardrobe();
+      }
+    }
+    function unloadWardrobe() {
+      wardrobeReady = false;
+      if (cosmeticsFrame.hasAttribute("src")) cosmeticsFrame.removeAttribute("src");
+    }
+    function sendWardrobeSession() {
+      if (!wardrobeReady || !wardrobeSession) return;
+      // A reloaded wardrobe picks up whether the reader bars are hidden.
+      wardrobeMessage({type:"tea-wardrobe-init",sessionId:wardrobeSession.id,seed:wardrobeSession.seed,language:selectedLanguage,hasBeta,hasClassic,
+        expanded:appShell.classList.contains("wardrobe-expanded")});
+    }
+    async function openWardrobe(seed, options={}) {
+      if (!await cosmeticsAvailable) return;
+      const returnTo=wardrobeSession?.returnTo || wardrobeReturnPoint();
+      wardrobeSession={id:randomId(),seed,returnTo,opener:options.opener,applied:!!wardrobeSession?.applied};
+      chooseWardrobe(seed);
+      setSettingsOpen(false);
+      if(primaryView === "cosmetics")showCosmetics();
+      else window.location.hash=ReaderUI.sectionHash("/cosmetics",{lang:selectedLanguage,mode:readerMode,gender:selectedGender});
+    }
+    function finishWardrobe(applied=false) {
+      const session=wardrobeSession;if(!session)return;
+      applied ||= !!session.applied;
+      wardrobeSession=null;++routeRevision;
+      primaryView=session.returnTo.view;initialNodeId=session.returnTo.initialNode;
+      window.history.replaceState(null,"",ReaderUI.sectionHash(session.returnTo.hash,{lang:selectedLanguage,mode:readerMode,gender:selectedGender}).replace(/^#?/,"#"));
+      applyPreferencesToUi();updatePrimaryShell();
+      if(primaryView === "home")showHome();
+      else if(applied && (primaryView === "stories" || primaryView === "mystical" && selectedInteractionAssetKey) && storyGraph)renderPreservingScroll();
+      storyScroll.scrollTo({top:session.returnTo.paneTop,behavior:"instant"});window.scrollTo({top:session.returnTo.pageTop,behavior:"instant"});
+      session.opener?.focus({preventScroll:true});
+      if(applied){
+        document.querySelector(".reader-appearance-notice")?.remove();
+        const notice=document.createElement("p");notice.className="reader-appearance-notice";notice.setAttribute("role","status");notice.textContent=uiText("Merlin’s look updated");document.body.append(notice);
+        clearTimeout(wardrobeNoticeTimer);wardrobeNoticeTimer=setTimeout(()=>notice.remove(),5000);
+      }
+    }
+    function showCosmetics() {
+      clearContentStatus();
+      stopActiveVoice();
+      storyMusic?.stop();
+      updatePrimaryShell();
+      if (!cosmeticsFrame.hasAttribute("src")) {
+        const url = new URL(cosmeticsUrl);
+        url.search = new URLSearchParams({embed: "reader", gender: selectedGender, lang:selectedLanguage}).toString();
+        cosmeticsFrame.src = ReaderPublication.url(url.href);
+      }
+      sendWardrobeSession();
+      updateHash();
+      scrollReaderToTop();
     }
 
     function characterFaction(character) {
@@ -8555,14 +8655,19 @@
       return `${path}?${target}`;
     }
 
-    function rememberMainQuestReturn(link, block) {
-      if (!logicalNavigation || selectedCategory !== "main") return;
-      const target = new URLSearchParams((link.getAttribute("href") || "").split("?")[1] || "");
-      const source = validMainQuestReturn(target.get("return"));
-      if (!source) return;
+    // randomUUID needs a secure page (https or localhost) and a 2022 or later browser; getRandomValues works everywhere.
+    function randomId() {
+      if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+      const bytes = crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = bytes[6] & 15 | 64; bytes[8] = bytes[8] & 63 | 128;
+      const hex = [...bytes].map(byte => byte.toString(16).padStart(2, "0")).join("");
+      return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+    }
+    // Everything needed to put the reader back at a block: the shown lines, choices and scroll offset.
+    function readingBookmark(block) {
       const mobile = window.matchMedia("(max-width: 900px)").matches;
-      const bookmark = {
-        version: 1, source, section: collectionRoutePart(selectedSection), storyId: String(selectedStoryId),
+      return {
+        version: 1, section: collectionRoutePart(selectedSection), storyId: String(selectedStoryId),
         language: selectedLanguage, mode: readerMode, gender: selectedGender,
         anchor: block.dataset.nodeId,
         offset: block.getBoundingClientRect().top - (mobile ? 0 : storyScroll.getBoundingClientRect().top),
@@ -8574,6 +8679,14 @@
         runtime: storySession?.snapshot(), history: storyHistory?.snapshot(),
         undo: structuredClone(choiceUndoStack),
       };
+    }
+
+    function rememberMainQuestReturn(link, block) {
+      if (!logicalNavigation || selectedCategory !== "main") return;
+      const target = new URLSearchParams((link.getAttribute("href") || "").split("?")[1] || "");
+      const source = validMainQuestReturn(target.get("return"));
+      if (!source) return;
+      const bookmark = {...readingBookmark(block), source};
       mainQuestBookmarks.set(source, bookmark);
       if (mainQuestBookmarks.size > 8) mainQuestBookmarks.delete(mainQuestBookmarks.keys().next().value);
       // Also survive refreshing the side quest. Storage failure still permits
@@ -8644,6 +8757,70 @@
       (mobile ? window : storyScroll).scrollTo({top: Math.max(0, top || 0), behavior: "instant"});
     }
 
+    // The latest story position survives visits, so chapter select can offer to continue it.
+    function readLastRead() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(LAST_READ_KEY) || "null");
+        return saved?.version === 1 && saved.bookmark?.version === 1 ? saved : null;
+      } catch (_) { return null; }
+    }
+
+    function saveLastRead() {
+      window.clearTimeout(lastReadTimer);
+      lastReadTimer = 0;
+      if (primaryView !== "stories" || !storyGraph || !timelineItems.length || !selectedSection
+          || /^patient-/.test(String(selectedStoryId)) || storyScroll.getAttribute("aria-busy") === "true"
+          || storyReader.getAttribute("aria-busy") === "true") return;
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      const edge = mobile ? 0 : storyScroll.getBoundingClientRect().top;
+      // The first block still on screen; restoring measures from the first element with its id.
+      const shown = [...timeline.querySelectorAll("[data-node-id]")].find(block => block.getBoundingClientRect().bottom > edge + 1);
+      const block = shown && timeline.querySelector(`[data-node-id="${CSS.escape(shown.dataset.nodeId)}"]`);
+      if (!block) return;
+      const record = {version: 1, collection: selectedSection, category: selectedCategory, savedAt: Date.now(),
+        bookmark: readingBookmark(block)};
+      try { localStorage.setItem(LAST_READ_KEY, JSON.stringify(record)); } catch (_) {}
+    }
+
+    function scheduleLastRead() {
+      if (primaryView !== "stories") return;
+      window.clearTimeout(lastReadTimer);
+      lastReadTimer = window.setTimeout(saveLastRead, 1200);
+    }
+
+    function flushLastRead() {
+      if (lastReadTimer) saveLastRead();
+    }
+
+    function lastReadBookmarkForRoute(route) {
+      if (!route.resume || route.view !== "stories") return null;
+      const saved = readLastRead(), bookmark = saved?.bookmark;
+      // Lines are shared across languages, so only the reading mode and Merlin's gender must match.
+      if (!bookmark || saved.category !== route.category
+          || bookmark.section !== route.section || bookmark.storyId !== String(route.storyId)
+          || bookmark.mode !== (route.mode || readerMode) || bookmark.gender !== (route.gender || selectedGender)) return null;
+      return bookmark;
+    }
+
+    function lastReadLink(collection) {
+      const saved = readLastRead();
+      if (saved?.collection !== collection.key) return null;
+      const story = collection.stories.find(entry => entry.category === saved.category
+        && String(entry.id) === saved.bookmark.storyId);
+      if (!story) return null;
+      return {title: story.title, href: storyArchiveHref(ReaderStoryRoutes.path(collection.key, story.category, story.id),
+        {mode: saved.bookmark.mode, gender: saved.bookmark.gender, continue: "1"})};
+    }
+
+    function updateBackToTop() {
+      if (!backToTop) return;
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      const top = mobile ? window.scrollY : storyScroll.scrollTop;
+      backToTop.hidden = primaryView === "cosmetics" || top < window.innerHeight * 1.5;
+      const label = uiText("Back to top");
+      if (backToTop.title !== label) { backToTop.title = label; backToTop.setAttribute("aria-label", label); }
+    }
+
     function renderStoryReturnLinks() {
       for (const link of document.querySelectorAll(".story-return-link")) link.remove();
       const route = primaryView === "stories" && selectedCategory === "side" ? validMainQuestReturn(returnToMainQuest) : "";
@@ -8666,6 +8843,8 @@
       const route = {};
       if (!parts.length || (parts.length === 1 && parts[0] === "home")) {
         route.view = "home";
+      } else if (parts.length === 1 && parts[0] === "cosmetics") {
+        route.view = "cosmetics";
       } else if (parts[0] === "mystical-house") {
         const target = ReaderCharacterRoutes.resolve(pathPart);
         if (!target) throw Object.assign(new Error(uiText("This character or conversation address could not be found.")), {code:"INVALID_READER_ROUTE"});
@@ -8706,6 +8885,7 @@
       if (params.get("node")) {
         route.node = params.get("node");
       }
+      if (params.get("continue") === "1") route.resume = true;
       if (params.get("gender")) {
         route.gender = params.get("gender");
       }
@@ -8734,7 +8914,7 @@
         storyArchiveRoute = {archivePage:route.archivePage || "", glossaryTerm:route.glossaryTerm || "", archiveQuery:route.archiveQuery || ""};
         return;
       }
-      if (["home", "story-archive"].includes(primaryView)) return;
+      if (["home", "cosmetics", "story-archive"].includes(primaryView)) return;
       if (primaryView === "mystical") {
         selectedCharacterId = route.characterId || "";
         selectedInteractionAssetKey = route.interactionId || "";
@@ -8778,6 +8958,8 @@
       } else if (primaryView === "story-archive") {
         if (storyArchiveRoute.archiveQuery) params.set("q", storyArchiveRoute.archiveQuery);
         nextHash = `#${ReaderStoryArchive.path(storyArchiveRoute.archivePage, storyArchiveRoute.glossaryTerm)}?${params.toString()}`;
+      } else if (primaryView === "cosmetics") {
+        nextHash = `#/cosmetics?${params.toString()}`;
       } else if (primaryView === "archive") {
         const routeParts = ["archive", archiveKind];
         if (selectedArchiveId) {
@@ -9118,6 +9300,7 @@
       }
     }
     let routeCatalogs = null;
+    let storyMusic = null;
     let storyNavigationLoad = null;
     let characterIndexLoad = null;
     let archiveBindings = null;
@@ -9559,6 +9742,7 @@
 
     async function loadManifest() {
       routeCatalogs = await loadCatalogIfPresent("data/catalogs/navigation/routes.json");
+      if (routeCatalogs?.music) await storyMusic?.load(routeCatalogs.music);
       if (!routeCatalogs) {
         if (globalThis.TEA_CONFIG?.require_routes) throw new Error("Required reader route catalog could not be loaded.");
         await loadLegacyManifest(); return;
@@ -9841,6 +10025,7 @@
       }
       // Validate authored end-of-dialogue placement before music wraps the end
       // with its invisible completion marker.
+      graph = storyMusic?.install(graph, assetKey) || graph;
       if (scenes) {
         graph = StoryScenes.install(graph, scenes.assets?.[assetKey]);
       }
@@ -9875,6 +10060,7 @@
         graph.roots = ["runtime:placement"];
       }
       graph = StoryEncounters.install(graph, story);
+      if (storyRuntimeCatalog?.treatment_feedback) graph = StoryRuntime.treatmentGraph(graph, storyRuntimeCatalog);
       const embeddedLocale = (base, language) => ({ ...base,
         texts: { ...base.texts, ...graph.embedded_locales?.[language]?.texts },
         speakers: { ...base.speakers, ...graph.embedded_locales?.[language]?.speakers },
@@ -10404,6 +10590,7 @@
 
     function applyPreferencesToUi() {
       ReaderUI.apply(document, selectedLanguage);
+      if(wardrobeReady)wardrobeMessage({type:"tea-wardrobe-language",language:selectedLanguage});
       languageSelect.value = selectedLanguage;
       modeSelect.value = readerMode;
       if (showMtInput) showMtInput.checked = showMt;
@@ -11405,11 +11592,14 @@
       block.dataset.nodeId = domNodeId(item.nodeId);
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = uiText("Choose Merlin’s appearance");
+      button.textContent = uiText("Choose a look");
       button.onclick = () => playerAppearance?.open({opener:button, chooseGender:true});
       const note = document.createElement("p");
       note.textContent = uiText("Optional — you can change this anytime in Settings.");
-      block.append(button, note);
+      const customize=document.createElement("button");customize.type="button";customize.textContent=uiText("Customize");customize.hidden=true;
+      cosmeticsAvailable.then(available=>{customize.hidden=!available;});
+      customize.onclick=async()=>{try{await playerAppearance?.customize({opener:customize,chooseGender:true});}catch(error){note.textContent=error.message;}};
+      block.append(button, customize, note);
       container.appendChild(block);
       return block;
     }
@@ -13162,6 +13352,7 @@
         return;
       }
       if (item.type === "effect" || item.type === "effect_reset") {
+        if (item.effectEvent?.kind === "story_music") storyMusic?.marker(container,item.effectEvent,domNodeId(item.nodeId));
         return;
       }
       if (item.type === "line") {
@@ -13664,6 +13855,7 @@
             reputationQuestHeading:Boolean(node.reputation_quest_heading),prerequisiteStories:node.prerequisite_stories || []},timeline);
           walk(node.next,indent,stopNodeId);
         } else if (node.type === "effect") {
+          if (node.effect_event?.kind === "story_music") storyMusic?.marker(timeline,node.effect_event,domNodeId(nodeId));
           walk(node.next, indent, stopNodeId);
         } else if (node.type === "line" || node.type === "document") {
           renderTimelineItem(nodeToTimelineLine(nodeId), timeline, indent, false);
@@ -14120,7 +14312,7 @@
       block.className = "story-activity";
       block.dataset.nodeId = domNodeId(item.nodeId);
       const heading = document.createElement("h3");
-      heading.textContent = node.instruction.title || uiText("Activity");
+      heading.textContent = uiText(node.instruction.title || "Activity");
       block.appendChild(heading);
       if (reasoning) {
         const caseData = storyRuntimeCatalog.reasoning.cases[node.instruction.case_id];
@@ -14197,7 +14389,8 @@
         const preview = new StoryRuntime.Session(storyHistory);
         preview.restore(item.runtimeBefore || storySession.snapshot());
         const options = preview.activityOptions(node, runtimeItemName, selectedLanguage)
-          .filter(option => detailed || !treatment || option.input.mode === "conclude");
+          .filter(option => detailed || !treatment || ["conclude", "first_attempt"].includes(option.input.mode))
+          .map(option => option.labelKey ? {...option, label:uiText(option.labelKey)} : option);
         if (options.length) {
           const select = document.createElement("select");
           select.setAttribute("aria-label", heading.textContent + " " + uiText(reasoning ? "combination" : "outcome"));
@@ -14573,7 +14766,9 @@
             continue;
           } catch (error) { runtimeNotice = error.message; break; }
         }
-        const automatic = !showDebug && readerMode !== "debug" && StoryRuntime.simpleRetryActivity(storyGraph, runtimeNode);
+        const reaction = runtimeNode?.instruction?.op === "treatment_reaction"
+          && storySession.activityOptions(runtimeNode, runtimeItemName, selectedLanguage)[0];
+        const automatic = reaction || (!showDebug && readerMode !== "debug" && StoryRuntime.simpleRetryActivity(storyGraph, runtimeNode));
         if (automatic) {
           const runtimeBefore = storySession.snapshot();
           try {
@@ -14889,6 +15084,7 @@
     }
 
     function updateStoryChrome() {
+      if (primaryView === "home" || primaryView === "archive" || (primaryView === "mystical" && !selectedInteractionAssetKey)) storyMusic?.stop();
       const beat = currentBeat();
       const story = (beat && beat.representativeStory) || storyByKey.get(selectedAssetKey);
       const title = localizedValue(beat?.logicalStory?.readingGroup?.title) || storyTitleFromEntry(story);
@@ -15037,7 +15233,7 @@
     }
 
     function render() {
-      if (primaryView === "home") { return; }
+      if (primaryView === "home" || primaryView === "cosmetics") { storyMusic?.stop(); return; }
       renderedPerspectiveEvents = new Set();
       containsMachineTranslation = false;
       renderedBattleSources = new Map();
@@ -15108,6 +15304,7 @@
       restartButton.hidden = readerMode !== "interactive";
       restartButton.closest(".reader-actions").hidden = undoChoiceButton.hidden && restartButton.hidden;
       updateStoryChrome();
+      storyMusic?.refresh(timeline, [selectedSection,selectedCategory,activeBeat?.logicalStory?.id || selectedInteractionAssetKey || storyGraph.asset_key || selectedStoryId].join(":"));
     }
 
     async function setSelectedGroup(section, category) {
@@ -15315,7 +15512,7 @@
       applyPreferencesToUi();
       savePreferences();
       if (primaryView === "story-archive") { renderStoryArchive(); return; }
-      if (primaryView === "home") {
+      if (primaryView === "home" || primaryView === "cosmetics") {
         updateHash();
         return;
       }
@@ -15519,7 +15716,7 @@
     showDebugInput?.addEventListener("change", async () => {
       showDebug = showDebugInput.checked;
       savePreferences();
-      if (["home", "story-archive"].includes(primaryView)) { applyPreferencesToUi(); return; }
+      if (["home", "cosmetics", "story-archive"].includes(primaryView)) { applyPreferencesToUi(); return; }
       if (primaryView === "archive") {
         renderArchive();
         return;
@@ -15538,7 +15735,7 @@
     playerNameInput.addEventListener("input", () => {
       playerName = playerNameInput.value.trim() || "Merlin";
       savePreferences();
-      if (["home", "story-archive"].includes(primaryView)) return;
+      if (["home", "cosmetics", "story-archive"].includes(primaryView)) return;
       if (primaryView === "archive") {
         renderArchive();
         return;
@@ -15557,7 +15754,7 @@
       updateHash(false, true);
       updateHomeLinks();
       if (primaryView === "story-archive") { renderStoryArchive(); return; }
-      if (["home", "story-archive"].includes(primaryView)) return;
+      if (["home", "cosmetics", "story-archive"].includes(primaryView)) return;
       await playerAppearance?.ensure().catch(error => console.warn(error));
       if (primaryView === "archive") {
         renderArchive();
@@ -15587,6 +15784,18 @@
     nextStoryBottom.addEventListener("click", () => navigateStory("next").catch(showRouteError));
     storyScroll.addEventListener("scroll", onStoryOutlineScroll, { passive: true });
     window.addEventListener("scroll", onStoryOutlineScroll, { passive: true });
+    backToTop = document.createElement("button");
+    backToTop.type = "button"; backToTop.className = "back-to-top"; backToTop.hidden = true;
+    backToTop.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    backToTop.addEventListener("click", () => scrollReaderToTop("smooth"));
+    document.body.append(backToTop);
+    const onReaderScroll = () => { scheduleLastRead(); updateBackToTop(); };
+    storyScroll.addEventListener("scroll", onReaderScroll, { passive: true });
+    window.addEventListener("scroll", onReaderScroll, { passive: true });
+    // New lines and choices move the reading position without scrolling.
+    new MutationObserver(scheduleLastRead).observe(document.getElementById("timeline"), { childList: true, subtree: true });
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushLastRead(); });
+    window.addEventListener("pagehide", flushLastRead);
     window.addEventListener("resize", () => {
       positionStoryOutline();
       if (!window.matchMedia("(max-width: 900px)").matches) setStoryOutlineOpen(false);
@@ -15651,6 +15860,46 @@
         }).catch(showLoadError);
       }
       window.location.hash = `/archive/${archiveKind}?lang=${encodeURIComponent(selectedLanguage)}&mode=${encodeURIComponent(readerMode)}&gender=${encodeURIComponent(selectedGender)}`;
+    });
+
+    cosmeticsTab.addEventListener("click", () => {
+      if (primaryView === "cosmetics") return scrollReaderToTop("smooth");
+      playerAppearance.customize({opener:cosmeticsTab}).catch(()=>playerAppearance.customize({fresh:true,opener:cosmeticsTab}));
+    });
+    window.addEventListener("message", async event => {
+      if (event.origin !== location.origin || event.source !== cosmeticsFrame.contentWindow) return;
+      const {type, height} = event.data || {};
+      if (type === "tea-cosmetics-height" && Number.isInteger(height) && height >= 480 && height <= 12000) {
+        cosmeticsFrame.style.height = `${height}px`;
+      }
+      // A fitted wardrobe takes the reading area's height from the layout.
+      if (type === "tea-cosmetics-height" && height === null) cosmeticsFrame.style.height = "";
+      // Phones: the wardrobe's expand button hides the reader's bars.
+      if(type === "tea-wardrobe-expand"){appShell.classList.toggle("wardrobe-expanded",primaryView==="cosmetics"&&event.data.expanded===true);return;}
+      if(type === "tea-wardrobe-ready"){wardrobeReady=true;sendWardrobeSession();return;}
+      const session=wardrobeSession;
+      if(!session || primaryView!=="cosmetics" || event.data.sessionId!==session.id)return;
+      if(type === "tea-wardrobe-switch" && !session.saving) {
+        const beta = event.data.editor === "3d";
+        if (beta ? !hasBeta : !hasClassic) return;
+        const seed = event.data.seed || session.seed;
+        wardrobeSession = {...session, id:randomId(), seed};
+        chooseWardrobe(seed, beta);
+        showCosmetics();
+        return;
+      }
+      if(type === "tea-wardrobe-back" && !session.saving)finishWardrobe();
+      if(type === "tea-wardrobe-apply" && !session.saving){
+        session.saving=true;
+        try{
+          const row=await playerAppearance.savePack(event.data.pack,()=>wardrobeSession===session);
+          if(wardrobeSession!==session)return;
+          playerAppearance.applyChoice(row.gender,row.id);selectedGender=row.gender;savePreferences();
+          session.applied=true;updateHash(false,true);applyPreferencesToUi();
+          wardrobeMessage({type:"tea-wardrobe-saved",sessionId:session.id});
+        }catch(error){wardrobeMessage({type:"tea-wardrobe-error",sessionId:session.id,message:error.message});}
+        finally{session.saving=false;}
+      }
     });
 
     characterSearch.addEventListener("input", renderCharacterIndex);
@@ -15739,8 +15988,23 @@
     }
 
     async function openRoute(route) {
-      const returnBookmark = mainQuestBookmarkForRoute(route);
+      const returnBookmark = mainQuestBookmarkForRoute(route) || lastReadBookmarkForRoute(route);
       const revision = ++routeRevision;
+      if (route.view === "cosmetics") {
+        const available = await cosmeticsAvailable;
+        if (revision !== routeRevision) return;
+        if (!available) route = {...route, view: "home"};
+        else if(!wardrobeSession){
+          const returnTo=wardrobeReturnPoint();
+          let seed;try{seed=await playerAppearance.customizationSeed();}catch(_){seed={gender:selectedGender === "male"?"male":"female"};}
+          if(revision!==routeRevision)return;
+          // A direct Cosmetics URL has no preceding reader location.
+          if(returnTo.hash.includes("/cosmetics")){returnTo.view="home";returnTo.hash="#/home";returnTo.paneTop=returnTo.pageTop=0;}
+          chooseWardrobe(seed);
+          wardrobeSession={id:randomId(),seed,returnTo};
+        }
+      }
+      if(route.view!=="cosmetics")wardrobeSession=null;
       if (route.view === "story-archive") {
         return withContentLoading(async () => {
           if (["stories", "search"].includes(route.archivePage)) {
@@ -15759,11 +16023,12 @@
           renderStoryArchive();
         });
       }
-      if (route.view === "home") {
+      if (route.view === "home" || route.view === "cosmetics") {
         applyRoute(route);
         applyPreferencesToUi();
         savePreferences();
-        showHome();
+        if (primaryView === "cosmetics") showCosmetics();
+        else showHome();
         return;
       }
       return withContentLoading(async () => {
@@ -15810,6 +16075,7 @@
       if (suppressHashChange) {
         return;
       }
+      flushLastRead();
       try {
         await openRoute(parseHashRoute());
       } catch (error) {
@@ -15873,17 +16139,24 @@
         read: routeJson, url: value => ReaderPublication.url(value), gender: () => selectedGender,
         text: uiText, storage: localStorage, mount: document.getElementById("settings-popover"),
         makePortrait: makeDialogueLinePortrait,
+        onCustomize:openWardrobe,canCustomize:()=>cosmeticsAvailable,
         onApply: ({gender, chooseGender}) => {
           if (chooseGender) {
             selectedGender = gender; genderSelect.value = gender;
             savePreferences(); updateHash(false, true); updateHomeLinks();
           }
           if (primaryView === "story-archive") renderStoryArchive();
-          else if (storyGraph) renderPreservingScroll();
+          else if ((primaryView === "stories" || primaryView === "mystical" && selectedInteractionAssetKey) && storyGraph) renderPreservingScroll();
           if (chooseGender) document.querySelector(".reader-appearance-prompt button")?.focus({preventScroll:true});
         },
       });
     }
+    if (typeof StoryMusic !== "undefined") storyMusic = StoryMusic.create({
+      read: routeJson, url: value => globalThis.TEA_CONFIG?.data_base
+        ? ReaderPublication.url("data/"+value) : "data/"+value,
+      mount: document.getElementById("settings-popover"), scrollRoot: storyScroll,
+      language: () => selectedLanguage, debug: () => showDebug || readerMode === "debug", storage: localStorage,
+    });
     installHomeWarming();
     boot();
   </script>

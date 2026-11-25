@@ -30,6 +30,14 @@
 .archive-season-kicker { font-size: calc(11px * var(--reader-font-ratio)); line-height: 1.3; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
 .archive-season-card h2 { font-size: calc(clamp(19px,2vw,25px) * var(--reader-font-ratio)); line-height: 1.3; margin: 8px 0 12px; color: var(--accent); text-wrap: balance; }
 .archive-season-open { font-size: calc(13px * var(--reader-font-ratio)); line-height: 1.45; color: var(--muted); margin-top: 4px; }
+.archive-season-last-read { font-size: calc(12px * var(--reader-font-ratio)); line-height: 1.4; color: var(--accent); margin-top: 6px; padding: 3px 10px; border: 1px solid rgba(var(--accent-rgb),.35); border-radius: 999px; max-width: 100%; overflow-wrap: anywhere; }
+.archive-season-last-read + .archive-season-open { color: var(--accent); }
+/* The last-read chapter: a gold line along the artwork. Season covers are cut-outs, so stacked
+   shadows trace their own outline; arched windows (Starter Story, events) take a ring instead. */
+.archive-season-resume { --resume-line: 2px; }
+.archive-season-resume .archive-season-window:not(.archive-portrait) img { filter: drop-shadow(var(--resume-line) 0 0 var(--accent)) drop-shadow(calc(-1 * var(--resume-line)) 0 0 var(--accent)) drop-shadow(0 var(--resume-line) 0 var(--accent)) drop-shadow(0 calc(-1 * var(--resume-line)) 0 var(--accent)) drop-shadow(0 12px 14px rgba(0,0,0,.26)); }
+.archive-season-resume:is([data-collection="base_campaign"]) .archive-season-window, .archive-season-resume .archive-season-window.archive-portrait { box-shadow: 0 0 0 var(--resume-line) var(--accent), 0 12px 14px rgba(0,0,0,.26); }
+.archive-season-resume[data-collection="base_campaign"] .archive-season-window img { filter: none; }
 .archive-season-card:hover { border-color: rgba(var(--accent-rgb),.2); background: rgba(var(--accent-rgb),.035); }
 .archive-search-section { margin-bottom: 34px; }
 .archive-search-section h2 { font-size: calc(23px * var(--reader-font-ratio)); color: var(--accent); padding-bottom: 14px; border-bottom: 1px solid var(--line); }

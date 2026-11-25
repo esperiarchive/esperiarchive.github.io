@@ -39,7 +39,7 @@
       const source = illustrations[kind] || illustrations.stories;
       if (source?.presentation === "portrait") node.classList.add("archive-portrait");
       if (source) {
-        const image = element("img"); image.src = url(source.image); image.alt = "";
+        const image = element("img"); image.src = ReaderPublication.url(url(source.image)); image.alt = "";
         image.width = source.width; image.height = source.height; image.decoding = "async";
         node.append(image);
       }
@@ -126,14 +126,17 @@
       heading("Stories", "Choose a chapter of Esperia.");
       const grid = element("div", "archive-season-grid");
       for (const collection of collections()) {
-        const card = link("", collection.href, "archive-season-card");card.dataset.collection = collection.key;
+        // The chapter holding the last-read story opens at that position.
+        const resume = collection.lastRead;
+        const card = link("", resume?.href || collection.href, "archive-season-card");card.dataset.collection = collection.key;
+        if (resume) card.classList.add("archive-season-resume");
         const art = element("div", "archive-season-art");
         const cover = artwork[collection.key] || (collection.key === "special_events" ? illustrations.events : null);
         if (cover) {
           const window = element("figure", "archive-season-window");
           if (cover.presentation === "portrait") window.classList.add("archive-portrait");
           window.style.aspectRatio = cover.presentation === "portrait" ? "3 / 4" : `${cover.width} / ${cover.height}`;
-          const image = element("img"); image.src = url(cover.image); image.alt = ""; image.width = cover.width; image.height = cover.height; image.loading = "lazy";
+          const image = element("img"); image.src = ReaderPublication.url(url(cover.image)); image.alt = ""; image.width = cover.width; image.height = cover.height; image.loading = "lazy";
           image.addEventListener("error", () => {window.hidden = true; art.append(icon("stories"));}, {once:true});
           const caption = element("figcaption", "archive-window-caption");
           caption.append(element("h2", "archive-window-title", collection.label));
@@ -143,7 +146,8 @@
         card.append(art, element("span", "archive-season-kicker", number ? text("Season {number}", {number:number[1]})
           : text(collection.key === "base_campaign" ? "Starter Story" : "Special Events")));
         if (!cover) card.append(element("h2", "", collection.label));
-        card.append(element("span", "archive-season-open", text("Read stories") + " →"));
+        if (resume) card.append(element("span", "archive-season-last-read", text("Last read: {title}", {title:value(resume.title)})));
+        card.append(element("span", "archive-season-open", text(resume ? "Continue reading" : "Read stories") + " →"));
         grid.append(card);
       }
       root.append(grid);

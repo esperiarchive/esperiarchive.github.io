@@ -165,6 +165,7 @@
       const data = name => "data/" + name, local = name => "../reader_data/" + name;
       const routes = await preloadJson(local("catalogs/navigation/routes.json"));
       if (!routes) return;
+      if (routes.music) preload(data(routes.music));
       const bootstrap = routes.bootstrap ? preloadJson(data(routes.bootstrap)) : Promise.resolve(null);
       if (view === "archive") {
         if (["fish", "enemies"].includes(parts[1])) {

@@ -373,6 +373,21 @@
         {label: 'Succeeded', input: {mode: 'settled', result: true}},
         {label: 'Failed — try again', input: {mode: 'settled', result: false}},
       ];
+      if (op === 'treatment_reaction') return node.options.map(option => ({
+        label:option.labelKey || option.labels?.[language] || option.labels?.en || option.labels?.cn,
+        labelKey:option.labelKey, input:{mode:'reaction', id:option.id},
+      }));
+      if (op === 'treatment' && node.instruction.attempt === 1) return [
+        {label:'Healed', labelKey:'Healed', input:{mode:'first_attempt', result:true}},
+        {label:'Failed', labelKey:'Failed', input:{mode:'first_attempt', result:false}},
+        ...Object.values(this.catalog.pharmacy.therapy_drugs).map(row => ({
+          label:`Brew ${itemName(Number(row.ItemID))}`, input:{mode:'brew', item_id:Number(row.ItemID)},
+        })),
+      ];
+      if (op === 'treatment' && node.instruction.attempt === 2) return [
+        {label:'Healed', labelKey:'Healed', input:{mode:'conclude', result:1}},
+        {label:'Failed', labelKey:'Failed', input:{mode:'conclude', result:2}},
+      ];
       if (op === 'treatment') return [
         {label: 'Healed on the first attempt', input: {mode: 'conclude', result: 0}},
         {label: 'Healed on the second attempt', input: {mode: 'conclude', result: 1}},
@@ -416,8 +431,13 @@
         if (input.mode !== 'load_failed') {
           values[instruction.return_name] = input.result; values._isPlayFailedAnim = !input.result;
         }
+      } else if (instruction.op === 'treatment_reaction') {
+        return node.options.find(option => option.id === input.id).target;
       } else if (instruction.op === 'treatment') {
-        if (input.mode === 'brew') values.PharmacyId = Number(this.catalog.pharmacy.therapy_drugs[input.item_id].PharmacyID);
+        if (input.mode === 'first_attempt') {
+          if (!input.result) return node.skip;
+          values.TreatmentResult = 0;
+        } else if (input.mode === 'brew') values.PharmacyId = Number(this.catalog.pharmacy.therapy_drugs[input.item_id].PharmacyID);
         else if (input.mode === 'conclude') values.TreatmentResult = input.result;
         else throw new Pending('Treatment has not completed.');
       } else if (instruction.op === 'pharmacy') {
@@ -433,6 +453,46 @@
       return node.next;
     }
   }
+  // The game reports the final treatment result after its own UI closes.
+  // Recover the intermediate feedback as reader-only stages before that result.
+  function treatmentGraph(graph, catalog) {
+    const data = catalog?.treatment_feedback?.patients?.[graph?.asset_key];
+    if (!data || graph.treatment_attempts_version) return graph;
+    const original = Object.values(graph.nodes).filter(node => node.instruction?.op === 'treatment'
+      && String(node.instruction.patient_id) === String(data.patient_id));
+    if (original.length !== 1 || !data.reactions?.[0]?.unchanged) throw new Pending('Incomplete treatment attempt data.');
+    const result = clone(graph), first = result.nodes[original[0].id];
+    const secondId = first.id + ':second-attempt', reactionId = first.id + ':first-failure';
+    const speaker = 'treatment-speaker:' + data.patient_id;
+    const model = Object.values(graph.nodes).find(node => String(node.speaker_actor_id) === String(data.reactions[0].actor_id))?.speaker_actor_model || '';
+    result.nodes[secondId] = {...clone(first), id:secondId,
+      instruction:{...first.instruction, attempt:2, title:'Second attempt'}};
+    first.instruction = {...first.instruction, attempt:1, title:'First attempt'};
+    first.skip = reactionId;
+    result.nodes[reactionId] = {id:reactionId, type:'activity', runtime_scope:first.runtime_scope,
+      instruction:{op:'treatment_reaction', title:'Patient response'}, options:[]};
+    result.text_entries ||= {}; result.speaker_entries ||= {}; result.embedded_locales ||= {};
+    result.speaker_entries[speaker] = {key:speaker, source_cn:data.reactions[0].speaker};
+    for (const row of data.reactions) {
+      const id = first.id + ':feedback:' + row.id, text = 'treatment-feedback:' + data.patient_id + ':' + row.id;
+      if (result.nodes[id]) throw new Pending('Duplicate treatment feedback.');
+      result.nodes[id] = {id, type:'line', entry_kind:'say', dialogue_frame_type:'Normal',
+        text_key:text, speaker_key:speaker, speaker_actor_id:String(row.actor_id), speaker_actor_model:model,
+        animation_set:row.animation, source_node_id:'', therapy_feedback:row.source, next:secondId};
+      result.text_entries[text] = {key:text, kind:'say', source_cn:row.source_cn, therapy_feedback:row.source};
+      result.nodes[reactionId].options.push({id:row.id, target:id, labels:row.labels,
+        ...(row.unchanged ? {labelKey:'No change'} : {})});
+      for (const language of ['cn','en','jp','kr']) {
+        const locale = result.embedded_locales[language] ||= {texts:{},speakers:{}};
+        locale.texts ||= {}; locale.speakers ||= {};
+        locale.texts[text] = clone(row.texts[language]);
+        locale.speakers[speaker] = {text:data.speaker_i18n[language], source_cn:row.speaker, status:'matched_treatment_feedback'};
+      }
+    }
+    result.treatment_attempts_version = 1;
+    return result;
+  }
+
   // Admit only a local Boolean retry loop. Its failure path cannot write state,
   // grant an item, show a document, choose a branch, or launch another activity.
   // Shared BlackScene narration is the same presentation template on success.
@@ -679,5 +739,5 @@
       else this.overrides[control.key] = control.type === 'activity' ? value.input : value.index;
     }
   }
-  return {History, Session, FullScriptRoute, StoryVariants, objectiveGate, choiceDependencies, simpleRetryActivity, Pending, STORAGE_KEY};
+  return {History, Session, FullScriptRoute, StoryVariants, objectiveGate, choiceDependencies, simpleRetryActivity, treatmentGraph, Pending, STORAGE_KEY};
 });

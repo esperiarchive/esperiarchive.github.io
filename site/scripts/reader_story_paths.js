@@ -1010,6 +1010,7 @@
     "season-6/reputation/16010525": {"path":"stories/tower-of-memory/clingy-critters"},
     "season-6/reputation/16010526": {"path":"stories/tower-of-memory/strange-fungus"},
     "season-6/reputation/16010527": {"path":"stories/tower-of-memory/invisible-animal"},
-    "season-6/reputation/16010528": {"path":"stories/tower-of-memory/tails-of-farewell"}
+    "season-6/reputation/16010528": {"path":"stories/tower-of-memory/tails-of-farewell"},
+    "season-8/side/18010601": {"path":"stories/veil-of-memories/raven-whispers"}
   }};
 });

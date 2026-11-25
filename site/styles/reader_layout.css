@@ -91,22 +91,25 @@
   .navrow .selector-group { grid-row: 2; }
   .navrow:not([data-expanded="true"]) > :not(.story-navigation-toggle) { display: none; }
 
-  .archive-header-row { flex-direction: row; align-items: center; gap: 8px; }
-  .archive-header-row .archive-heading { font-size: clamp(20px, 5.5vw, 25px); flex-shrink: 0; }
-  .archive-kind-tabs { width: auto; min-width: 0; margin-left: auto; }
-  .archive-kind-tab { flex: 0 1 auto; font-size: clamp(11px, 3.2vw, 13px); min-height: 36px; padding-inline: 7px; white-space: nowrap; }
+  /* Title and type tabs share one row from 352px up, in every language. */
+  .archive-header-row { flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 8px; }
+  .archive-header-row .archive-heading { font-size: clamp(18px, 4.6vw, 25px); flex-shrink: 0; }
+  .archive-kind-tabs { flex: 0 0 auto; flex-wrap: nowrap; width: auto; min-width: 0; margin-left: auto; gap: 2px; padding: 2px; }
+  .archive-kind-tab { flex: 0 1 auto; font-size: clamp(11px, 2.8vw, 13px); min-height: 36px; padding-inline: clamp(3px, 1vw, 7px); white-space: nowrap; }
 
   /* Let the entrance artwork yield space to its text and navigation on short screens. */
   body:has(.story-archive-view .story-archive-page[data-page="entrance"]:not([hidden])) { min-height: 100dvh; }
   .app-shell.story-archive-view:has(.story-archive-page[data-page="entrance"]:not([hidden])) { height: 100dvh; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
   .story-archive-view .story-scroll:has(> .story-archive-page[data-page="entrance"]:not([hidden])) { min-height: 0; padding: 0; overflow: auto; }
-  .story-archive-page[data-page="entrance"] { height: 100%; min-height: 0; padding: clamp(8px, 2dvh, 18px) 12px max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+  /* Content height: the page choices follow the portal instead of sitting at the bottom of the screen. */
+  .story-archive-page[data-page="entrance"] { height: 100%; min-height: 0; padding: clamp(8px, 2dvh, 18px) 12px max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-rows: auto auto auto; align-content: start; row-gap: 6px; }
   .archive-entrance-heading .archive-eyebrow { margin: 0 0 6px; }
   .archive-entrance-heading h1 { margin: 0 0 8px; font-size: calc(clamp(24px, 6.5vw, 32px) * var(--reader-font-ratio)); }
-  .story-archive-page[data-page="entrance"] .archive-carousel { min-height: 0; height: 100%; margin: 0; }
-  .archive-portal-slot { min-height: 0; height: 100%; }
-  .archive-portal { min-height: 0; padding: 8px 4px 14px; display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; justify-items: center; gap: 8px; }
-  .archive-portal .archive-illustration { width: min(100%, 250px); height: 100%; min-height: 0; max-height: 35dvh; align-self: center; }
+  .story-archive-page[data-page="entrance"] .archive-carousel { min-height: 0; height: auto; margin: 0; }
+  .archive-portal-slot { min-height: 0; height: auto; }
+  /* Keep the artwork with its title. */
+  .archive-portal { min-height: 0; padding: 8px 4px 14px; display: grid; grid-template-rows: auto auto auto auto; align-content: center; justify-items: center; gap: 8px; }
+  .archive-portal .archive-illustration { width: min(100%, 230px); height: clamp(110px, 27dvh, 230px); min-height: 0; align-self: center; }
   .archive-portal h2 { margin: 0; font-size: calc(clamp(26px, 7.5vw, 36px) * var(--reader-font-ratio)); }
   .archive-portal-description { font-size: calc(14px * var(--reader-font-ratio)); line-height: 1.5; }
   .archive-open { margin: 0; padding: 2px 6px; }
@@ -116,9 +119,27 @@
   .archive-term-detail h2 { scroll-margin-top: 12px; }
 }
 
+/* Very narrow phones: the type tabs always take their own full-width row, so the
+   layout does not change between World sections with longer or shorter titles. */
+@media (max-width: 351px) {
+  .archive-header-row { flex-wrap: wrap; row-gap: 10px; }
+  .archive-kind-tabs { flex: 1 1 100%; }
+  .archive-kind-tab { flex: 1 1 0; }
+}
+
 @media (max-width: 900px) and (max-height: 500px) {
   .archive-entrance-heading .archive-eyebrow { display: none; }
   .story-archive-page[data-page="entrance"] .archive-portal { grid-template-columns: minmax(60px, .8fr) minmax(0, 1fr); grid-template-rows: auto auto auto; align-content: center; column-gap: 16px; }
   .archive-portal .archive-illustration { grid-column: 1; grid-row: 1 / span 3; height: 100%; max-height: 40dvh; }
   .archive-portal :is(h2, .archive-portal-description, .archive-open) { grid-column: 2; }
+}
+
+/* Back to top: shown once a page is scrolled well down, clear of the phone contents button. */
+.back-to-top { position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); z-index: 25; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 999px; background: var(--control-hover); color: var(--ink); box-shadow: 0 3px 16px #0006; cursor: pointer; }
+.back-to-top[hidden] { display: none; }
+.back-to-top:hover, .back-to-top:focus-visible { color: var(--accent); }
+.back-to-top svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 900px) {
+  .back-to-top { right: max(12px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); }
+  body .story-outline-toggle:not([hidden]) { max-width: calc(100vw - 80px); }
 }

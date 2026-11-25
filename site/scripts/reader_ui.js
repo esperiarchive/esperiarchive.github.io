@@ -6,6 +6,12 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
   const messages = {
+  "First attempt": {"cn":"第一次治疗","jp":"1回目の治療","kr":"첫 번째 치료"},
+  "Second attempt": {"cn":"第二次治疗","jp":"2回目の治療","kr":"두 번째 치료"},
+  "Patient response": {"cn":"患者反应","jp":"患者の反応","kr":"환자의 반응"},
+  "Healed": {"cn":"治愈","jp":"治癒","kr":"치료 성공"},
+  "Failed": {"cn":"失败","jp":"失敗","kr":"치료 실패"},
+  "No change": {"cn":"病情没有变化","jp":"症状に変化なし","kr":"증상 변화 없음"},
   "Choose a patient": {"cn":"选择患者","jp":"患者を選択","kr":"환자 선택"},
   "Event Stories": {"cn":"活动剧情","jp":"イベントストーリー","kr":"이벤트 스토리"},
   "World": {"cn": "世界", "jp": "世界", "kr": "세계"},
@@ -56,6 +62,9 @@
   "Choose a chapter of Esperia.": {"jp": "読みたい物語を選んでください。", "kr": "읽고 싶은 에스페리아의 이야기를 선택하세요.", "cn": "选择想要阅读的伊索米亚篇章。"},
   "Season {number}": {"jp": "シーズン{number}", "kr": "시즌 {number}", "cn": "赛季 {number}"},
   "Read stories": {"jp": "物語を読む", "kr": "스토리 읽기", "cn": "阅读故事"},
+  "Continue reading": {"jp": "続きから読む", "kr": "이어 읽기", "cn": "继续阅读"},
+  "Last read: {title}": {"jp": "前回読んだ物語：{title}", "kr": "마지막으로 읽은 이야기: {title}", "cn": "上次阅读：{title}"},
+  "Back to top": {"jp": "ページの先頭へ", "kr": "맨 위로", "cn": "回到顶部"},
   "Explore the world and lore of Esperia.": {"jp": "エスペリアの世界と伝承を知る。", "kr": "에스페리아의 세계와 이야기를 알아보세요.", "cn": "探索伊索米亚的世界与传说。"},
   "Search the glossary": {"jp": "用語集を検索", "kr": "용어집 검색", "cn": "搜索词条"},
   "Glossary terms": {"jp": "用語一覧", "kr": "용어 목록", "cn": "词条列表"},
@@ -172,6 +181,7 @@
     "jp": "文書",
     "kr": "문서"
   },
+  "Cosmetics": {"cn": "外观", "jp": "外見", "kr": "외형"},
   "Theme": {"cn": "主题", "jp": "テーマ", "kr": "테마"},
   "Dark": {"cn": "深色", "jp": "ダーク", "kr": "다크"},
   "Light": {"cn": "浅色", "jp": "ライト", "kr": "라이트"},
@@ -1923,6 +1933,31 @@
     "jp": "外見は性別ごとに保存されます。",
     "kr": "외형은 성별마다 따로 저장됩니다."
   },
+  "Import portrait pack": {
+    "cn": "导入立绘包",
+    "jp": "立ち絵パックを読み込む",
+    "kr": "초상화 팩 가져오기"
+  },
+  "Imported looks": {
+    "cn": "已导入的外观",
+    "jp": "読み込んだ外見",
+    "kr": "가져온 외형"
+  },
+  "Reset to default": {
+    "cn": "恢复默认外观",
+    "jp": "初期の外見に戻す",
+    "kr": "기본 외형으로 초기화"
+  },
+  "Local looks stay in this tab until it is closed or reloaded.": {
+    "cn": "本地外观仅保留在当前标签页，关闭或刷新后将清除。",
+    "jp": "読み込んだ外見は、このタブを閉じるか再読み込みするまで保持されます。",
+    "kr": "가져온 외형은 이 탭을 닫거나 새로 고침할 때까지 유지됩니다."
+  },
+  "Imported portraits are used only in this tab. Missing poses use the normal portrait.": {
+    "cn": "导入的立绘仅用于当前标签页。缺少的姿势使用普通立绘。",
+    "jp": "読み込んだ立ち絵はこのタブのみで使用します。不足するポーズには通常の立ち絵を使います。",
+    "kr": "가져온 초상화는 이 탭에서만 사용됩니다. 없는 포즈는 기본 포즈로 표시됩니다."
+  },
   "Look {n}": {
     "cn": "外观{n}",
     "jp": "外見{n}",
@@ -1944,6 +1979,74 @@
     "kr": "현재 시점: {name}"
   }
 });
+  Object.assign(messages, {
+  "My looks": {
+    "cn": "我的造型",
+    "jp": "マイスタイル",
+    "kr": "내 외형"
+  },
+  "+ Create your own": {
+    "cn": "+ 创建专属造型",
+    "jp": "+ 自分のスタイルを作成",
+    "kr": "+ 나만의 외형 만들기"
+  },
+  "Customize this look →": {
+    "cn": "自定义此造型 →",
+    "jp": "このスタイルをカスタマイズ →",
+    "kr": "이 외형 꾸미기 →"
+  },
+  "My looks are saved in this browser.": {
+    "cn": "我的造型保存在此浏览器中。",
+    "jp": "マイスタイルはこのブラウザーに保存されます。",
+    "kr": "내 외형은 이 브라우저에 저장됩니다."
+  },
+  "Look name": {
+    "cn": "造型名称",
+    "jp": "スタイル名",
+    "kr": "외형 이름"
+  },
+  "Rename": {
+    "cn": "重命名",
+    "jp": "名前を変更",
+    "kr": "이름 변경"
+  },
+  "Delete": {
+    "cn": "删除",
+    "jp": "削除",
+    "kr": "삭제"
+  },
+  "Choose a look": {
+    "cn": "选择造型",
+    "jp": "スタイルを選択",
+    "kr": "외형 선택"
+  },
+  "Customize": {
+    "cn": "自定义",
+    "jp": "カスタマイズ",
+    "kr": "꾸미기"
+  },
+  "Merlin’s look updated": {
+    "cn": "梅林的造型已更新",
+    "jp": "マーリンのスタイルを更新しました",
+    "kr": "멀린의 외형이 변경되었습니다"
+  },
+  "This pack has no editable recipe. Create your own look instead.": {
+    "cn": "此肖像包没有可编辑搭配。请创建专属造型。",
+    "jp": "このパックには編集用レシピがありません。新しいスタイルを作成してください。",
+    "kr": "이 팩에는 편집 가능한 조합이 없습니다. 새 외형을 만들어 주세요."
+  },
+  "Import portrait pack": {
+    "cn": "导入肖像包",
+    "jp": "ポートレートパックをインポート",
+    "kr": "인물 이미지 팩 가져오기"
+  },
+  "Reset to default": {
+    "cn": "恢复默认",
+    "jp": "デフォルトに戻す",
+    "kr": "기본값으로 초기화"
+  }
+});
+  Object.assign(messages,{"Delete this look?":{"cn":"删除此造型？","jp":"このスタイルを削除？","kr":"이 외형을 삭제할까요?"}});
   const languages = {cn: "zh-Hans", en: "en", jp: "ja", kr: "ko"};
   function language(value) { return Object.hasOwn(languages, value) ? value : "en"; }
   function text(key, locale = "en", values = {}) {
