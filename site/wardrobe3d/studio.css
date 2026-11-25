@@ -6,9 +6,9 @@
   container-type:size;margin:10px -8px 0;border-radius:6px;cursor:grab;touch-action:none}
 :root:not(.reader-fit) .model-stage {height:clamp(260px,55vw,480px)}
 .model-stage:active {cursor:grabbing}
-.model-stage[data-bg=dark] {background:radial-gradient(ellipse at 50% 40%,#303030,#080808)}
-.model-stage[data-bg=white] {background:white}
-.model-stage[data-bg=clear] {background:repeating-conic-gradient(#242424 0% 25%,#393939 0% 50%) 0 0 / 24px 24px}
+.model-stage[data-bg=dark], [data-backdrop=dark] {background:radial-gradient(ellipse at 50% 40%,#303030,#080808)}
+.model-stage[data-bg=white], [data-backdrop=white] {background:white}
+.model-stage[data-bg=clear], [data-backdrop=clear] {background:repeating-conic-gradient(#242424 0% 25%,#393939 0% 50%) 0 0 / 24px 24px}
 .frame {position:absolute;inset:0}
 .frame canvas {position:absolute;inset:0;width:100%;height:100%}
 .model-stage .gender-switch {position:absolute;top:8px;left:8px}

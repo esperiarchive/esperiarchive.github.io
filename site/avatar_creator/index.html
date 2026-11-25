@@ -53,7 +53,10 @@
       <div class="preview-options"><label>Backdrop <select id="backdrop"><option value="studio">Studio</option><option value="light">Light</option><option value="checker">Transparency</option></select></label><label>View <select id="framing"><option value="full">Full body</option><option value="portrait">Portrait</option></select></label></div>
       <label id="fit-control" class="fit-control" hidden>Layer order <select id="clothing-fit" aria-label="Layer order"><option value="clothing">Outfit → Cloak → Back</option><option value="native">Original depth</option></select><small>Tail bases tuck beneath the cloak where it covers the outfit.</small></label>
       <label id="hair-fit-control" class="fit-control" hidden><span><input type="checkbox" id="hair-fit" checked> Keep front hair over collars</span></label>
-      <details class="lighting"><summary>Lighting & effects <span id="lighting-caption">Capture lighting</span></summary><fieldset id="light-controls"><label><input type="checkbox" id="rim" checked> Rim lighting</label><label><input type="checkbox" id="bloom" checked> Bloom</label><label><input type="checkbox" id="grade" checked> Color grading</label></fieldset><p id="light-note">Effects use a fixed captured frame.</p></details>
+      <section class="lighting" aria-labelledby="lighting-title">
+        <div class="lighting-header"><h3 id="lighting-title">Lighting &amp; effects</h3><span id="lighting-caption">Capture lighting</span></div>
+        <fieldset id="light-controls" aria-labelledby="lighting-title"><label><input type="checkbox" id="rim" checked> Rim lighting</label><label><input type="checkbox" id="bloom" checked> Bloom</label><label><input type="checkbox" id="grade" checked> Color grading</label></fieldset><p id="light-note">Effects use a fixed captured frame.</p>
+      </section>
       <p id="preview-status" role="status" aria-live="polite">Loading catalogue…</p>
       <div class="export-row"><button id="export-png" class="primary" disabled>Download PNG <span aria-hidden="true">↓</span></button><button id="export-set" disabled>Portrait set <span aria-hidden="true">↓</span></button></div><small class="export-hint">Transparent images. The backdrop stays in the studio.</small>
     </section>

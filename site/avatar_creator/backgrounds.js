@@ -18,9 +18,18 @@
     stage.style.backgroundPosition=image?'center':'';
   }
   function decorate(button,id){
-    const image=url(id);if(!image)return;
-    const thumbnail=document.createElement('img');thumbnail.src=image;thumbnail.alt='';thumbnail.loading='lazy';
-    button.prepend(thumbnail);
+    const image=url(id);
+    const preview=document.createElement(image?'img':'span');
+    preview.className='background-preview';
+    if(image){
+      preview.src=image;
+      preview.alt='';
+      preview.loading='lazy';
+    }else{
+      preview.dataset.backdrop=id;
+      preview.setAttribute('aria-hidden','true');
+    }
+    button.prepend(preview);
   }
   function addOptions(select){
     for(const entry of entries){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.label;select.append(option);}

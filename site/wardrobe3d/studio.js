@@ -23,8 +23,9 @@
   $('bgs').classList.add('background-choices');
   for(const entry of WardrobeBackgrounds.entries){
     const button=document.createElement('button');button.type='button';button.dataset.bg=entry.id;button.textContent=entry.label;
-    button.setAttribute('aria-pressed','false');WardrobeBackgrounds.decorate(button,entry.id);$('bgs').append(button);
+    button.setAttribute('aria-pressed','false');$('bgs').append(button);
   }
+  for(const button of $('bgs').children)WardrobeBackgrounds.decorate(button,button.dataset.bg);
   const staticLabels = [];
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {

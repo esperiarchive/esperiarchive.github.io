@@ -3752,9 +3752,9 @@
             <div id="overview-meta" class="overview-meta"></div>
           </section>
           <div id="translation-notice" class="notice" data-i18n="This story contains machine-translated dialogue.">This story contains machine-translated dialogue.</div>
-          <div class="reader-actions">
+          <div class="reader-actions" hidden>
             <button id="undo-choice-button" type="button" hidden disabled data-i18n="Undo last choice">Undo last choice</button>
-            <button id="restart-button" type="button" data-i18n="Restart story">Restart story</button>
+            <button id="restart-button" type="button" hidden data-i18n="Restart story">Restart story</button>
           </div>
         </header>
           <div id="timeline" class="timeline"></div>
@@ -3812,7 +3812,7 @@
   <script src="scripts/player_appearance.js?v=a5ef37abc860b257"></script>
   <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
   <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=e855de1ba4c2919f"></script>
+  <script src="scripts/reader_ui.js?v=fb6859a9d08d9d7a"></script>
   <link rel="stylesheet" href="styles/world_archive.css?v=cec953d64ee098ee">
   <script src="scripts/world_archive.js?v=4b6d8247b4363ae1"></script>
   <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
@@ -3822,7 +3822,7 @@
   <script src="scripts/story_archive.js?v=8b819dcb7f4e890c"></script>
   <script src="scripts/reader_story_paths.js?v=64bec758a5c3c344"></script>
   <script src="scripts/reader_story_routes.js?v=256d812e5e4d78b5"></script>
-  <script src="scripts/reader_character_paths.js?v=3b0fd5a2f9f137d2"></script>
+  <script src="scripts/reader_character_paths.js?v=b6ce00e7374f117c"></script>
   <script src="scripts/reader_character_routes.js?v=e60e48540f469236"></script>
   <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
   <script src="scripts/story_runtime.js?v=9a1bbdf5a750aa41"></script>
@@ -15295,14 +15295,12 @@
       // NPC availability is audit metadata, not an additional story transcript.
       // Timeline-prefab dialogue is already rendered through the story graph.
       translationNotice.classList.toggle("visible", containsMachineTranslation);
-      undoChoiceButton.disabled = (
-        choiceUndoStack.length === 0
-        || readerMode !== "interactive"
-      );
-      undoChoiceButton.hidden = undoChoiceButton.disabled;
+      const canResetProgress = readerMode === "interactive" && choiceUndoStack.length > 0;
+      undoChoiceButton.disabled = !canResetProgress;
+      undoChoiceButton.hidden = !canResetProgress;
       undoChoiceButton.textContent=choiceUndoStack.at(-1)?.action === "inspection" ? uiText("Undo inspection") : uiText("Undo last choice");
-      restartButton.hidden = readerMode !== "interactive";
-      restartButton.closest(".reader-actions").hidden = undoChoiceButton.hidden && restartButton.hidden;
+      restartButton.hidden = !canResetProgress;
+      restartButton.closest(".reader-actions").hidden = !canResetProgress;
       updateStoryChrome();
       storyMusic?.refresh(timeline, [selectedSection,selectedCategory,activeBeat?.logicalStory?.id || selectedInteractionAssetKey || storyGraph.asset_key || selectedStoryId].join(":"));
     }

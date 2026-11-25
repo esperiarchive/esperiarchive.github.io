@@ -24,7 +24,7 @@ Back|背面|背面|뒷모습
 Front|正面|正面|앞모습
 Back to reader|返回阅读器|リーダーに戻る|리더로 돌아가기
 Save and apply|保存并应用|保存して適用|저장 후 적용
-Cosmetics|外观|外見|외형
+Cosmetics|外观|コスチューム|코스튬
 A wardrobe item from the current game catalogue.|来自当前游戏目录的衣橱物品。|ゲーム内のワードローブアイテムです。|현재 게임 목록에 있는 옷장 아이템입니다.
 Changes your character’s physique while keeping the selected wardrobe.|更改角色体型，保留当前穿搭。|選択中の衣装のまま、キャラクターの体格を変更します。|선택한 의상을 유지하면서 캐릭터의 체형을 바꿉니다.
 Options|选项|オプション|옵션
