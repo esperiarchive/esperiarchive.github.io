@@ -12,7 +12,7 @@ The Esperia Archive brings the stories, characters, and written records of *AFK 
 
 Revisit a favorite scene, follow a different dialogue choice, or catch up on the letters and conversations you missed along the way.
 
-[Stories](#story-reader) · [Characters](#character-archive) · [Documents & Mail](#documents--mail) · [What's next](#whats-next) · [Contributing](#contributing)
+[Stories](#story-reader) · [Merlin's Wardrobe](#merlins-wardrobe) · [Characters](#character-archive) · [Documents & Mail](#documents--mail) · [What's next](#whats-next) · [Contributing](#contributing)
 
 ## Story Reader
 
@@ -26,6 +26,16 @@ Character portraits identify speakers, while cinematic subtitles and perspective
 ![Story dialogue with character portraits and choices in the dark theme.](docs/images/story-reader.png)
 
 Customize Merlin in **Settings**: choose a name, gender, and appearance preset. The current presets include default and seasonal looks, which you can preview before applying and change at any time.
+
+## Merlin's Wardrobe
+
+Open **Cosmetics** to try a complete look or choose Merlin’s outfit and hairstyle yourself.
+
+![Merlin wearing the Apprentice Mage outfit beside the complete looks in the 2D wardrobe.](docs/images/wardrobe-2d.jpg)
+
+Switch to **3D Beta** to rotate Merlin and see the outfit from any angle. In either editor, choose **Save and apply** to use your look in story portraits.
+
+![A side view of Merlin wearing The Unrivaled in the 3D wardrobe.](docs/images/wardrobe-3d.jpg)
 
 ## Character Archive
 
@@ -62,9 +72,9 @@ Some stories, translations, portraits, and recordings are still incomplete.
 
 ## What's Next
 
-- **Merlin customization**, with individual outfit, hair, and appearance options beyond the current presets.
-- **Further reading improvements**, including spacing, navigation, and loading speed.
-- **More dialogue effects**, bringing additional in-game expressions and scene effects into the reader while keeping the text easy to read.
+- Add more wardrobe previews and improve how outfits fit in 3D.
+- Make stories easier to navigate and quicker to load.
+- Bring more in-game expressions and effects into dialogue scenes.
 
 ## Contributing
 

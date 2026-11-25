@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#182825"><title>Merlin's Wardrobe</title><link rel="stylesheet" href="studio.css"><link rel="stylesheet" href="backgrounds.css">
+<script>
+  if (window.parent !== window && new URLSearchParams(location.search).get('embed') === 'reader') {
+    const root = document.documentElement;
+    root.classList.add('reader-embedded', 'reader-opening', 'reader-theme-pending');
+    const host = window.parent.document.documentElement;
+    const palette = getComputedStyle(host);
+    const background = palette.getPropertyValue('--bg').trim();
+    root.style.setProperty('--wardrobe-opening-bg', background);
+    root.style.setProperty('--wardrobe-opening-accent', palette.getPropertyValue('--accent'));
+    root.dataset.theme = host.dataset.theme || 'dark';
+    document.querySelector('meta[name="theme-color"]').content = background;
+    document.title = window.parent.document.getElementById('cosmetics-tab')?.textContent.trim() || 'Cosmetics';
+    // Reuse the reader's own copies, wherever its publication keeps them.
+    const shared = file => [...window.parent.document.querySelectorAll('link[rel="stylesheet"],script[src]')]
+      .map(element => element.href || element.src).find(url => new URL(url).pathname.endsWith('/' + file))
+      || '../reader_viewer/' + file;
+    for (const file of ['reader_fonts.css', 'reader_theme.css']) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = shared(file);
+      if (file === 'reader_theme.css') {
+        link.onload = () => root.classList.remove('reader-theme-pending');
+        link.onerror = () => {
+          // The open reader already has its palette if the shared stylesheet fails to load.
+          for (const property of palette) {
+            if (property.startsWith('--')) root.style.setProperty(property, palette.getPropertyValue(property));
+          }
+          root.classList.remove('reader-theme-pending');
+        };
+      }
+      document.head.append(link);
+    }
+    const theme = document.createElement('script');
+    theme.src = shared('reader_theme.js');
+    document.head.append(theme);
+  }
+</script>
+<script src="wardrobe.js" defer></script><script src="library-loader.js" defer></script><script src="buffer-view.js" defer></script><script src="clothing-fit.js" defer></script><script src="hair-fit.js" defer></script><script src="locale.js" defer></script><script src="backgrounds.js" defer></script><script src="studio.js" defer></script><script src="../scripts/config.js"></script></head>
+<body>
+<progress id="reader-opening" aria-label="Loading catalogue…"></progress>
+<header class="masthead"><a class="brand" href="index.html" aria-label="Merlin's Wardrobe home"><span class="brand-mark" aria-hidden="true">✦</span><span>MERLIN'S <b>WARDROBE</b></span></a><span class="edition">STANDALONE STUDIO <span>·</span> DEVELOPMENT</span><div class="header-actions"><button id="load-recipe" class="quiet">Open recipe</button><button id="save-recipe" class="quiet">Save recipe <span aria-hidden="true">↗</span></button></div></header>
+<main>
+  <section class="intro"><div><p class="overline">A LOOK OF YOUR OWN</p><h1>Make it yours.</h1><p>Explore Esperia’s wardrobe. Find your Merlin.</p></div><div class="catalogue-stats"><strong id="total-count">—</strong><span>items in the catalogue</span><small id="capture-count">Loading your wardrobe…</small></div></section>
+  <div class="workspace">
+    <section class="preview-panel" aria-label="Character preview">
+      <div class="preview-top"><div class="gender-switch" role="group" aria-label="Character gender"><button data-gender="female" aria-pressed="true">Female</button><button data-gender="male" aria-pressed="false">Male</button></div><button id="random" type="button" class="subtle" disabled>Random</button><button id="reset" class="subtle" title="Restore a preview-ready starting look">Reset</button></div>
+      <div class="stage" id="stage"><div class="stage-decoration" aria-hidden="true">✦</div><canvas id="avatar" width="512" height="768" aria-label="Assembled character preview"></canvas><div id="empty-preview" hidden><span aria-hidden="true">◇</span><h2>Preview data is missing</h2><p>Your selections are kept in the recipe. Choose Preview-ready items or a complete look to see a finished character.</p><button id="find-ready">Choose a complete look</button></div><div id="loading" class="loading" hidden>Preparing your look…</div><div class="stage-caption"><span id="preview-kind">PREVIEW</span><span id="resolution"></span></div></div>
+      <div class="preview-navigation" role="group" aria-label="Preview zoom and position"><span>Right-drag to zoom · zoom in to pan vertically</span><button id="zoom-out" type="button" aria-label="Zoom out preview">−</button><output id="zoom-value" aria-live="polite">100%</output><button id="zoom-in" type="button" aria-label="Zoom in preview">+</button><button id="reset-view" type="button" disabled>Reset view</button></div>
+      <div class="look-title"><div><p class="overline">CURRENT LOOK</p><h2 id="look-title">Merlin</h2></div><div class="history"><button id="toggle-view" type="button" disabled title="Show back view">Back</button><button id="undo" aria-label="Undo selection" title="Undo" disabled>↶</button><button id="redo" aria-label="Redo selection" title="Redo" disabled>↷</button></div></div>
+      <div class="poses" id="poses" role="group" aria-label="Pose"></div>
+      <div class="preview-options"><label>Backdrop <select id="backdrop"><option value="studio">Studio</option><option value="light">Light</option><option value="checker">Transparency</option></select></label><label>View <select id="framing"><option value="full">Full body</option><option value="portrait">Portrait</option></select></label></div>
+      <label id="fit-control" class="fit-control" hidden>Layer order <select id="clothing-fit" aria-label="Layer order"><option value="clothing">Outfit → Cloak → Back</option><option value="native">Original depth</option></select><small>Tail bases tuck beneath the cloak where it covers the outfit.</small></label>
+      <label id="hair-fit-control" class="fit-control" hidden><span><input type="checkbox" id="hair-fit" checked> Keep front hair over collars</span></label>
+      <details class="lighting"><summary>Lighting & effects <span id="lighting-caption">Capture lighting</span></summary><fieldset id="light-controls"><label><input type="checkbox" id="rim" checked> Rim lighting</label><label><input type="checkbox" id="bloom" checked> Bloom</label><label><input type="checkbox" id="grade" checked> Color grading</label></fieldset><p id="light-note">Effects use a fixed captured frame.</p></details>
+      <p id="preview-status" role="status" aria-live="polite">Loading catalogue…</p>
+      <div class="export-row"><button id="export-png" class="primary" disabled>Download PNG <span aria-hidden="true">↓</span></button><button id="export-set" disabled>Portrait set <span aria-hidden="true">↓</span></button></div><small class="export-hint">Transparent images. The backdrop stays in the studio.</small>
+    </section>
+    <section class="wardrobe-panel" aria-label="Wardrobe catalogue">
+      <div class="catalogue-toolbar"><div class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search names or avatar IDs…" aria-label="Search wardrobe"></div></div>
+      <nav id="categories" aria-label="Wardrobe categories"></nav>
+      <div class="selection-strip" id="selection-strip" aria-label="Selected parts"></div>
+      <div class="results-heading"><div><h2 id="category-title">Outfits</h2><span id="result-count"></span></div><div class="sort-controls"><label class="sort-label">Sort by <select id="sort"><option value="name">Name</option><option value="id">ID</option></select></label><select id="sort-order" aria-label="Sort order"><option value="asc">Ascending</option><option value="desc">Descending</option></select></div></div>
+      <div id="color-options" class="color-options" role="group" aria-label="Item colors" hidden></div>
+      <div id="items" class="item-grid"></div>
+      <div id="no-items" hidden><h3>No matching items</h3><p>Try a Wardrobe starter for supported parts, clear the search, or turn off Preview-ready to browse everything.</p></div>
+      <aside id="item-detail" class="item-detail" hidden></aside>
+      <div id="compatibility" class="compatibility" hidden></div>
+    </section>
+  </div>
+  <footer><span>Merlin's Wardrobe · Local development build</span><span id="coverage-note">Full catalogue · Captures expand over time</span></footer>
+</main>
+<input id="recipe-file" type="file" accept=".json,application/json" hidden><p id="toast" role="status" hidden></p><button id="mobile-preview" aria-label="View character preview" hidden>↑ View preview</button>
+<dialog id="export-dialog"><form method="dialog"><button class="close-dialog" aria-label="Close export options">×</button><p class="overline">TAKE YOUR LOOK WITH YOU</p><h2>Export portrait set</h2><p id="export-poses"></p><p>The export includes poses available for this look and view.</p><button id="download-zip" type="button" class="primary">Download PNG set (.zip)</button><button id="download-pack" type="button">Download portrait pack (.json)</button><p id="export-status" role="status"></p></form></dialog>
+</body></html>

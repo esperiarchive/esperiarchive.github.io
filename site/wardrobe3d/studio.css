@@ -1,0 +1,38 @@
+/* The 2D studio stylesheet supplies the reader shell, catalogue and controls. */
+.beta {color:var(--accent);border:1px solid var(--line);border-radius:3px;padding:2px 6px;font-size:calc(11px * var(--wardrobe-text,1));white-space:nowrap}
+
+.reader-fit .preview-panel > .model-stage {flex:1 1 0}
+.model-stage {position:relative;min-height:180px;display:grid;place-items:center;overflow:hidden;
+  container-type:size;margin:10px -8px 0;border-radius:6px;cursor:grab;touch-action:none}
+:root:not(.reader-fit) .model-stage {height:clamp(260px,55vw,480px)}
+.model-stage:active {cursor:grabbing}
+.model-stage[data-bg=dark] {background:radial-gradient(ellipse at 50% 40%,#303030,#080808)}
+.model-stage[data-bg=white] {background:white}
+.model-stage[data-bg=clear] {background:repeating-conic-gradient(#242424 0% 25%,#393939 0% 50%) 0 0 / 24px 24px}
+.frame {position:absolute;inset:0}
+.frame canvas {position:absolute;inset:0;width:100%;height:100%}
+.model-stage .gender-switch {position:absolute;top:8px;left:8px}
+#angle,.hint {position:absolute;pointer-events:none;background:#181818c9;color:#eee;border-radius:3px;font-size:11px;padding:2px 6px}
+#angle {top:8px;right:8px;font-variant-numeric:tabular-nums}
+.hint {bottom:8px;text-align:center}
+#status,.busy {position:absolute;max-width:90%;text-align:center;background:var(--panel);padding:6px 10px;border-radius:4px}
+#status {bottom:8px;color:var(--danger)}
+#status:empty,#status:not(:empty) ~ .hint {display:none}
+.busy {color:var(--accent);pointer-events:none}
+@media (min-width:761px) {
+  .reader-embedded .preview-panel .poses button {padding-inline:var(--pose-padding,10px)}
+}
+.history :is(#front,#back) {font-size:12px;padding:5px 10px}
+#detail-description {white-space:pre-line;overflow-wrap:anywhere}
+.reader-fit .item-grid:empty {display:none}
+#cut,.seg {display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+#cut,.note {font-size:calc(12px * var(--wardrobe-text,1));color:var(--muted)}
+#cut {margin-bottom:8px}
+.seg button {font-size:calc(12px * var(--wardrobe-text,1));padding:6px 10px}
+.seg button[aria-pressed=true] {background:var(--accent);color:var(--accent-ink)}
+.note {margin:8px 0}
+@media (max-width:760px) {
+  .model-stage {grid-column:1/-1;min-height:0;margin:0}
+  .hint {display:none}
+  .reader-fit #categories {overflow-y:auto;min-height:0}
+}

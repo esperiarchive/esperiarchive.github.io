@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en" class="reader-embedded reader-fit">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Merlin's Wardrobe 3D</title>
+<link rel="stylesheet" href="../avatar_creator/studio.css">
+<link rel="stylesheet" href="../styles/reader_fonts.css">
+<script src="../scripts/reader_theme.js"></script>
+<link rel="stylesheet" href="../styles/reader_theme.css">
+<link rel="stylesheet" href="studio.css"><link rel="stylesheet" href="../avatar_creator/backgrounds.css">
+<script src="../scripts/config.js"></script></head>
+<body><main>
+<header class="intro">
+  <div><h1>Cosmetics</h1></div>
+  <div class="reader-use-bar">
+    <label>Look name<input id="reader-look-name" maxlength="80" placeholder="My Merlin" aria-label="Look name"></label>
+    <div class="reader-use-actions">
+      <button id="reader-use" class="primary" disabled>Save and apply</button>
+      <button id="classic" hidden>2D version</button>
+      <strong class="beta">3D Beta</strong>
+      <button id="retry" hidden>Retry</button>
+    </div>
+    <p id="reader-save-status" role="status"></p>
+  </div>
+</header>
+<div class="workspace">
+  <section class="preview-panel" aria-label="Character preview">
+    <div class="model-stage" id="stage">
+      <div class="frame"><canvas id="view" width="1024" height="1536" aria-label="3D character preview"></canvas></div>
+      <div class="gender-switch" role="group" aria-label="Gender" id="genders"></div>
+      <span id="angle">0°</span>
+      <div id="status" role="status"></div>
+      <span class="hint">Drag to rotate · right-drag up or down to pan · scroll to zoom</span>
+      <div class="busy" id="busy" hidden>Loading…</div>
+      <button id="expand" class="expand-toggle" aria-pressed="false" aria-label="Expand wardrobe"><svg viewBox="0 0 24 24" aria-hidden="true"><path/></svg></button>
+    </div>
+    <div class="look-title">
+      <div><p class="overline">CURRENT LOOK</p><h2 id="look-title"></h2></div>
+      <div class="history">
+        <button id="optionsBtn" class="view-options" aria-expanded="false" aria-controls="options">Options</button>
+        <button id="front">Front</button><button id="back">Back</button>
+        <button id="savePng" aria-label="Download image (PNG)" title="Download image (PNG)"><svg class="download-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 2.5h2.8v8.6h3.7L12 16.7l-5.1-5.6h3.7zM2.5 14.5h2.8v4.7h13.4v-4.7h2.8v7.5h-19z"/></svg></button>
+      </div>
+    </div>
+    <div class="poses" id="poses" role="group" aria-label="Pose"></div>
+  </section>
+  <section class="wardrobe-panel" id="wardrobe" aria-label="Wardrobe" data-level="categories">
+    <div class="catalogue-toolbar"><div class="search"><span aria-hidden="true">⌕</span><input type="search" id="search" placeholder="Search names or avatar IDs…" aria-label="Search wardrobe"></div></div>
+    <nav id="categories" aria-label="Categories"></nav>
+    <div class="results-heading">
+      <div><button class="category-back" id="backCat" aria-label="Back to categories">‹</button><h2 id="catTitle">Outfits</h2><span id="count"></span></div>
+      <div class="color-options" id="color-options" hidden></div>
+      <div class="sort-controls"><select id="sort-combined" aria-label="Sort items"></select></div>
+    </div>
+    <div class="cut" id="cut" hidden><span id="cutLabel">Version</span><div class="seg" role="group" aria-labelledby="cutLabel"><button data-g="female" aria-pressed="false">Female</button><button data-g="male" aria-pressed="false">Male</button></div><em>Experimental</em></div>
+    <div id="items" class="item-grid"></div>
+    <div id="no-items" hidden><h3>No matching items</h3></div>
+    <aside id="item-detail" class="item-detail" aria-labelledby="detail-name" aria-live="polite" aria-atomic="true" hidden>
+      <strong id="detail-name"></strong><p id="detail-description"></p>
+    </aside>
+    <div id="options">
+      <div class="options-head"><button class="options-back" id="closeOptions" aria-label="Back to the wardrobe">‹</button><h2>Options</h2></div>
+      <p class="section-title" style="margin-top:4px">View</p>
+      <div class="toggles">
+        <button id="spin" aria-pressed="false">Turntable</button>
+        <button id="random">Random</button><button id="reset">Reset look</button>
+        <button id="light" aria-pressed="false">Light follows view</button>
+      </div>
+      <p class="section-title">Background</p>
+      <div class="toggles" id="bgs" role="group" aria-label="Background">
+        <button data-bg="dark" aria-pressed="true">Dark</button>
+        <button data-bg="white" aria-pressed="false">White</button>
+        <button data-bg="clear" aria-pressed="false">Transparent</button>
+      </div>
+      <p class="section-title">Experimental</p>
+      <div class="toggles">
+        <button id="legs" aria-pressed="true">Fill hidden legs</button>
+        <button id="hairfix" aria-pressed="true">Hair collision</button>
+        <button id="layerfit" aria-pressed="true">Keep layers apart</button>
+        <button id="wowfit" aria-pressed="true" hidden>Wow leg fit</button>
+        <button id="cross" aria-pressed="false">Other gender's outfits</button>
+      </div>
+      <p class="note">The outfit version determines the body and poses.</p>
+    </div>
+  </section>
+</div>
+</main>
+<script src="../avatar_creator/wardrobe.js"></script>
+<script src="renderer.js"></script>
+<script src="wardrobe-renderer.js?v=stage-viewport-2"></script>
+<script src="effects.js"></script>
+<script src="wardrobe3d-renderer.js?v=parallel-loading-20261124"></script>
+<script src="../avatar_creator/locale.js"></script>
+<script src="locale.js"></script>
+<script src="../avatar_creator/backgrounds.js"></script>
+<script src="studio.js"></script>
+</body>
+</html>
