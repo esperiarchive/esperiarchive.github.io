@@ -1,3 +1,9 @@
+/* Keep offscreen archive rows searchable and focusable while deferring their layout. */
+.archive-entry {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto max(44px, calc(44px * var(--reader-font-ratio) + 6px));
+}
+
 /* Use the available desktop window; long content scrolls in its own reading area. */
 @media (min-width: 901px) {
   .app-shell.home-view,

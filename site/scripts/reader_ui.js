@@ -14,7 +14,7 @@
   "No change": {"cn":"病情没有变化","jp":"症状に変化なし","kr":"증상 변화 없음"},
   "Choose a patient": {"cn":"选择患者","jp":"患者を選択","kr":"환자 선택"},
   "Event Stories": {"cn":"活动剧情","jp":"イベントストーリー","kr":"이벤트 스토리"},
-  "World": {"cn": "世界", "jp": "世界", "kr": "세계"},
+  "World": {"cn": "世界", "jp": "ワールド", "kr": "월드"},
   "Fish": {
     "cn": "鱼类",
     "jp": "魚類",
@@ -295,9 +295,9 @@
     "kr": "특별 이벤트"
   },
   "Starter Story": {
-    "cn": "启程篇",
-    "jp": "旅の始まり",
-    "kr": "여정의 시작"
+    "cn": "启程篇章",
+    "jp": "旅立ちの章",
+    "kr": "여정의 장"
   },
   "World Archive": {
     "cn": "世界档案",
@@ -467,7 +467,7 @@
   "Skills & Stats": {
     "cn": "技能与属性",
     "jp": "スキル・ステータス",
-    "kr": "스킬 및 능력치"
+    "kr": "스킬 및 속성"
   },
   "Interactions": {
     "cn": "互动",
@@ -480,9 +480,9 @@
     "kr": "캐릭터 음성"
   },
   "Resonating Hall Idles": {
-    "cn": "共鸣大厅闲聊",
-    "jp": "共鳴の間のボイス",
-    "kr": "공명의 전당 대사"
+    "cn": "英雄厅堂闲聊",
+    "jp": "英雄ホールのボイス",
+    "kr": "영웅의 전당 대사"
   },
   "Affinity Gift Lines": {
     "cn": "赠礼语音",
@@ -490,19 +490,19 @@
     "kr": "선물 대사"
   },
   "Mystical House Lines": {
-    "cn": "秘闻馆语音",
-    "jp": "秘話の館のボイス",
-    "kr": "비화의 집 대사"
+    "cn": "神秘屋语音",
+    "jp": "神秘屋のボイス",
+    "kr": "미스테리 하우스 대사"
   },
   "Mystical House Idle Dialogue": {
-    "cn": "秘闻馆闲聊",
-    "jp": "秘話の館の日常会話",
-    "kr": "비화의 집 일상 대화"
+    "cn": "神秘屋闲聊",
+    "jp": "神秘屋の日常会話",
+    "kr": "미스테리 하우스 일상 대화"
   },
   "Affinity Tales": {
-    "cn": "好感故事",
-    "jp": "親交の物語",
-    "kr": "친밀도 이야기"
+    "cn": "信赖度故事",
+    "jp": "信頼度の物語",
+    "kr": "신뢰도 이야기"
   },
   "Skins": {
     "cn": "皮肤",
@@ -510,9 +510,9 @@
     "kr": "스킨"
   },
   "Mystical House Interactions": {
-    "cn": "秘闻馆互动",
-    "jp": "秘話の館の交流",
-    "kr": "비화의 집 상호작용"
+    "cn": "神秘屋互动",
+    "jp": "神秘屋の交流",
+    "kr": "미스테리 하우스 상호작용"
   },
   "Profile": {
     "cn": "档案",
@@ -567,7 +567,7 @@
   "Loading skills and stats…": {
     "cn": "正在加载技能与属性…",
     "jp": "スキルとステータスを読み込み中…",
-    "kr": "스킬과 능력치 불러오는 중…"
+    "kr": "스킬과 속성 불러오는 중…"
   },
   "Character skills could not be loaded. Please try again.": {
     "cn": "无法加载角色技能，请重试。",
@@ -590,9 +590,10 @@
     "kr": "기본 설정 계수"
   },
   "Base stats": {
+    "en": "Basic Stats",
     "cn": "基础属性",
-    "jp": "基礎ステータス",
-    "kr": "기본 능력치"
+    "jp": "基本ステータス",
+    "kr": "기본 속성"
   },
   "Exact config rows; naked hero": {
     "cn": "原始配置数据；无装备英雄",
@@ -630,6 +631,7 @@
     "kr": "영웅 마스터리"
   },
   "Basic Attack": {
+    "en": "Normal Attack",
     "cn": "普通攻击",
     "jp": "通常攻撃",
     "kr": "일반 공격"
@@ -645,6 +647,7 @@
     "kr": "전용 장비"
   },
   "Signature equipment": {
+    "en": "Exclusive Equipment",
     "cn": "专属装备",
     "jp": "専用装備",
     "kr": "전용 장비"
@@ -690,6 +693,7 @@
     "kr": "공격력"
   },
   "Physical DEF": {
+    "en": "Phys DEF",
     "cn": "护甲",
     "jp": "物理防御",
     "kr": "물리 방어력"
@@ -710,14 +714,15 @@
     "kr": "치료"
   },
   "Attack Speed": {
+    "en": "ATK SPD",
     "cn": "攻击速度",
     "jp": "攻撃速度",
     "kr": "공격 속도"
   },
   "Life Drain": {
-    "cn": "吸血",
-    "jp": "吸収",
-    "kr": "흡혈"
+    "cn": "生命汲取",
+    "jp": "ライフスティール",
+    "kr": "생명 흡수"
   },
   "Crit": {
     "cn": "暴击",
@@ -725,8 +730,8 @@
     "kr": "치명타"
   },
   "Crit Resist": {
-    "cn": "暴击抵抗",
-    "jp": "クリティカル耐性",
+    "cn": "抗暴击",
+    "jp": "クリティカル抵抗",
     "kr": "치명타 저항"
   },
   "Haste": {
@@ -752,7 +757,7 @@
   "Damage Type": {
     "cn": "伤害类型",
     "jp": "ダメージタイプ",
-    "kr": "피해 유형"
+    "kr": "대미지 유형"
   },
   "Range": {
     "cn": "射程",
@@ -1432,7 +1437,7 @@
   "Damage": {
     "cn": "伤害类型",
     "jp": "ダメージ",
-    "kr": "피해 유형"
+    "kr": "대미지 유형"
   },
   "Growth": {
     "cn": "成长",
@@ -1440,14 +1445,16 @@
     "kr": "성장"
   },
   "Max quality tier": {
+    "en": "Max Tier",
     "cn": "最高品阶",
     "jp": "最高ランク",
     "kr": "최고 등급"
   },
   "Starting energy": {
+    "en": "Initial Energy",
     "cn": "初始能量",
-    "jp": "初期エネルギー",
-    "kr": "시작 에너지"
+    "jp": "初期SP",
+    "kr": "초기 에너지"
   },
   "Standard progression": {
     "cn": "常规成长",
@@ -1462,12 +1469,12 @@
   "The calculator reconstructs naked config stats at exact table-backed levels. It deliberately excludes equipment, charms, mastery, artifacts, mode normalization, and account bonuses, so roster-panel totals can differ.": {
     "cn": "计算器根据配置表中的精确等级还原无装备属性，不计入装备、魔法饰品、专精、神器、模式平衡与账号加成，因此可能与游戏内英雄面板不同。",
     "jp": "設定表に記録されたレベルごとの装備なしの値を計算します。装備、魔法のチャーム、熟練度、アーティファクト、モード補正、アカウントのボーナスを含まないため、ゲーム内の表示値とは異なる場合があります。",
-    "kr": "설정표의 정확한 레벨별 장비 미착용 능력치를 계산합니다. 장비, 마법 부적, 숙련도, 아티팩트, 모드 보정, 계정 보너스는 포함하지 않아 게임 내 영웅 화면의 수치와 다를 수 있습니다."
+    "kr": "설정표의 정확한 레벨별 장비 미착용 속성을 계산합니다. 장비, 마법 부적, 숙련도, 아티팩트, 모드 보정, 계정 보너스는 포함하지 않아 게임 내 영웅 화면의 수치와 다를 수 있습니다."
   },
   "Values are cumulative at the selected equipment level. *_PR fields are rendered as percentage-point bonuses from their field convention; secondary attributes are config points.": {
     "cn": "数值为所选装备等级的累计加成。*_PR字段按字段约定显示为百分比加成，次要属性为配置点数。",
     "jp": "選択した装備レベルの累積ボーナスです。*_PR項目はフィールドの規則に従ってパーセント加算として表示し、その他の属性は設定上のポイントで表示します。",
-    "kr": "선택한 장비 레벨의 누적 보너스입니다. *_PR 필드는 필드 규칙에 따라 퍼센트 포인트 보너스로, 보조 능력치는 설정 포인트로 표시합니다."
+    "kr": "선택한 장비 레벨의 누적 보너스입니다. *_PR 필드는 필드 규칙에 따라 퍼센트 포인트 보너스로, 보조 속성은 설정 포인트로 표시합니다."
   },
   "Change outcome": {
     "cn": "更改结果",
@@ -1572,12 +1579,12 @@
   "{name} cumulative stats": {
     "cn": "{name} 累计属性",
     "jp": "{name}の累積ステータス",
-    "kr": "{name} 누적 능력치"
+    "kr": "{name} 누적 속성"
   },
   "Incomplete profile. Unit {n} is disabled in the game data. This entry shows the recovered biography and dialogue; skills and stats are not yet recovered for this record.": {
     "cn": "档案尚不完整。单位{n}在游戏数据中未启用。此处显示已取得的传记与对话，尚无技能与属性。",
     "jp": "未完成のプロフィールです。ユニット{n}はゲームデータで無効になっています。取得済みの経歴と会話を表示します。スキルとステータスは未取得です。",
-    "kr": "미완성 프로필입니다. 유닛 {n}은 게임 데이터에서 비활성화되어 있습니다. 확보한 전기와 대사를 표시하며 스킬과 능력치는 아직 없습니다."
+    "kr": "미완성 프로필입니다. 유닛 {n}은 게임 데이터에서 비활성화되어 있습니다. 확보한 전기와 대사를 표시하며 스킬과 속성은 아직 없습니다."
   },
   "Preview profile. Not recovered yet: {fields}.": {
     "cn": "预览档案。尚未取得：{fields}。",
@@ -1600,9 +1607,9 @@
     "kr": "화면의 등장인물: {name}"
   },
   "Deploy": {
-    "cn": "上阵",
-    "jp": "出陣",
-    "kr": "출전"
+    "cn": "英雄上阵",
+    "jp": "英雄出撃",
+    "kr": "영웅 출전"
   },
   "Upgrade": {
     "cn": "升级",
@@ -1610,9 +1617,9 @@
     "kr": "레벨 상승"
   },
   "Defeated": {
-    "cn": "战败",
-    "jp": "敗北",
-    "kr": "패배"
+    "cn": "英雄阵亡",
+    "jp": "戦闘不能",
+    "kr": "영웅 전사"
   },
   "Victory": {
     "cn": "胜利",
@@ -1620,14 +1627,14 @@
     "kr": "승리"
   },
   "First Recruitment": {
-    "cn": "初次招募",
-    "jp": "初回募集",
-    "kr": "첫 모집"
+    "cn": "首次获取",
+    "jp": "英雄獲得",
+    "kr": "최초 획득"
   },
   "Resonating Hall Idle": {
-    "cn": "共鸣大厅闲聊",
-    "jp": "共鳴の間のボイス",
-    "kr": "공명의 전당 대사"
+    "cn": "英雄厅堂闲聊",
+    "jp": "英雄ホールのボイス",
+    "kr": "영웅의 전당 대사"
   },
   "Liked Gift": {
     "cn": "喜爱的礼物",
@@ -1640,9 +1647,9 @@
     "kr": "싫어하는 선물"
   },
   "Affinity Gift": {
-    "cn": "好感赠礼",
-    "jp": "親交のプレゼント",
-    "kr": "친밀도 선물"
+    "cn": "信赖度赠礼",
+    "jp": "信頼度のプレゼント",
+    "kr": "신뢰도 선물"
   },
   "Advanced effect": {
     "cn": "进阶效果",
@@ -1652,12 +1659,12 @@
   "PvP damage boost": {
     "cn": "竞技场伤害加成",
     "jp": "アリーナのダメージ増幅",
-    "kr": "아레나 피해 증폭"
+    "kr": "아레나 대미지 증폭"
   },
   "PvP damage reduction": {
     "cn": "竞技场伤害减免",
-    "jp": "アリーナのダメージ軽減",
-    "kr": "아레나 피해 감소"
+    "jp": "アリーナのダメージ耐性",
+    "kr": "아레나 대미지 감면"
   },
   "Lv. {n}": {
     "cn": "{n}级",
@@ -1722,6 +1729,7 @@
     "kr": "메인 레벨"
   },
   "Seasonal level": {
+    "en": "Season Level",
     "cn": "赛季等级",
     "jp": "シーズンレベル",
     "kr": "시즌 레벨"
@@ -1804,7 +1812,7 @@
   "How damage is calculated": {
     "cn": "伤害计算方式",
     "jp": "ダメージの計算方法",
-    "kr": "피해 계산 방식"
+    "kr": "대미지 계산 방식"
   },
   "Skill / level": {
     "cn": "技能 / 等级",
@@ -1834,12 +1842,12 @@
   "Damage dealt": {
     "cn": "造成伤害",
     "jp": "与ダメージ",
-    "kr": "가하는 피해"
+    "kr": "입히는 대미지"
   },
   "Damage taken": {
     "cn": "受到伤害",
     "jp": "被ダメージ",
-    "kr": "받는 피해"
+    "kr": "받는 대미지"
   },
   "Difficulty": {
     "cn": "难度",
@@ -1864,7 +1872,7 @@
   "{skill} · Lv. 1 damage coefficient {before} → {after}": {
     "cn": "{skill} · 1级伤害系数 {before} → {after}",
     "jp": "{skill} · Lv.1 ダメージ係数 {before} → {after}",
-    "kr": "{skill} · Lv.1 피해 계수 {before} → {after}"
+    "kr": "{skill} · Lv.1 대미지 계수 {before} → {after}"
   }
 });
   Object.assign(messages, {

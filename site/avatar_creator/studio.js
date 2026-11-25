@@ -601,7 +601,7 @@
     const token=generation;try{
       const poses=portraitPoses.filter(([pose])=>(snapshot.yaw!==180||backPoses.has(pose))&&index.resolve(snapshot,pose));if(!poses.some(([p])=>p==='normal'))throw new Error('A Hand on Hip capture is required to export a portrait set.');
       const files=[],pack={schema:'afk.reader.portrait-pack',version:1,gender:snapshot.gender,displayName:name.slice(0,80),recipe:{avatarIds:Object.fromEntries(Object.entries(snapshot.avatarIds).filter(([slot])=>slot!=='footprint'))},poses:{}};
-      for(const [pose,label] of poses){$('export-status').textContent='Preparing '+label.toLowerCase()+'…';const view=await resolveView(snapshot,pose),canvas=await renderView(view,settings),blob=await png(canvas);
+      for(const [pose,label] of poses){$('export-status').textContent='Preparing '+label+'…';const view=await resolveView(snapshot,pose),canvas=await renderView(view,settings),blob=await png(canvas);
         files.push({name:pose+'.png',bytes:new Uint8Array(await blob.arrayBuffer())});const framing=view.framing;pack.framing||=framing;
         pack.poses[pose]={png:canvas.toDataURL('image/png'),framing};if(view.portrait?.choiceFraming)pack.poses[pose].choiceFraming=view.portrait.choiceFraming;
       }
@@ -645,7 +645,14 @@
       $('load-recipe').onclick=()=>$('recipe-file').click();$('recipe-file').onchange=async()=>{const file=$('recipe-file').files[0];try{if(!file)return;if(file.size>131072)throw new Error('Choose a recipe smaller than 128 KB.');setState(W.parseRecipe(await file.text(),index.items));notify('Recipe opened.');}catch(error){notify(error.message);}finally{$('recipe-file').value='';}};
       $('save-recipe').onclick=()=>download(new Blob([JSON.stringify(W.exportRecipe({...state,name:title()}),null,2)],{type:'application/json'}),slug(title())+'.recipe.json');
       $('export-png').onclick=async()=>{const selected=current,name=slug(title())+'-'+state.pose+(state.yaw===180?'-back':'')+'.png';if(!selected)return;try{download(await png(selected.canvas),name);}catch(e){notify(e.message);}};
-      $('export-set').onclick=()=>{clearReadyDownload();const poses=portraitPoses.filter(([pose])=>(state.yaw!==180||backPoses.has(pose))&&index.resolve(state,pose));$('export-poses').textContent=(state.yaw===180?'Back view':'Front view')+' · Available poses: '+poses.map(p=>p[1]).join(', ')+'.';$('export-status').textContent='';$('export-dialog').showModal();};
+      $('export-set').onclick=()=>{
+        clearReadyDownload();
+        const poses=portraitPoses.filter(([pose])=>(state.yaw!==180||backPoses.has(pose))&&index.resolve(state,pose));
+        const summary=$('export-poses');
+        summary.replaceChildren(node('span','',state.yaw===180?'Back':'Front'),' · ',node('span','','Available poses'),': ');
+        poses.forEach(([,label],i)=>{if(i)summary.append(', ');summary.append(node('span','',label));});
+        $('export-status').textContent='';$('export-dialog').showModal();
+      };
       $('download-zip').onclick=()=>exportSet('zip');$('download-pack').onclick=()=>exportSet('pack');refresh();watchLibrary(loaded.stamp);
       studioReady=true;if(embedded)window.parent.postMessage({type:'tea-wardrobe-ready'},location.origin);
     }catch(error){

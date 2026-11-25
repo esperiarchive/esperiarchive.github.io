@@ -28,7 +28,7 @@
     "Marksman": ["射手", "アーチャー", "사수"], "Rogue": ["游侠", "レンジャー", "레인저"],
     "Physical": ["物理", "物理", "물리"], "Magic": ["魔法", "魔法", "마법"],
     "Melee": ["近战", "近接", "근접"], "Ranged": ["远程", "遠距離", "원거리"],
-    "Base stats": ["基础属性", "基礎ステータス", "기본 능력치"],
+    "Base stats": ["基础属性", "基本ステータス", "기본 속성"],
     "HP": ["生命值", "HP", "HP"], "ATK": ["攻击力", "攻撃力", "공격력"],
     "Physical DEF": ["护甲", "物理防御", "물리 방어력"],
     "Magic DEF": ["魔抗", "魔法防御", "마법 방어력"],
@@ -36,7 +36,7 @@
     "Before equipment and battle modifiers. Enemy stats vary by encounter.": [
       "未计入装备与战斗修正。敌人属性随战斗而变化。",
       "装備や戦闘補正を含まない値です。敵のステータスは戦闘によって変わります。",
-      "장비 및 전투 보정 전의 수치입니다. 적의 능력치는 전투에 따라 달라집니다."],
+      "장비 및 전투 보정 전의 수치입니다. 적의 속성은 전투에 따라 달라집니다."],
     "Skills": ["技能", "スキル", "스킬"], "Skill {number}": ["技能 {number}", "スキル {number}", "스킬 {number}"],
     "Skill level {level}": ["技能等级 {level}", "スキルLv. {level}", "스킬 레벨 {level}"],
     "{count} of {total} entries": ["{count} / {total} 条", "{total}件中{count}件", "{total}개 중 {count}개"],
@@ -48,7 +48,7 @@
   };
   function text(key, language, values = {}) {
     // Shared game concepts use the same vocabulary as character profiles.
-    const common = new Set(["Class", "Tank", "Warrior", "Mage", "Support", "Marksman", "Rogue", "HP", "ATK", "Physical DEF", "Magic DEF", "Skills"]);
+    const common = new Set(["Class", "Tank", "Warrior", "Mage", "Support", "Marksman", "Rogue", "HP", "ATK", "Physical DEF", "Magic DEF", "Skills", "Base stats"]);
     const shared = common.has(key) && globalThis.ReaderUI?.messages?.[key]?.[language];
     let value = shared || messages[key]?.[{cn: 0, jp: 1, kr: 2}[language]] || key;
     return value.replace(/\{(\w+)\}/g, (match, name) => values[name] ?? match);

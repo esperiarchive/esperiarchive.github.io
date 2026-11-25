@@ -76,4 +76,13 @@
 </main>
 <input id="recipe-file" type="file" accept=".json,application/json" hidden><p id="toast" role="status" hidden></p><button id="mobile-preview" aria-label="View character preview" hidden>↑ View preview</button>
 <dialog id="export-dialog"><form method="dialog"><button class="close-dialog" aria-label="Close export options">×</button><p class="overline">TAKE YOUR LOOK WITH YOU</p><h2>Export portrait set</h2><p id="export-poses"></p><p>The export includes poses available for this look and view.</p><button id="download-zip" type="button" class="primary">Download PNG set (.zip)</button><button id="download-pack" type="button">Download portrait pack (.json)</button><p id="export-status" role="status"></p></form></dialog>
+<script>
+if (location.hostname === "esperiarchive.github.io") {
+  const beacon = document.createElement("script");
+  beacon.type = "module";
+  beacon.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  beacon.dataset.cfBeacon = '{"token":"a7df6733d2db49ec926ef50d51d3af9f"}';
+  document.body.appendChild(beacon);
+}
+</script>
 </body></html>

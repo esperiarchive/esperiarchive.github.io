@@ -179,8 +179,10 @@
         if (kind === "mail" && routes.characters) preload(data(routes.characters));
         const [manifest, bindings] = await Promise.all([bootstrap,
           routes.archives ? preloadJson(data(routes.archives)) : null]);
-        preload(local(manifest?.item_images || "media/item_images/index.json"));
-        preload(local("mt/fallbacks.json"));
+        if (kind !== "mail") {
+          preload(local(manifest?.item_images || "media/item_images/index.json"));
+          preload(local("mt/fallbacks.json"));
+        }
         preload(local("mt/archives.json"));
         const index = bindings?.archives?.[kind]?.index;
         if (!index) return;
@@ -194,6 +196,8 @@
       const story = view === "stories" || storyArchive
         || (view === "mystical-house" ? parts.length > 2 : parts.length >= 3);
       if (!story) return;
+      preload(local("picture_inspections.json?v=20261011-native-points"));
+      if (view === "stories" && routes.story_bundles) preload(data(routes.story_bundles));
       for (const key of ["runtime", "exploration", "interactions"]) {
         if (routes[key]) preload(data(routes[key]));
       }

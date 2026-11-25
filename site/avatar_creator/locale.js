@@ -73,12 +73,17 @@ CURRENT LOOK|当前造型|現在のスタイル|현재 외형
 PREVIEW|预览|プレビュー|미리보기
 Right-drag to zoom · zoom in to pan vertically|按住右键拖动缩放 · 放大后可上下平移|右ドラッグでズーム・拡大後は上下に移動|오른쪽 드래그로 확대/축소 · 확대 후 위아래 이동
 Reset view|重置视图|表示をリセット|보기 초기화
-Hand on Hip|叉腰|腰に手を当てる|허리에 손
-Standing|站立|立ち姿|서 있기
-Thinking|思考|考える|생각하기
-Rage|愤怒|激怒|분노
-Helpless|无奈|お手上げ|난감
-Wow|哇！|わあ！|와!
+Hand on Hip|叉腰|腰に手を当てる|우쭐
+Standing|站立|立つ|차렷
+Thinking|思考|熟考|고민
+Rage|愤怒|激昂|분노
+Helpless|无奈|しょうがない|유감
+Wow|艳羡|いいなぁ|부러움
+Shy|害羞|恥ずかしい|부끄
+Dignified|威严|威厳|위엄
+Confident|自信|自信|도도
+Contemplative|沉思|考え込む|명상
+Delighted|愉悦|ニコニコ|자신만만
 Backdrop|背景|背景|배경
 Studio|工作室|スタジオ|스튜디오
 Light|浅色|明るい背景|밝게
@@ -104,19 +109,19 @@ Preview-ready|可预览|プレビュー可能|미리보기 가능
 Capture needed|需要捕获|撮影データが必要|캡처 필요
 Complete looks|完整造型|完成スタイル|완성된 외형
 Outfits|服装|衣装|의상
-Hair|发型|髪型|머리
-Face|脸型|顔|얼굴
-Skin|肤色|肌|피부
-Eyes|眼睛|目|눈
+Hair|发型|髪型|헤어
+Face|脸型|顔|얼굴형
+Skin|肤色|肌の色|피부
+Eyes|瞳色|目の色|동공
 Headwear|头饰|頭飾り|머리 장식
 Hero headgear|英雄头饰|英雄頭装飾|영웅 머리 장식
 Expand wardrobe|展开衣橱|ワードローブを広げる|옷장 펼치기
-Masks|面饰|マスク|얼굴 장식
+Masks|面饰|マスク|액세서리
 Cloaks|披风|マント|망토
 Back & tails|背饰与尾巴|背中・尻尾|등 장식 및 꼬리
-Beards|胡须|ひげ|수염
-Makeup|妆容|メイク|메이크업
-Body paint|身体彩绘|ボディペイント|바디 페인트
+Beards|胡子|ひげ|수염
+Makeup|脸部妆容|メイク|메이크업
+Body paint|身体彩绘|ペイント|보디 페인팅
 Body shape|体型|体型|체형
 Body build|体型|体型|체형
 Type A|类型A|タイプA|타입 A
@@ -156,6 +161,9 @@ Your selections are kept in the recipe. Choose Preview-ready items or a complete
 Some selected parts or appearance variants need preview data. You can still save or export the recipe.|部分选择缺少预览数据，仍可保存或导出搭配。|一部の選択にプレビューデータが必要です。レシピは保存・出力できます。|일부 항목의 미리보기 데이터가 필요합니다. 조합은 저장하거나 내보낼 수 있습니다.
 Assembled from reusable items · depth-aware veils and adjustable lighting.|独立部件组合 · 透明面纱与可调光照|個別パーツから合成 · 透けるベールと照明調整|개별 아이템 조합 · 투명 베일 및 조명 조절
 Complete captured look · changing parts needs matching captures.|完整捕获造型 · 更换部件需要相应数据|完成スタイル画像 · パーツ変更には対応データが必要|완성된 외형 이미지 · 부위 변경 시 해당 데이터 필요
+Available poses|可用姿势|使用可能なポーズ|사용 가능한 포즈
+Happy|开心|喜び|기쁨
+Sad|可怜|かわいそう|맴찢
 Export portrait set|导出肖像集|ポートレートセットを出力|인물 이미지 세트 내보내기
 The export includes poses available for this look and view.|导出包含该造型和视角可用的姿势。|このスタイルと視点で利用できるポーズを出力します。|현재 외형과 시점에서 가능한 포즈를 내보냅니다.
 Download PNG set (.zip)|下载PNG集 (.zip)|PNGセットをダウンロード (.zip)|PNG 세트 다운로드 (.zip)

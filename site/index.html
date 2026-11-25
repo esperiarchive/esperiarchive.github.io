@@ -1,12 +1,15 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=419b8e4c38854dc0"></script>
-  <script src="scripts/reader_publication.js?v=0b04c337808e8c4d"></script>
+  <script src="scripts/config.js?v=327b829ffb87a7eb"></script>
+  <script src="scripts/reader_publication.js?v=adb6fb298994787e"></script>
   <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
   <script>ReaderPublication.preloadRoute();</script>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="styles/reader_fonts.css?v=3d7f7cc1c1c07abe">
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+<link rel="preconnect" href="https://raw.githubusercontent.com">
+<link rel="preload" href="assets/fonts/tea-reader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles/reader_fonts.css?v=3d7f7cc1c1c07abe">
   <link rel="stylesheet" href="styles/reader_home.css?v=b0b0de43b7b49e73">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Esperia Archive</title>
@@ -3804,41 +3807,10 @@
     </figure>
   </dialog>
 
-  <link rel="stylesheet" href="styles/dialogue_effects.css?v=f20d39d58efeafb5">
-  <script src="scripts/dialogue_color_lookup.js?v=df178e5ff1d61dc3"></script>
-  <script src="scripts/dialogue_effects.js?v=b0899998f27194f3"></script>
-  <link rel="stylesheet" href="styles/player_appearance.css?v=bbe2920c2c85b962">
-  <script src="scripts/appearance_store.js?v=de0b5603743f1028"></script>
-  <script src="scripts/player_appearance.js?v=a5ef37abc860b257"></script>
-  <link rel="stylesheet" href="styles/story_perspectives.css?v=98c128176ba40729">
-  <script src="scripts/story_perspectives.js?v=d4d6a6aa3739e699"></script>
-  <script src="scripts/reader_ui.js?v=fb6859a9d08d9d7a"></script>
-  <link rel="stylesheet" href="styles/world_archive.css?v=cec953d64ee098ee">
-  <script src="scripts/world_archive.js?v=4b6d8247b4363ae1"></script>
-  <script src="scripts/reader_catalogs.js?v=2195067df81ee6a1"></script>
-  <link rel="stylesheet" href="styles/reader_glossary.css?v=4b3723ec42a3c8a9">
-  <script src="scripts/reader_glossary.js?v=ced38dae0e2db22b"></script>
-  <link rel="stylesheet" href="styles/story_archive.css?v=98169a197d6c77e2">
-  <script src="scripts/story_archive.js?v=8b819dcb7f4e890c"></script>
-  <script src="scripts/reader_story_paths.js?v=64bec758a5c3c344"></script>
-  <script src="scripts/reader_story_routes.js?v=256d812e5e4d78b5"></script>
-  <script src="scripts/reader_character_paths.js?v=b6ce00e7374f117c"></script>
-  <script src="scripts/reader_character_routes.js?v=e60e48540f469236"></script>
-  <script src="scripts/character_stats.js?v=9ae3716077cff076"></script>
-  <script src="scripts/story_runtime.js?v=9a1bbdf5a750aa41"></script>
-  <script src="scripts/story_results.js?v=30688082fc607173"></script>
-  <script src="scripts/story_activities.js?v=f8845c3b5fbc9432"></script>
-  <script src="scripts/story_encounters.js?v=14a044583a8d3874"></script>
-  <script src="scripts/story_battles.js?v=08c8c9fce10f8a4d"></script>
-  <script src="scripts/story_objectives.js?v=3c252d14016e19be"></script>
-  <script src="scripts/story_locale_references.js?v=4d50cb502dbd8009"></script>
-  <script src="scripts/story_scenes.js?v=ac54f9821c2db679"></script>
-  <script src="scripts/story_chapters.js?v=aa58a593eed587a1"></script>
-  <script src="scripts/story_inspections.js?v=28934bf41b9646a2"></script>
-  <script src="scripts/story_translation.js?v=39534bcf860e2c03"></script>
-  <link rel="stylesheet" href="styles/story_runtime.css?v=88e65f15e34eb01c">
-  <link rel="stylesheet" href="styles/reader_theme.css?v=7d56085553e391e5">
-  <link rel="stylesheet" href="styles/reader_layout.css?v=44e52eb4384de05a">
+  <link rel="stylesheet" href="styles/reader_bundle.css?v=4642518dd8c242a1">
+<link rel="stylesheet" href="styles/reader_theme.css?v=7d56085553e391e5">
+<link rel="stylesheet" href="styles/reader_layout.css?v=5ea87bde12ba3b28">
+<script src="scripts/reader_bundle.js?v=6331632bb88356d1"></script>
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
     const READER_PUBLIC = Boolean(window.TEA_CONFIG?.public_reader) || document.documentElement.dataset.readerProfile === "public";
@@ -6246,7 +6218,7 @@
       const selectionKey = `${archiveKind}:${selectedArchiveId}`;
       const selectionChanged = archiveList.dataset.selectionKey !== selectionKey;
       const query = archiveSearch.value.trim().toLocaleLowerCase();
-      archiveList.innerHTML = "";
+      const rows = document.createDocumentFragment();
       if (archiveKind === "documents") {
         const entries = archiveDocumentEntries().filter((entry) => (
           !query || archiveDocumentSearchText(entry).includes(query)
@@ -6278,8 +6250,8 @@
           meta.className = "archive-entry-meta";
           meta.textContent = entry.textdes_id;
           button.append(name, preview, meta);
-          button.addEventListener("click", () => selectArchiveEntry("documents", entry.textdes_id, false));
-          archiveList.appendChild(button);
+          button.dataset.archiveId = entry.textdes_id;
+          rows.appendChild(button);
         }
       } else if (archiveKind === "mail") {
         const visible = visibleMailEntries();
@@ -6308,8 +6280,8 @@
           meta.className = "archive-entry-meta";
           meta.textContent = entry.mail_key;
           button.append(name, preview, meta);
-          button.addEventListener("click", () => selectArchiveEntry("mail", entry.mail_key, false));
-          archiveList.appendChild(button);
+          button.dataset.archiveId = entry.mail_key;
+          rows.appendChild(button);
         }
       } else {
         const categoryEntries = itemCategoryEntries();
@@ -6356,16 +6328,17 @@
             ? `${itemIds.length} variants`
             : itemIds[0];
           button.append(name, preview, meta);
-          button.addEventListener("click", () => selectArchiveEntry("items", item.item_id, false));
-          archiveList.appendChild(button);
+          button.dataset.archiveId = item.item_id;
+          rows.appendChild(button);
         }
       }
-      if (!archiveList.children.length) {
+      if (!rows.childElementCount) {
         const empty = document.createElement("div");
         empty.className = "archive-list-empty";
         empty.textContent = uiText("No matching entries.");
-        archiveList.appendChild(empty);
+        rows.appendChild(empty);
       }
+      archiveList.replaceChildren(rows);
       archiveList.dataset.selectionKey = selectionKey;
       const activeEntry = archiveList.querySelector(".archive-entry.active");
       if (selectionChanged && activeEntry) {
@@ -6450,7 +6423,7 @@
       }
     }
 
-    function selectArchiveEntry(kind, id = "", replaceHash = true, overview = false) {
+    function selectArchiveEntry(kind, id = "", replaceHash = true, overview = false, row = null) {
       const previousEntry = `${archiveKind}/${selectedArchiveId}`;
       primaryView = "archive";
       const nextKind = ["documents", "items", "mail", "fish", "enemies"].includes(kind) ? kind : "documents";
@@ -6461,8 +6434,15 @@
         selectedMailFilter = "all";
       }
       if (!overview) ensureArchiveSelection();
-      updatePrimaryShell();
-      renderArchive();
+      if (row) {
+        archiveList.querySelector(".archive-entry.active")?.classList.remove("active");
+        row.classList.add("active");
+        archiveList.dataset.selectionKey = `${archiveKind}:${selectedArchiveId}`;
+        renderArchiveDetail();
+      } else {
+        updatePrimaryShell();
+        renderArchive();
+      }
       if (`${archiveKind}/${selectedArchiveId}` !== previousEntry) archiveDetail.scrollTop = 0;
       updateHash(false, replaceHash);
       // In the stacked layout, an explicit selection should reveal its contents.
@@ -9528,9 +9508,12 @@
 
     async function ensureArchiveData(kind) {
       if (ReaderWorldArchive.kinds.includes(kind)) return worldArchive.ensure(kind);
-      if (kind === "mail") await ensureCharacterIndex();
+      const archiveFallbacks = loadOptionalJson("data/mt/archives.json");
+      const imagePath = `data/${manifest.item_images || "media/item_images/index.json"}`;
+      const images = kind === "mail" ? null : loadOptionalJson(imagePath);
+      const textFallbacks = kind === "mail" ? null : loadOptionalJson("data/mt/fallbacks.json");
       if (routeCatalogs) {
-        const bindings = await ensureArchiveBindings();
+        const [bindings] = await Promise.all([ensureArchiveBindings(), kind === "mail" && ensureCharacterIndex()]);
         const path = bindings.archives[kind].index;
         const catalog = await routeJson(path);
         if (kind === "documents") { documentCatalog = catalog; documentCatalogPath = path; }
@@ -9543,12 +9526,17 @@
         loadItemLocale(selectedLanguage), loadItemLocale("cn")]);
       if (kind === "mail") [mailLocale, mailCnLocale] = await Promise.all([
         loadMailLocale(selectedLanguage), loadMailLocale("cn")]);
-      [itemImageCatalog, savedTextFallbacks, savedArchiveFallbacks] = await Promise.all([
-        loadOptionalJson(`data/${manifest.item_images || "media/item_images/index.json"}`),
-        loadOptionalJson("data/mt/fallbacks.json"), loadOptionalJson("data/mt/archives.json"),
-      ]);
-      buildArchiveItemIndex();
-      documentsByExplorationStep = explorationDocumentIndex(documentCatalog);
+      savedArchiveFallbacks = await archiveFallbacks;
+      if (kind === "mail") {
+        // Older catalogs can refer to sender icons only the general image index knows.
+        if (!itemImageCatalog && archiveMailEntries().some(entry => entry.sender_icon && !archiveMailPortrait(entry))) {
+          itemImageCatalog = await loadOptionalJson(imagePath);
+        }
+      } else {
+        [itemImageCatalog, savedTextFallbacks] = await Promise.all([images, textFallbacks]);
+        if (kind === "items") buildArchiveItemIndex();
+        else documentsByExplorationStep = explorationDocumentIndex(documentCatalog);
+      }
     }
 
     // All speculative requests use the publication queue. Ordinary loaders keep
@@ -15827,6 +15815,10 @@
     for (const kind of ReaderWorldArchive.kinds) {
       document.getElementById(`archive-${kind}-tab`).addEventListener("click", () => showArchive(kind, "", false).catch(showLoadError));
     }
+    archiveList.addEventListener("click", event => {
+      const row = event.target.closest("button[data-archive-id]");
+      if (row) selectArchiveEntry(archiveKind, row.dataset.archiveId, false, false, row);
+    });
     archiveSearch.addEventListener("input", () => {
       renderArchiveList();
     });
@@ -15860,6 +15852,29 @@
       window.location.hash = `/archive/${archiveKind}?lang=${encodeURIComponent(selectedLanguage)}&mode=${encodeURIComponent(readerMode)}&gender=${encodeURIComponent(selectedGender)}`;
     });
 
+    // Pointing at, focusing or touching Cosmetics fetches the 2D editor's files and its
+    // catalogue indexes, so the click mostly draws. It shares the home links' data-saver rule.
+    let wardrobeWarmed = null;
+    function warmWardrobe() {
+      if (wardrobeWarmed || !hasClassic || !ReaderPublication.canWarm(false)) return;
+      const page = new URL(classicWardrobeUrl);
+      wardrobeWarmed = ReaderPublication.fetch(page).then(response => response.ok ? response.text() : "").then(html => {
+        const urls = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css)(?:\?[^"]*)?)"/g)].map(match => new URL(match[1], page).href);
+        urls.push(new URL("compositor.worker.js", page).href);
+        const base = wardrobeConfig.wardrobe_2d_base, more = [];
+        if (base) {
+          for (const file of ["catalogue.json", "captures.json"]) urls.push(new URL(file, base).href);
+          // The availability index and the opening view's metadata are the largest start-up
+          // downloads. Both are immutable; the view follows the editor's own gender choice.
+          more.push(ReaderPublication.fetch(new URL("items-startup.json", base)).then(response => ReaderPublication.readJson(response)).then(startup => {
+            const view = startup.shards?.[(selectedGender === "male" ? "male" : "female") + "/normal/0"];
+            return Promise.all([startup.coverage, view].filter(info => info?.url).map(info => ReaderPublication.fetch(new URL(info.url, base)).catch(() => null)));
+          }).catch(() => null));
+        }
+        return Promise.all([...urls.map(url => ReaderPublication.fetch(url).catch(() => null)), ...more]);
+      }).catch(() => { wardrobeWarmed = null; });
+    }
+    for (const type of ["pointerenter", "focus", "touchstart"]) cosmeticsTab.addEventListener(type, warmWardrobe, {passive: true});
     cosmeticsTab.addEventListener("click", () => {
       if (primaryView === "cosmetics") return scrollReaderToTop("smooth");
       playerAppearance.customize({opener:cosmeticsTab}).catch(()=>playerAppearance.customize({fresh:true,opener:cosmeticsTab}));
@@ -16036,12 +16051,13 @@
         }
         await ensureReaderData();
         if (revision !== routeRevision) return;
-        if (route.view !== "archive") await ensureCharacterIndex();
+        if (route.view === "stories" || !route.view) await ensureStoryNavigation();
+        else if (route.view !== "archive") await ensureCharacterIndex();
         if (revision !== routeRevision) return;
         if (route.namedCharacter && !mysticalCharacterById.has(route.characterId)) {
           throw Object.assign(new Error(uiText("This character is not available in this reader's data release.")), {code:"INVALID_READER_ROUTE"});
         }
-        if (!route.view || route.view === "stories" || route.interactionId) await ensureStoryNavigation();
+        if (route.interactionId) await ensureStoryNavigation();
         if (revision !== routeRevision) return;
         applyRoute(route);
         applyPreferencesToUi();
@@ -16158,5 +16174,14 @@
     installHomeWarming();
     boot();
   </script>
+<script>
+if (location.hostname === "esperiarchive.github.io") {
+  const beacon = document.createElement("script");
+  beacon.type = "module";
+  beacon.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  beacon.dataset.cfBeacon = '{"token":"a7df6733d2db49ec926ef50d51d3af9f"}';
+  document.body.appendChild(beacon);
+}
+</script>
 </body>
 </html>

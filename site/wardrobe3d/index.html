@@ -94,5 +94,14 @@
 <script src="locale.js"></script>
 <script src="../avatar_creator/backgrounds.js"></script>
 <script src="studio.js"></script>
+<script>
+if (location.hostname === "esperiarchive.github.io") {
+  const beacon = document.createElement("script");
+  beacon.type = "module";
+  beacon.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  beacon.dataset.cfBeacon = '{"token":"a7df6733d2db49ec926ef50d51d3af9f"}';
+  document.body.appendChild(beacon);
+}
+</script>
 </body>
 </html>

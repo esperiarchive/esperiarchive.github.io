@@ -26,23 +26,12 @@ Light follows view|光照随视角旋转|視点に光を追従|시점에 맞춰 
 Fill hidden legs|补全隐藏的腿部|隠れた脚を補完|가려진 다리 보완
 Hair collision|发型防穿模|髪の干渉を補正|머리카락 겹침 보정
 Keep layers apart|防止衣物重叠|衣装の重なりを補正|옷 겹침 보정
-Wow leg fit|惊讶姿势腿部修正|驚きポーズの脚補正|놀람 포즈 다리 보정
+Wow leg fit|艳羡姿势腿部修正|いいなぁポーズの脚補正|부러움 포즈 다리 보정
 Dark|深色|暗色|어둡게
 Transparent|透明|透明|투명
 Other gender's outfits|另一性别的服装|別の性別の衣装|다른 성별 의상
 The outfit version determines the body and poses.|服装款式决定体型和姿势。|衣装のバージョンで体型とポーズが決まります。|의상 버전에 따라 체형과 포즈가 결정됩니다.
 Original|原始|オリジナル|기본
-Hand on Hip|叉腰|腰に手|허리에 손
-Standing|站立|立ち姿|서기
-Thinking|思考|思案|생각
-Rage|愤怒|怒り|분노
-Helpless|无奈|困惑|난감
-Wow|惊讶|驚き|놀람
-Shy|害羞|照れ|수줍음
-Dignified|端庄|威厳|위엄
-Confident|自信|自信|자신감
-Contemplative|沉思|熟考|사색
-Delighted|欣喜|喜び|기쁨
 Loading…|加载中…|読み込み中…|불러오는 중…
 3D uses capture lighting.|3D 使用拍摄光照。|3Dでは撮影時の照明を使います。|3D에서는 촬영 조명을 사용합니다.
 `;
