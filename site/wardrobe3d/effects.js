@@ -12,6 +12,7 @@ float sat(float x){ return clamp(x,0.,1.); }`;
 const FX_VARYINGS = 'in vec2 vUv; in vec2 vUv1; in vec2 vUvRaw; in vec3 vNormal; in vec3 vWorld; in float vEyeDepth; in vec4 vColor;';
 
 const LAYERED_FS = COMMON + GAMMA_HELPERS + FX_VARYINGS + `
+uniform vec3 uCameraPos;
 uniform sampler2D _MainTex, _BlendTex, _MaskTex, _Soft_MaskTex, _TileTex, _AFKVertexMask;
 uniform vec4 _MainTex_ST, _BlendTex_ST, _MaskTex_ST, _Soft_MaskTex_ST, _TileTex_ST, _AFKVertexMask_ST;
 uniform vec4 _MainTex_CT, _BlendTex_CT, _Mask_CT, _MaskTex_CT, _Tile_CT, _Soft_Mask_CT, _PolarUV_Center_Main;
@@ -20,6 +21,7 @@ uniform vec4 _MainTex_Color, _BlendTex_Color, _MainTex_Color_W, _White_Color, _B
 uniform float _AFKFxKind, _AFKPreviewTime, _TimeScale, _AlphaCT, _Alpha_CT, _Mask, _SoftMask, _Tile, _Blend;
 uniform float _Light_Dark_Set, _RGB_Set, _MainTex_Channel_R_A, _OneMinus, _Soft_Mask_Oneminus, _Tile_OneMinus, _UseVertCol, _FadeRate;
 uniform float _PolarUV_Main, _PolarUV_Tile, _PolarUV_Mask;
+uniform float _AFKGlassTexture;
 out vec4 outColor;
 vec2 effectUV(vec2 uv, vec4 st, vec4 motion, float polar, float time){
   vec2 delta=uv-_PolarUV_Center_Main.xy;
@@ -28,6 +30,16 @@ vec2 effectUV(vec2 uv, vec4 st, vec4 motion, float polar, float time){
   return vec2(c*p.x+s*p.y,-s*p.x+c*p.y)+0.5;
 }
 void main(){
+  if(_AFKFxKind>3.5){
+    vec3 n=normalize(vNormal),v=normalize(uCameraPos-vWorld);
+    float rim=pow(1.-sat(abs(dot(n,v))),3.);
+    float highlight=pow(sat(dot(n,normalize(v+vec3(-0.35,0.8,-0.45)))),48.);
+    vec4 painted=texture(_MainTex,vUvRaw*_MainTex_ST.xy+_MainTex_ST.zw);
+    float paint=sat(painted.a*_AFKGlassTexture);
+    vec3 color=mix(mix(_Main_Color.rgb,_Main_Dark_Color.rgb,rim)+highlight*0.3,painted.rgb,paint);
+    outColor=vec4(color,sat(_Main_Color.a+rim*_Main_Dark_Color.a+highlight*0.18+paint));
+    return;
+  }
   vec2 uv=vUvRaw; float time=(_AFKPreviewTime>=0.?_AFKPreviewTime:1.35)*_TimeScale;
   vec4 tex=texture(_MainTex,effectUV(uv,_MainTex_ST,_MainTex_CT,_PolarUV_Main,time));
   float main=mix(tex.r,1.-tex.r,sat(_OneMinus)); float alpha=tex.a*main; vec3 color=tex.rgb;

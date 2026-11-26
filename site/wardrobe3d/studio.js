@@ -339,7 +339,8 @@
   function draw() {
     if (!renderer || lost || closed || saving || committed !== revision) return;
     camera(); renderPreview();
-    $('angle').textContent = Math.round(view.yaw) + '°';
+    $('angle-input').disabled = false;
+    if(document.activeElement!==$('angle-input'))syncAngle();
   }
   function renderPreview() {
     const canvas = $('view'), width = canvas.clientWidth, height = canvas.clientHeight;
@@ -524,6 +525,24 @@
     view.pan=[0,Math.max(-limit,Math.min(limit,panY))];
     scheduleDraw();
   }
+  const angleInput=$('angle-input');
+  function syncAngle() {
+    angleInput.value=String(((Math.round(view.yaw*10)%3600)+3600)%3600/10);
+  }
+  angleInput.addEventListener('focus',()=>{stopSpin();angleInput.select();});
+  angleInput.addEventListener('blur',()=>{
+    const text=angleInput.value.trim().replace(',','.');
+    const yaw=text===''?NaN:Number(text);
+    if(Number.isFinite(yaw) && renderer?.cam0 && !saving && !lost)setView(yaw,view.zoom,view.pan[1]);
+    syncAngle();
+  });
+  angleInput.addEventListener('keydown',e=>{
+    if(e.key==='Enter' || e.key==='Escape'){
+      e.preventDefault();e.stopPropagation();
+      if(e.key==='Escape')syncAngle();
+      angleInput.blur();
+    }
+  });
   $('front').onclick=()=>setView(0);$('back').onclick=()=>setView(180);
   $('reset').onclick=()=>{const previous=view;initializeLook({gender});view={...previous,outfitGender:gender};update();};
   $('random').onclick=()=>{
@@ -559,7 +578,7 @@
   };
   stage.oncontextmenu=e=>e.preventDefault();
   stage.onpointerdown=e=>{
-    if(e.target.closest('button') || !renderer?.cam0)return;
+    if(e.target.closest('button,input,label') || !renderer?.cam0)return;
     pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});stage.setPointerCapture(e.pointerId);
   };
   stage.onpointermove=e=>{
@@ -573,8 +592,8 @@
     setView(yaw,zoom,view.pan[1]+dy*scale);
   };
   stage.onpointerup=stage.onpointercancel=stage.onlostpointercapture=e=>pointers.delete(e.pointerId);
-  stage.ondblclick=()=>{if(renderer?.cam0)setView(view.yaw);};
-  stage.addEventListener('wheel',e=>{if(!renderer?.cam0 || saving || lost)return;e.preventDefault();setView(view.yaw,view.zoom*(e.deltaY<0?1.1:1/1.1),view.pan[1]);},{passive:false});
+  stage.ondblclick=e=>{if(!e.target.closest('button,input,label') && renderer?.cam0)setView(view.yaw);};
+  stage.addEventListener('wheel',e=>{if(e.target.closest('button,input,label') || !renderer?.cam0 || saving || lost)return;e.preventDefault();setView(view.yaw,view.zoom*(e.deltaY<0?1.1:1/1.1),view.pan[1]);},{passive:false});
   $('view').tabIndex=0;
   stage.onkeydown=e=>{
     if(e.target.id!=='view' || !renderer?.cam0)return;

@@ -311,10 +311,10 @@ class WardrobeRenderer extends Renderer {
     for (const part of this.active) part.submeshes.forEach((sub, index) => {
       if (!sub.mat || !KIND[sub.mat.shader]) return;
       const p = part.center, distance = -(view[2] * p[0] + view[6] * p[1] + view[10] * p[2] + view[14]);
-      list.push({ part, sub, index, material: sub.mat, kind: KIND[sub.mat.shader], distance });
+      list.push({ part, sub, index, material: sub.mat, kind: KIND[sub.mat.shader], distance: distance + (part.sortingFudge || 0) });
     });
     const opaque = list.filter(d => d.material.queue <= 2500).sort((a, b) => a.material.queue - b.material.queue || a.distance - b.distance);
-    const transparent = list.filter(d => d.material.queue > 2500).sort((a, b) => a.material.queue - b.material.queue || b.distance - a.distance);
+    const transparent = list.filter(d => d.material.queue > 2500).sort((a, b) => a.material.queue - b.material.queue || (a.part.sortingLayer || 0) - (b.part.sortingLayer || 0) || (a.part.sortingOrder || 0) - (b.part.sortingOrder || 0) || b.distance - a.distance);
     return [...opaque, ...transparent];
   }
   unsupported() { const s = new Set(); for (const p of this.active || []) for (const sub of p.submeshes) if (sub.mat && !KIND[sub.mat.shader]) s.add(sub.mat.name + ' / ' + sub.mat.shader); return [...s]; }

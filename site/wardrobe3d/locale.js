@@ -16,6 +16,7 @@ Drag to rotate · right-drag up or down to pan · scroll to zoom|拖动旋转 ·
 Character preview|角色预览|キャラクタープレビュー|캐릭터 미리보기
 Gender|性别|性別|성별
 View|视图|表示|보기
+View angle (degrees)|查看角度（度）|表示角度（度）|보기 각도 (도)
 Pose|姿势|ポーズ|포즈
 Categories|分类|カテゴリー|분류
 Turntable|自动旋转|自動回転|자동 회전

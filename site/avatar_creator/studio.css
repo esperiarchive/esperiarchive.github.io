@@ -350,10 +350,10 @@
 .expand-toggle{display:none}
 .fullscreen-toggle,.preview-close{display:grid;place-items:center;position:absolute;z-index:5;right:8px;top:8px;width:40px;height:40px;min-width:0;min-height:0;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--panel-strong);color:var(--ink)}
 .fullscreen-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.wardrobe-preview-dialog{padding:0;border:0;max-width:none;max-height:none;width:100vw;height:100dvh;inset:0;margin:0;overflow:hidden;background:var(--bg);color:var(--ink)}
-.wardrobe-preview-dialog::backdrop{background:var(--bg)}
+.wardrobe-preview-dialog{--preview-gap:clamp(16px,4.5vmin,40px);padding:0;border:1px solid rgba(var(--accent-rgb,213,187,130),.5);border-radius:18px;max-width:none;max-height:1200px;width:min(1100px,calc(100% - 2 * var(--preview-gap)));height:calc(100dvh - 2 * var(--preview-gap));inset:0;margin:auto;overflow:hidden;background:var(--bg);color:var(--ink);box-shadow:0 20px 80px #0009}
+.wardrobe-preview-dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}
 .wardrobe-preview-dialog > #stage{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-width:none;margin:0;border:0;border-radius:0}
-.wardrobe-preview-dialog #stage > :is(.preview-top,.gender-switch,.expand-toggle,.fullscreen-toggle,#item-detail,#angle,.hint){display:none!important}
+.wardrobe-preview-dialog #stage > :is(.preview-top,.gender-switch,.expand-toggle,.fullscreen-toggle,#item-detail,.hint){display:none!important}
 .wardrobe-preview-dialog .preview-close{top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));margin:0;font:28px/1 sans-serif;width:44px;height:44px}
 .preview-fullscreen-controls{position:absolute;z-index:5;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:8px}
 .wardrobe-preview-dialog .preview-fullscreen-controls button{flex:0 0 44px;width:44px;height:44px;margin:0;padding:0;font:24px/1 sans-serif;background:var(--panel-strong);color:var(--ink)}

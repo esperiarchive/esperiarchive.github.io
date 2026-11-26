@@ -1117,7 +1117,7 @@ class FullWardrobe extends WardrobeRenderer {
         const j = part.skinned ? joints[i * 4] : 0, m = mat4.mul(object, skin.subarray(j * 16, j * 16 + 16)), v = inst.pos.subarray(i * 3, i * 3 + 3);
         for (let a = 0; a < 3; a++) { const w = m[a] * v[0] + m[4 + a] * v[1] + m[8 + a] * v[2] + m[12 + a]; lo[a] = Math.min(lo[a], w); hi[a] = Math.max(hi[a], w); }
       }
-      active.push({ ...inst, item, path: part.path, object, submeshes, state: { visible: true, overrides: [] }, center: lo.map((v, a) => (v + hi[a]) / 2), layout: inst.layout });
+      active.push({ ...inst, item, path: part.path, object, submeshes, sortingFudge: part.sortingFudge || 0, sortingLayer: part.sortingLayer || 0, sortingOrder: part.sortingOrder || 0, state: { visible: true, overrides: [] }, center: lo.map((v, a) => (v + hi[a]) / 2), layout: inst.layout });
     }
     this.active = active; this.pose = poseName; this.selection = selection; this.filled = !!(fillItem || repair); this.hairMoved = hairMoved; this.fittedLeg = fittedLeg; this.layersMoved = layers.moved || 0;
     const faceHead = face?.bones.find(b => b.path.split('/').pop() === 'Bip001 Head');

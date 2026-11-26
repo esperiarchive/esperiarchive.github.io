@@ -1103,10 +1103,10 @@ class WardrobeRenderer extends Renderer {
     for (const part of this.active) part.submeshes.forEach((sub, index) => {
       if (!sub.mat || !KIND[sub.mat.shader]) return;
       const p = part.center, distance = -(view[2] * p[0] + view[6] * p[1] + view[10] * p[2] + view[14]);
-      list.push({ part, sub, index, material: sub.mat, kind: KIND[sub.mat.shader], distance });
+      list.push({ part, sub, index, material: sub.mat, kind: KIND[sub.mat.shader], distance: distance + (part.sortingFudge || 0) });
     });
     const opaque = list.filter(d => d.material.queue <= 2500).sort((a, b) => a.material.queue - b.material.queue || a.distance - b.distance);
-    const transparent = list.filter(d => d.material.queue > 2500).sort((a, b) => a.material.queue - b.material.queue || b.distance - a.distance);
+    const transparent = list.filter(d => d.material.queue > 2500).sort((a, b) => a.material.queue - b.material.queue || (a.part.sortingLayer || 0) - (b.part.sortingLayer || 0) || (a.part.sortingOrder || 0) - (b.part.sortingOrder || 0) || b.distance - a.distance);
     return [...opaque, ...transparent];
   }
   unsupported() { const s = new Set(); for (const p of this.active || []) for (const sub of p.submeshes) if (sub.mat && !KIND[sub.mat.shader]) s.add(sub.mat.name + ' / ' + sub.mat.shader); return [...s]; }
@@ -1264,6 +1264,7 @@ float sat(float x){ return clamp(x,0.,1.); }`;
 const FX_VARYINGS = 'in vec2 vUv; in vec2 vUv1; in vec2 vUvRaw; in vec3 vNormal; in vec3 vWorld; in float vEyeDepth; in vec4 vColor;';
 
 const LAYERED_FS = COMMON + GAMMA_HELPERS + FX_VARYINGS + `
+uniform vec3 uCameraPos;
 uniform sampler2D _MainTex, _BlendTex, _MaskTex, _Soft_MaskTex, _TileTex, _AFKVertexMask;
 uniform vec4 _MainTex_ST, _BlendTex_ST, _MaskTex_ST, _Soft_MaskTex_ST, _TileTex_ST, _AFKVertexMask_ST;
 uniform vec4 _MainTex_CT, _BlendTex_CT, _Mask_CT, _MaskTex_CT, _Tile_CT, _Soft_Mask_CT, _PolarUV_Center_Main;
@@ -1272,6 +1273,7 @@ uniform vec4 _MainTex_Color, _BlendTex_Color, _MainTex_Color_W, _White_Color, _B
 uniform float _AFKFxKind, _AFKPreviewTime, _TimeScale, _AlphaCT, _Alpha_CT, _Mask, _SoftMask, _Tile, _Blend;
 uniform float _Light_Dark_Set, _RGB_Set, _MainTex_Channel_R_A, _OneMinus, _Soft_Mask_Oneminus, _Tile_OneMinus, _UseVertCol, _FadeRate;
 uniform float _PolarUV_Main, _PolarUV_Tile, _PolarUV_Mask;
+uniform float _AFKGlassTexture;
 out vec4 outColor;
 vec2 effectUV(vec2 uv, vec4 st, vec4 motion, float polar, float time){
   vec2 delta=uv-_PolarUV_Center_Main.xy;
@@ -1280,6 +1282,16 @@ vec2 effectUV(vec2 uv, vec4 st, vec4 motion, float polar, float time){
   return vec2(c*p.x+s*p.y,-s*p.x+c*p.y)+0.5;
 }
 void main(){
+  if(_AFKFxKind>3.5){
+    vec3 n=normalize(vNormal),v=normalize(uCameraPos-vWorld);
+    float rim=pow(1.-sat(abs(dot(n,v))),3.);
+    float highlight=pow(sat(dot(n,normalize(v+vec3(-0.35,0.8,-0.45)))),48.);
+    vec4 painted=texture(_MainTex,vUvRaw*_MainTex_ST.xy+_MainTex_ST.zw);
+    float paint=sat(painted.a*_AFKGlassTexture);
+    vec3 color=mix(mix(_Main_Color.rgb,_Main_Dark_Color.rgb,rim)+highlight*0.3,painted.rgb,paint);
+    outColor=vec4(color,sat(_Main_Color.a+rim*_Main_Dark_Color.a+highlight*0.18+paint));
+    return;
+  }
   vec2 uv=vUvRaw; float time=(_AFKPreviewTime>=0.?_AFKPreviewTime:1.35)*_TimeScale;
   vec4 tex=texture(_MainTex,effectUV(uv,_MainTex_ST,_MainTex_CT,_PolarUV_Main,time));
   float main=mix(tex.r,1.-tex.r,sat(_OneMinus)); float alpha=tex.a*main; vec3 color=tex.rgb;
@@ -2680,7 +2692,7 @@ class FullWardrobe extends WardrobeRenderer {
         const j = part.skinned ? joints[i * 4] : 0, m = mat4.mul(object, skin.subarray(j * 16, j * 16 + 16)), v = inst.pos.subarray(i * 3, i * 3 + 3);
         for (let a = 0; a < 3; a++) { const w = m[a] * v[0] + m[4 + a] * v[1] + m[8 + a] * v[2] + m[12 + a]; lo[a] = Math.min(lo[a], w); hi[a] = Math.max(hi[a], w); }
       }
-      active.push({ ...inst, item, path: part.path, object, submeshes, state: { visible: true, overrides: [] }, center: lo.map((v, a) => (v + hi[a]) / 2), layout: inst.layout });
+      active.push({ ...inst, item, path: part.path, object, submeshes, sortingFudge: part.sortingFudge || 0, sortingLayer: part.sortingLayer || 0, sortingOrder: part.sortingOrder || 0, state: { visible: true, overrides: [] }, center: lo.map((v, a) => (v + hi[a]) / 2), layout: inst.layout });
     }
     this.active = active; this.pose = poseName; this.selection = selection; this.filled = !!(fillItem || repair); this.hairMoved = hairMoved; this.fittedLeg = fittedLeg; this.layersMoved = layers.moved || 0;
     const faceHead = face?.bones.find(b => b.path.split('/').pop() === 'Bip001 Head');
@@ -3051,6 +3063,7 @@ Drag to rotate · right-drag up or down to pan · scroll to zoom|拖动旋转 ·
 Character preview|角色预览|キャラクタープレビュー|캐릭터 미리보기
 Gender|性别|性別|성별
 View|视图|表示|보기
+View angle (degrees)|查看角度（度）|表示角度（度）|보기 각도 (도)
 Pose|姿势|ポーズ|포즈
 Categories|分类|カテゴリー|분류
 Turntable|自动旋转|自動回転|자동 회전
@@ -3479,7 +3492,8 @@ Loading…|加载中…|読み込み中…|불러오는 중…
   function draw() {
     if (!renderer || lost || closed || saving || committed !== revision) return;
     camera(); renderPreview();
-    $('angle').textContent = Math.round(view.yaw) + '°';
+    $('angle-input').disabled = false;
+    if(document.activeElement!==$('angle-input'))syncAngle();
   }
   function renderPreview() {
     const canvas = $('view'), width = canvas.clientWidth, height = canvas.clientHeight;
@@ -3664,6 +3678,24 @@ Loading…|加载中…|読み込み中…|불러오는 중…
     view.pan=[0,Math.max(-limit,Math.min(limit,panY))];
     scheduleDraw();
   }
+  const angleInput=$('angle-input');
+  function syncAngle() {
+    angleInput.value=String(((Math.round(view.yaw*10)%3600)+3600)%3600/10);
+  }
+  angleInput.addEventListener('focus',()=>{stopSpin();angleInput.select();});
+  angleInput.addEventListener('blur',()=>{
+    const text=angleInput.value.trim().replace(',','.');
+    const yaw=text===''?NaN:Number(text);
+    if(Number.isFinite(yaw) && renderer?.cam0 && !saving && !lost)setView(yaw,view.zoom,view.pan[1]);
+    syncAngle();
+  });
+  angleInput.addEventListener('keydown',e=>{
+    if(e.key==='Enter' || e.key==='Escape'){
+      e.preventDefault();e.stopPropagation();
+      if(e.key==='Escape')syncAngle();
+      angleInput.blur();
+    }
+  });
   $('front').onclick=()=>setView(0);$('back').onclick=()=>setView(180);
   $('reset').onclick=()=>{const previous=view;initializeLook({gender});view={...previous,outfitGender:gender};update();};
   $('random').onclick=()=>{
@@ -3699,7 +3731,7 @@ Loading…|加载中…|読み込み中…|불러오는 중…
   };
   stage.oncontextmenu=e=>e.preventDefault();
   stage.onpointerdown=e=>{
-    if(e.target.closest('button') || !renderer?.cam0)return;
+    if(e.target.closest('button,input,label') || !renderer?.cam0)return;
     pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});stage.setPointerCapture(e.pointerId);
   };
   stage.onpointermove=e=>{
@@ -3713,8 +3745,8 @@ Loading…|加载中…|読み込み中…|불러오는 중…
     setView(yaw,zoom,view.pan[1]+dy*scale);
   };
   stage.onpointerup=stage.onpointercancel=stage.onlostpointercapture=e=>pointers.delete(e.pointerId);
-  stage.ondblclick=()=>{if(renderer?.cam0)setView(view.yaw);};
-  stage.addEventListener('wheel',e=>{if(!renderer?.cam0 || saving || lost)return;e.preventDefault();setView(view.yaw,view.zoom*(e.deltaY<0?1.1:1/1.1),view.pan[1]);},{passive:false});
+  stage.ondblclick=e=>{if(!e.target.closest('button,input,label') && renderer?.cam0)setView(view.yaw);};
+  stage.addEventListener('wheel',e=>{if(e.target.closest('button,input,label') || !renderer?.cam0 || saving || lost)return;e.preventDefault();setView(view.yaw,view.zoom*(e.deltaY<0?1.1:1/1.1),view.pan[1]);},{passive:false});
   $('view').tabIndex=0;
   stage.onkeydown=e=>{
     if(e.target.id!=='view' || !renderer?.cam0)return;
