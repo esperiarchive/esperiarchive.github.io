@@ -133,17 +133,19 @@
    The percentage bounds account for the 8px gaps and keep sparse search
    results at the same width as a full list. */
 .world-card-grid {
-  grid-template-columns: repeat(auto-fill, minmax(clamp(calc((100% - 24px) / 4), calc(6em - 12px), calc((100% - 8px) / 2)), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(clamp(calc((100% - 24px) / 4), calc(6em + 6px), calc((100% - 8px) / 2)), 1fr));
   grid-auto-rows: max-content; gap: 8px; align-content: start;
 }
 .world-card { display: flex; flex-direction: column; align-items: center; justify-content: start; gap: 4px;
+  container-type: inline-size;
   width: 100%; min-width: 0; min-height: 128px; padding: 8px 6px; text-align: center; background: rgba(var(--ink-rgb), 0.045);
   border: 1px solid var(--line); border-radius: 6px; color: var(--ink); }
 .world-card > * { flex-shrink: 0; }
 .world-card:hover, .world-card:focus-visible { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
 .world-card.active { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.14); }
 .world-card-image { display: block; width: min(100%, 60px); height: 60px; object-fit: contain; }
-.world-card-name { font-size: 0.9em; line-height: 1.25; overflow-wrap: anywhere; }
+/* On narrow phones, long words must still fit when reader text is enlarged. */
+.world-card-name { max-width: 100%; font-size: min(0.82em, 13cqi); line-height: 1.25; overflow-wrap: normal; word-break: normal; }
 .world-card-meta { font-size: 0.7em; color: var(--muted); line-height: 1.3; }
 .world-card-grid > .archive-list-empty { grid-column: 1 / -1; }
 .world-detail-meta { color: var(--muted); margin: 8px 0; font-size: 0.85em; line-height: 1.5; }
@@ -252,9 +254,10 @@
 .archive-season-art .archive-illustration { width: 90%; height: 100%; }
 .archive-window-caption { position: absolute; left: 13%; right: 13%; top: 81%; transform: translateY(-50%); text-align: center; }
 .archive-season-card .archive-window-title { margin: 0; font-size: clamp(18px, 1.9vw, 25px); line-height: 1.12; color: #fff3d4; font-style: italic; font-weight: 600; text-shadow: 0 2px 3px #150d08, 0 0 5px #150d08, 0 0 9px #150d08; text-wrap: balance; overflow-wrap: normal; }
-.archive-season-card[data-collection="base_campaign"] .archive-window-caption { left: 8%; right: 8%; }
+.archive-season-card[data-collection="base_campaign"] .archive-window-caption { left: 0; right: 0; }
 .archive-season-card[data-collection="base_campaign"] .archive-window-title { font-size: clamp(17px,1.6vw,21px); }
-.archive-season-card[data-collection="base_campaign"] .archive-season-window { border-radius: 50% 50% 2px 2px / 18% 18% 2px 2px; overflow: hidden; }
+.archive-season-card[data-collection="base_campaign"] .archive-season-window { position: absolute; inset: 0; width: 100%; }
+.archive-season-card[data-collection="base_campaign"] .archive-season-window img { width: auto; max-width: 100%; margin-inline: auto; border-radius: 50% 50% 2px 2px / 18% 18% 2px 2px; }
 .archive-season-kicker { font-size: calc(11px * var(--reader-font-ratio)); line-height: 1.3; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
 .archive-season-card h2 { font-size: calc(clamp(19px,2vw,25px) * var(--reader-font-ratio)); line-height: 1.3; margin: 8px 0 12px; color: var(--accent); text-wrap: balance; }
 .archive-season-open { font-size: calc(13px * var(--reader-font-ratio)); line-height: 1.45; color: var(--muted); margin-top: 4px; }
@@ -264,7 +267,7 @@
    shadows trace their own outline; arched windows (Starter Story, events) take a ring instead. */
 .archive-season-resume { --resume-line: 2px; }
 .archive-season-resume .archive-season-window:not(.archive-portrait) img { filter: drop-shadow(var(--resume-line) 0 0 var(--accent)) drop-shadow(calc(-1 * var(--resume-line)) 0 0 var(--accent)) drop-shadow(0 var(--resume-line) 0 var(--accent)) drop-shadow(0 calc(-1 * var(--resume-line)) 0 var(--accent)) drop-shadow(0 12px 14px rgba(0,0,0,.26)); }
-.archive-season-resume:is([data-collection="base_campaign"]) .archive-season-window, .archive-season-resume .archive-season-window.archive-portrait { box-shadow: 0 0 0 var(--resume-line) var(--accent), 0 12px 14px rgba(0,0,0,.26); }
+.archive-season-resume[data-collection="base_campaign"] .archive-season-window img, .archive-season-resume .archive-season-window.archive-portrait { box-shadow: 0 0 0 var(--resume-line) var(--accent), 0 12px 14px rgba(0,0,0,.26); }
 .archive-season-resume[data-collection="base_campaign"] .archive-season-window img { filter: none; }
 .archive-season-card:hover { border-color: rgba(var(--accent-rgb),.2); background: rgba(var(--accent-rgb),.035); }
 .archive-search-section { margin-bottom: 34px; }
@@ -431,7 +434,8 @@
 .inspection-points button.inspection-read { border-color: #6baf99; }
 .inspection-continue:disabled { opacity: .45; cursor: default; }
 .inspection-progress { color: var(--muted, #acaaa3); }
-.inspection-point-heading { margin: 24px 0 12px; font-size: .75em; color: var(--muted, #acaaa3); scroll-margin-top: 24px; }
+.inspection-point-heading { margin: 24px 0 12px; font-size: .75em; color: var(--muted, #acaaa3); }
+.inspection-point-heading, .inspection-complete { scroll-margin-block-start: min(20vh, 150px); }
 .inspection-complete { margin: 24px 0; color: #6baf99; font-size: .8em; }
 .inspection-points button:focus-visible, .inspection-continue:focus-visible { outline: 2px solid #d99729; outline-offset: 3px; }
 .story-encounter-dialogue { margin: 1rem 0 0; min-width: 0; overflow-wrap: anywhere; }

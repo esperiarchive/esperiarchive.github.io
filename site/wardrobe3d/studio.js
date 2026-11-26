@@ -80,30 +80,56 @@
     }
     return result;
   }
+  async function loadMetadata() {
+    const read = async file => {
+      const response = await fetch(new URL('../' + file, library3d));
+      if (!response.ok) throw Error(file + ' (' + response.status + ')');
+      return response.json();
+    };
+    // Existing releases and already-open editors keep using the legacy address.
+    return read('metadata-v2.json').catch(() => read('metadata.json'));
+  }
   function name(row, slot) {
     if (!row) return tr(slot === 'bodyshape' ? 'Original' : 'None');
-    const names = metadata.names[row.id]?.[slot === 'outfit' ? view.outfitGender : gender];
+    const entry = metadata.names[row.id];
+    const names = entry?.[slot === 'outfit' ? view.outfitGender : gender] || entry?.all;
     return names?.[language] || row.name;
+  }
+  let catalogueDetailsManifest = null, catalogueDetailsRequest = null;
+  function ensureItemDetails() {
+    if (!catalogueDetailsManifest || catalogueDetailsRequest || !catalogueItems) return;
+    catalogueDetailsRequest = fetch(new URL(catalogueDetailsManifest, library2d))
+      .then(res => {
+        if (!res.ok) throw Error(catalogueDetailsManifest + ' (' + res.status + ')');
+        return res.json();
+      })
+      .then(details => {
+        if (!catalogueItems) return;
+        Wardrobe.mergeCatalogueDetails(catalogueItems, details);
+        showItemDetail();
+      })
+      .catch(() => { catalogueDetailsRequest = null; });
   }
   function showItemDetail() {
     const item = ids && view && catalog && catalogueItems?.get(ids[slotOf()]);
     const panel = $('item-detail');
     panel.hidden = !item || Wardrobe.itemCategory(item) !== category;
     if (panel.hidden) return;
+    if (item.detailsPending) ensureItemDetails();
     const itemGender = category === 'outfit' ? view.outfitGender : gender;
-    const title = StudioLocale.label(item, itemGender, language);
-    // A description that only repeats the name (the Default outfit) stays blank.
-    const described = StudioLocale.description(item, language), description = described === title ? '' : described;
+    const {title, description} = Wardrobe.itemDetailContent(item, itemGender, language, StudioLocale);
     if ($('detail-name').textContent !== title) $('detail-name').textContent = title;
     if ($('detail-description').textContent !== description) $('detail-description').textContent = description;
   }
   async function loadItemDetails() {
-    // Both editors read the same localized catalogue. Descriptions can arrive after the model.
+    // Both editors share the slim core catalogue; descriptions arrive on demand.
     try {
-      const response = await fetch(new URL('catalogue.json', library2d));
+      let response = await fetch(new URL('catalogue-core.json', library2d));
+      if (!response.ok) response = await fetch(new URL('catalogue.json', library2d));
       if (!response.ok) return;
-      const {items} = await response.json();
-      catalogueItems = new Map(items.map(item => [item.id, item]));
+      const data = Wardrobe.expandCatalogue(await response.json());
+      catalogueDetailsManifest = data.detailsManifest || null;
+      catalogueItems = new Map(data.items.map(item => [item.id, item]));
       refresh();
     } catch (error) {
       console.warn('Wardrobe descriptions unavailable', error);
@@ -249,7 +275,7 @@
     }
   }
   function refresh() {
-    document.documentElement.lang = {en:'en',cn:'zh-Hans',jp:'ja',kr:'ko'}[language];
+    document.documentElement.lang = Wardrobe.documentLang(language);
     for (const [node, key] of staticLabels) node.nodeValue = tr(key);
     for (const [el, attr, key] of attributes) el.setAttribute(attr,tr(key));
     $('classic').hidden = !hasClassic;
@@ -388,11 +414,9 @@
       const opening=renderer.openCatalog(library3d.href);
       // The opening look's body is known already, so its poses needn't wait for the catalogue.
       if(gender) for(const body of new Set([gender,view?.outfitGender||gender])) renderer.posesOf(body).catch(()=>{});
-      const result=await Promise.all([opening,fetch(new URL('../metadata.json', library3d)).then(res=>{
-        if(!res.ok) throw Error('metadata.json ('+res.status+')'); return res.json();
-      })]);
+      const result=await Promise.all([opening,loadMetadata()]);
       if(closed || canvas!==$('view') || generation!==bootGeneration || renderer.gl.isContextLost()) return;
-      [catalog,metadata]=result; lost=false;
+      [catalog,metadata]=result; renderer.setLegFillOutfits(metadata.legFillOutfits); lost=false;
       if(preserved && preservedSeedSession===session) {
         initializeLook(preserved); $('reader-look-name').value=preserved.name; await update();
       } else await applySeed();
@@ -488,6 +512,7 @@
   // Phones can hide the reader's bars and the look-name row; the stage keeps the way back.
   const reportExpanded = expanded => send('tea-wardrobe-expand',{expanded});
   const setExpanded = Wardrobe.bindExpand($('expand'),matchMedia('(max-width:760px)'),reportExpanded);
+  Wardrobe.bindPreviewFullscreen($('stage'),open=>send('tea-wardrobe-inspect',{open}));
   Wardrobe.bindHorizontalWheel(poseRow);
   $('search').oninput=e=>{query=e.target.value.trim().toLocaleLowerCase();$('items').scrollTop=0;refresh();};
   readyFilter?.addEventListener('change',()=>{$('items').scrollTop=0;refresh();});
@@ -560,15 +585,7 @@
     e.preventDefault();
   };
   if (embedded) {
-    const tall = parent.matchMedia('(min-height:560px)');
-    const main = document.querySelector('main');
-    const fitFrame = () => {
-      document.documentElement.classList.toggle('reader-fit',tall.matches);
-      send('tea-cosmetics-height',{height:tall.matches ? null : Math.max(480,main.offsetHeight)});
-    };
-    tall.addEventListener('change',fitFrame);
-    new ResizeObserver(fitFrame).observe(main);
-    fitFrame();
+    Wardrobe.bindReaderFrameFit(height => send('tea-cosmetics-height', {height}));
   }
   seed={gender:params.get('gender')};initializeLook(seed);refresh();
   send('tea-wardrobe-ready');boot();loadItemDetails();

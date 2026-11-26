@@ -123,7 +123,7 @@
     const result = await warmBody(value, unmetered);
     if (!result) throw new Error("Background catalog unavailable");
     const payload = JSON.parse(new TextDecoder().decode(result.body));
-    return readShards(payload, result.url, href => loadWarmJson(href, unmetered));
+    return expandShared(await readShards(payload, result.url, href => loadWarmJson(href, unmetered)));
   }
 
   function warmJson(value, unmetered = false) {
@@ -192,11 +192,10 @@
         }
         return;
       }
-      if (routes.characters) preload(data(routes.characters));
+      if (!storyArchive && routes.characters) preload(data(routes.characters));
       const story = view === "stories" || storyArchive
         || (view === "mystical-house" ? parts.length > 2 : parts.length >= 3);
       if (!story) return;
-      preload(local("picture_inspections.json?v=20261011-native-points"));
       if (view === "stories" && routes.story_bundles) preload(data(routes.story_bundles));
       for (const key of ["runtime", "exploration", "interactions"]) {
         if (routes[key]) preload(data(routes[key]));
@@ -209,14 +208,66 @@
       }
       preload(local("ministory_collections.json"));
       const manifest = await bootstrap;
-      for (const key of ["story_membership", "group_index"]) if (manifest?.[key]) preload(data(manifest[key]));
-      if (manifest?.metadata) preload(local(manifest.metadata));
+      if (manifest?.story_membership) preload(data(manifest.story_membership));
     } catch (_) { /* The reader requests everything it needs itself. */ }
+  }
+
+  const FORBIDDEN_SHARED_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+
+  function expandShared(payload) {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload) || !Object.hasOwn(payload, "tea_shared")) {
+      return payload;
+    }
+    const table = payload.tea_shared;
+    if (!table || typeof table !== "object" || Array.isArray(table)) {
+      throw new Error("Invalid tea_shared table");
+    }
+    for (const key of FORBIDDEN_SHARED_KEYS) {
+      if (Object.hasOwn(table, key)) throw new Error("Unsafe tea_shared key");
+    }
+    const resolved = new Map();
+    const resolving = new Set();
+
+    function resolveEntry(tid) {
+      if (typeof tid !== "string" || FORBIDDEN_SHARED_KEYS.has(tid) || !Object.hasOwn(table, tid)) {
+        throw new Error(`Invalid shared reference: ${String(tid)}`);
+      }
+      if (resolved.has(tid)) return resolved.get(tid);
+      if (resolving.has(tid)) throw new Error(`Cyclic shared reference: ${tid}`);
+      resolving.add(tid);
+      const value = expand(table[tid]);
+      resolving.delete(tid);
+      resolved.set(tid, value);
+      return value;
+    }
+
+    function expand(value) {
+      if (!value || typeof value !== "object") return value;
+      if (Array.isArray(value)) return value.map(expand);
+      const keys = Object.keys(value);
+      if (keys.length === 1 && keys[0] === "$tea_ref") {
+        return resolveEntry(value.$tea_ref);
+      }
+      const out = {};
+      for (const key of keys) {
+        if (FORBIDDEN_SHARED_KEYS.has(key)) throw new Error("Unsafe key in shared payload");
+        out[key] = expand(value[key]);
+      }
+      return out;
+    }
+
+    const result = {};
+    for (const key of Object.keys(payload)) {
+      if (key === "tea_shared") continue;
+      if (FORBIDDEN_SHARED_KEYS.has(key)) throw new Error("Unsafe key in shared payload");
+      result[key] = expand(payload[key]);
+    }
+    return result;
   }
 
   async function readJson(response) {
     if (!response.ok) throw new Error(`${response.status}: ${response.url}`);
-    return readShards(await response.json(), response.url, async href => readJson(await global.fetch(href)));
+    return expandShared(await readShards(await response.json(), response.url, async href => readJson(await global.fetch(href))));
   }
 
   async function readShards(payload, href, readPart) {
@@ -234,5 +285,5 @@
     return payload;
   }
 
-  global.ReaderPublication = Object.freeze({ url, fetch: fetchResource, readJson, preloadRoute, canWarm, warm, warmJson });
+  global.ReaderPublication = Object.freeze({ url, fetch: fetchResource, readJson, expandShared, preloadRoute, canWarm, warm, warmJson });
 })(window);

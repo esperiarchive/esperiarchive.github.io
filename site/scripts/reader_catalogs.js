@@ -128,5 +128,22 @@
     }
     return {documents: [...documents], items: [...items], images: images || documents.size > 0 || items.size > 0};
   }
-  return {create, merge, dependencies, entities, patch, bundles};
+  function runtimeFeatures(runtime, {owner = "", assets = [], group = "", logical = true} = {}) {
+    const features = runtime?.runtime_features;
+    if (!features) return [];
+    owner = String(owner);
+    const index = runtime.runtime_dependencies || {};
+    const names = new Set(["scene_summaries", ...(logical ? index.stories?.[owner] : index.groups?.[group]) || []]);
+    const treatments = runtime.treatment_steps?.[owner] || [];
+    const keys = new Set([...assets, ...treatments.map(step => step.asset),
+      ...(runtime.menus?.[owner] || []).map(link => runtime.choices?.[String(link.choice_id)]?.asset)].filter(Boolean));
+    for (const asset of keys) for (const name of index.assets?.[asset] || []) names.add(name);
+    if (treatments.length) names.add("pharmacy");
+    if ((features.treatment_feedback?.assets || []).some(asset => keys.has(asset))) names.add("treatment_feedback");
+    if (features.placements?.[owner]) names.add("placements");
+    return [...names].map(name => ({name, owner, path: name === "placements" ? features.placements[owner]
+      : name === "treatment_feedback" ? features.treatment_feedback?.path : features[name]}))
+      .filter(entry => typeof entry.path === "string");
+  }
+  return {create, merge, dependencies, entities, patch, bundles, runtimeFeatures};
 });

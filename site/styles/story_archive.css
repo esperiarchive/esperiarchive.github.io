@@ -24,9 +24,10 @@
 .archive-season-art .archive-illustration { width: 90%; height: 100%; }
 .archive-window-caption { position: absolute; left: 13%; right: 13%; top: 81%; transform: translateY(-50%); text-align: center; }
 .archive-season-card .archive-window-title { margin: 0; font-size: clamp(18px, 1.9vw, 25px); line-height: 1.12; color: #fff3d4; font-style: italic; font-weight: 600; text-shadow: 0 2px 3px #150d08, 0 0 5px #150d08, 0 0 9px #150d08; text-wrap: balance; overflow-wrap: normal; }
-.archive-season-card[data-collection="base_campaign"] .archive-window-caption { left: 8%; right: 8%; }
+.archive-season-card[data-collection="base_campaign"] .archive-window-caption { left: 0; right: 0; }
 .archive-season-card[data-collection="base_campaign"] .archive-window-title { font-size: clamp(17px,1.6vw,21px); }
-.archive-season-card[data-collection="base_campaign"] .archive-season-window { border-radius: 50% 50% 2px 2px / 18% 18% 2px 2px; overflow: hidden; }
+.archive-season-card[data-collection="base_campaign"] .archive-season-window { position: absolute; inset: 0; width: 100%; }
+.archive-season-card[data-collection="base_campaign"] .archive-season-window img { width: auto; max-width: 100%; margin-inline: auto; border-radius: 50% 50% 2px 2px / 18% 18% 2px 2px; }
 .archive-season-kicker { font-size: calc(11px * var(--reader-font-ratio)); line-height: 1.3; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
 .archive-season-card h2 { font-size: calc(clamp(19px,2vw,25px) * var(--reader-font-ratio)); line-height: 1.3; margin: 8px 0 12px; color: var(--accent); text-wrap: balance; }
 .archive-season-open { font-size: calc(13px * var(--reader-font-ratio)); line-height: 1.45; color: var(--muted); margin-top: 4px; }
@@ -36,7 +37,7 @@
    shadows trace their own outline; arched windows (Starter Story, events) take a ring instead. */
 .archive-season-resume { --resume-line: 2px; }
 .archive-season-resume .archive-season-window:not(.archive-portrait) img { filter: drop-shadow(var(--resume-line) 0 0 var(--accent)) drop-shadow(calc(-1 * var(--resume-line)) 0 0 var(--accent)) drop-shadow(0 var(--resume-line) 0 var(--accent)) drop-shadow(0 calc(-1 * var(--resume-line)) 0 var(--accent)) drop-shadow(0 12px 14px rgba(0,0,0,.26)); }
-.archive-season-resume:is([data-collection="base_campaign"]) .archive-season-window, .archive-season-resume .archive-season-window.archive-portrait { box-shadow: 0 0 0 var(--resume-line) var(--accent), 0 12px 14px rgba(0,0,0,.26); }
+.archive-season-resume[data-collection="base_campaign"] .archive-season-window img, .archive-season-resume .archive-season-window.archive-portrait { box-shadow: 0 0 0 var(--resume-line) var(--accent), 0 12px 14px rgba(0,0,0,.26); }
 .archive-season-resume[data-collection="base_campaign"] .archive-season-window img { filter: none; }
 .archive-season-card:hover { border-color: rgba(var(--accent-rgb),.2); background: rgba(var(--accent-rgb),.035); }
 .archive-search-section { margin-bottom: 34px; }

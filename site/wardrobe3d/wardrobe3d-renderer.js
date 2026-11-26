@@ -71,7 +71,42 @@ class FullWardrobe extends WardrobeRenderer {
     this.posesPending = new Map();
     this.resolvedMaterials = new Map();
     this.fillLegs = true;
+    this.legFill = null;
+    this.legFillPending = null;
+    this.legFillOutfits = null;
     this.instances = new Map();
+  }
+  setLegFillOutfits(outfits) {
+    if (!outfits || typeof outfits !== 'object') {
+      this.legFillOutfits = null;
+      return;
+    }
+    this.legFillOutfits = new Map(
+      Object.entries(outfits).map(([gender, ids]) => [gender, new Set((ids || []).map(Number))])
+    );
+  }
+  needsLegFill(gender, outfitId) {
+    if (this.fillLegs === false || !outfitId) return false;
+    // Without an outfit list, stay conservative and load leg-fill before rendering.
+    if (!this.legFillOutfits) return true;
+    return this.legFillOutfits.get(gender)?.has(Number(outfitId)) || false;
+  }
+  async ensureLegFill() {
+    if (this.legFill) return this.legFill;
+    if (!this.legFillPending) {
+      const pending = (async () => {
+        const response = await fetch(this.base + 'leg-fill.json');
+        if (!response.ok) throw new Error('leg-fill.json (' + response.status + ')');
+        return this.legFill = await response.json();
+      })();
+      this.legFillPending = pending;
+    }
+    const pending = this.legFillPending;
+    try { return await pending; }
+    catch (error) {
+      if (this.legFillPending === pending) this.legFillPending = null;
+      throw error;
+    }
   }
   async openCatalog(base) {
     this.base = base;
@@ -82,12 +117,14 @@ class FullWardrobe extends WardrobeRenderer {
     };
     const image = url => new Promise((resolve, reject) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = () => resolve(img); img.onerror = () => reject(new Error('LUT failed to load')); img.src = url; });
     // All at once: from a distant library each request costs a round trip, so none waits on another.
-    const [catalog, tables, mips, overlays, legFill, lut] = await Promise.all([get('catalog.json'), get('tables.json'), get('tex-mips.json'), get('overlays.json'), get('leg-fill.json'), image(base + 'lut.png')]);
+    // leg-fill.json only applies to a small set of outfits and loads on demand before their first render.
+    const [catalog, tables, mips, overlays, lut] = await Promise.all([get('catalog.json'), get('tables.json'), get('tex-mips.json'), get('overlays.json'), image(base + 'lut.png')]);
     this.catalog = catalog; this.tables = tables;
     this.validation = {references: []};
     this.noMipmaps = new Set(mips.noMipmaps);
     this.tables.overlays = overlays.overlays;
-    this.legFill = legFill;
+    this.legFill = null;
+    this.legFillPending = null;
     this.fillParts = new Map();
     this.repairItems = new Map();
     const index = (rows, keyed) => { const m = new Map(); for (const r of rows || []) m.set(r.id + '|' + r.key, r.texture); return m; };
@@ -157,7 +194,13 @@ class FullWardrobe extends WardrobeRenderer {
   }
   async item(file) {
     if (!this.items.has(file)) this.items.set(file, (async () => {
-      const data = await (await fetch(this.base + file + '?v=poses-20261115')).json(); this.bytes += JSON.stringify(data).length; fixSockets(data); return data;
+      const response = await fetch(this.base + file + '?v=poses-20261115');
+      if (!response.ok) throw new Error(file + ' (' + response.status + ')');
+      const size = Number(response.headers.get('Content-Length'));
+      if (size > 0) this.bytes += size;
+      const data = await response.json();
+      fixSockets(data);
+      return data;
     })());
     return this.cachedValue(this.items, file);
   }
@@ -1006,10 +1049,11 @@ class FullWardrobe extends WardrobeRenderer {
     const outfit = chosen.find(i => i.slot === 'outfit'), body = outfit?.gender || g;
     const poses = (await this.posesOf(body)).poses, poseIndex = Math.max(0, poses.findIndex(p => p.name === poseName)), root = new Float32Array(poses[poseIndex].root);
     // Leg fill (build_fill.py): Default's legs where this outfit models none, only in the poses where the gap shows;
-    // hand-fitted legs (blender/legfit_save.py) in every pose.
-    const entry = outfit && this.fillLegs !== false ? this.legFill?.outfits?.[body]?.[outfit.id] : null;
+    // hand-fitted legs (blender/legfit_save.py) in every pose. Loaded on demand before any repair outfit renders.
+    const legFill = outfit && this.needsLegFill(body, outfit.id) ? await this.ensureLegFill() : this.legFill;
+    const entry = outfit && this.fillLegs !== false ? legFill?.outfits?.[body]?.[outfit.id] : null;
     const fillPose = entry?.hand?.replaceLegFill ? null : entry?.hand || entry?.poses?.[poseName] || null;
-    const [fillItem, repair] = await Promise.all([fillPose ? this.item(this.legFill.base[body]) : null, entry ? this.repairItem(body, outfit.id, entry.hand) : null]);
+    const [fillItem, repair] = await Promise.all([fillPose ? this.item(legFill.base[body]) : null, entry ? this.repairItem(body, outfit.id, entry.hand) : null]);
     if (repair) this.prefetchParts(repair.parts.map(part => ({ item: repair, part })), selection);
     const bootsId = fillItem ? (this.bootDonor?.[outfit.id] ?? entry.boots) : null;
     const bootsTex = bootsId ? (this.bootTex?.[outfit.id] !== undefined ? this.bootTex[outfit.id] : this.bootDonor?.[outfit.id] ? null : entry.bootsTex) : null;

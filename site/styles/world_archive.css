@@ -7,17 +7,19 @@
    The percentage bounds account for the 8px gaps and keep sparse search
    results at the same width as a full list. */
 .world-card-grid {
-  grid-template-columns: repeat(auto-fill, minmax(clamp(calc((100% - 24px) / 4), calc(6em - 12px), calc((100% - 8px) / 2)), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(clamp(calc((100% - 24px) / 4), calc(6em + 6px), calc((100% - 8px) / 2)), 1fr));
   grid-auto-rows: max-content; gap: 8px; align-content: start;
 }
 .world-card { display: flex; flex-direction: column; align-items: center; justify-content: start; gap: 4px;
+  container-type: inline-size;
   width: 100%; min-width: 0; min-height: 128px; padding: 8px 6px; text-align: center; background: rgba(var(--ink-rgb), 0.045);
   border: 1px solid var(--line); border-radius: 6px; color: var(--ink); }
 .world-card > * { flex-shrink: 0; }
 .world-card:hover, .world-card:focus-visible { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
 .world-card.active { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.14); }
 .world-card-image { display: block; width: min(100%, 60px); height: 60px; object-fit: contain; }
-.world-card-name { font-size: 0.9em; line-height: 1.25; overflow-wrap: anywhere; }
+/* On narrow phones, long words must still fit when reader text is enlarged. */
+.world-card-name { max-width: 100%; font-size: min(0.82em, 13cqi); line-height: 1.25; overflow-wrap: normal; word-break: normal; }
 .world-card-meta { font-size: 0.7em; color: var(--muted); line-height: 1.3; }
 .world-card-grid > .archive-list-empty { grid-column: 1 / -1; }
 .world-detail-meta { color: var(--muted); margin: 8px 0; font-size: 0.85em; line-height: 1.5; }

@@ -10,10 +10,17 @@
   }
 
   // Source identifiers are mapped to their current collection and category.
-  function categoryFor(collection, category, id) {
+  function categoryFor(collection, category, id, story) {
     if (category === "daily") return "reputation";
-    return section(collection) === 'special-events' && category === 'mini'
-      && ['8', '10', '11', '20', '21', '22'].includes(String(id)) ? 'starry' : category;
+    if (category !== 'mini') return category;
+    // Use the game's dedicated Starry Tales screen, not a growing list of IDs.
+    // The older Pandora event also has hero_story subtype, but a different screen.
+    if (typeof story?.prefab === 'string') {
+      const prefab = story.prefab.replace(/\\/g, '/').toLowerCase();
+      return prefab.includes('/herostory/')
+        || prefab.endsWith('/pbui_ministory_tournamentl_story_windows_ep.prefab') ? 'starry' : 'mini';
+    }
+    return registry.stories[`special-events/starry/${id}`] ? 'starry' : 'mini';
   }
 
   const eventTitles = {cn:'活动剧情', en:'Event Stories', jp:'イベントストーリー', kr:'이벤트 스토리'};
@@ -98,11 +105,29 @@
     const categories = new Set(['main', 'side', 'reputation', 'mini', 'starry', 'heart_to_heart', 'daily', 'exploration']);
     const slugPath = /^stories\/[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
     const eventIds = new Set(Object.keys(data.stories).filter(key => ['mini', 'starry'].includes(key.split('/')[1])).map(key => key.split('/')[2]));
+    const family = category => ['mini', 'starry'].includes(category) ? 'event'
+      : category === 'heart_to_heart' ? 'interaction' : 'quest';
+    const targetsById = new Map();
+    for (const key of Object.keys(data.stories)) {
+      const [collection, category, storyId] = key.split('/');
+      const targets = targetsById.get(storyId) || [];
+      targets.push({section:collection, category, storyId});
+      targetsById.set(storyId, targets);
+    }
     function targetFor(collection, category, id) {
       collection = section(collection);
+      if (category === 'daily') category = 'reputation';
+      // An explicitly assigned quest wins over an event from another catalog
+      // that happens to have the same numeric ID.
+      if (data.stories[`${collection}/${category}/${id}`]) {
+        return {section:collection, category, storyId:String(id)};
+      }
       if (category === 'side' && eventIds.has(String(id))) category = 'mini';
       if (['mini', 'starry'].includes(category)) collection = 'special-events';
-      return {section:collection, category:categoryFor(collection, category, id), storyId:String(id)};
+      const target = {section:collection, category, storyId:String(id)};
+      if (data.stories[`${collection}/${category}/${id}`]) return target;
+      const candidates = (targetsById.get(String(id)) || []).filter(row => family(row.category) === family(category));
+      return candidates.length === 1 ? {...candidates[0]} : target;
     }
     for (const [key, entry] of Object.entries(data.stories)) {
       const parts = key.split('/');
@@ -158,5 +183,5 @@
     }
     return {resolve, path, canonicalHash, referenceHash, mainReturn, targetFor};
   }
-  return {...create(registry), create, categoryFor, relocateEvents, readingEntries};
+  return {...create(registry), create, section, categoryFor, relocateEvents, readingEntries};
 });

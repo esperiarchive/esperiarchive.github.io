@@ -299,10 +299,18 @@
     "jp": "旅立ちの章",
     "kr": "여정의 장"
   },
+  "Song of Strife": {"cn": "残阳下的战歌", "jp": "黄昏の戦歌", "kr": "분쟁의 군가"},
+  "Waves of Intrigue": {"cn": "锈锚港风云", "jp": "荒海に咲く薔薇", "kr": "음모의 파도"},
+  "Chains of Eternity": {"cn": "冬夜残响", "jp": "冬夜の残響", "kr": "겨울밤의 메아리"},
+  "Echoes of Dissent": {"cn": "渊火龙诗", "jp": "深焔の竜歌", "kr": "에세일의 노래"},
+  "Thorns of Devotion": {"cn": "血月将至", "jp": "紅き月の刻", "kr": "붉은 달의 예언"},
+  "Tower of Memory": {"cn": "光影迷局", "jp": "光影の迷宮", "kr": "가면 속 그림자"},
+  "Crown of Ashes": {"cn": "王都终幕", "jp": "王都の終幕", "kr": "진실의 화살"},
+  "Veil of Memories": {"cn": "彼岸月幕", "jp": "彼岸の月明り", "kr": "달빛의 장막"},
   "World Archive": {
     "cn": "世界档案",
-    "jp": "世界アーカイブ",
-    "kr": "세계 아카이브"
+    "jp": "ワールドアーカイブ",
+    "kr": "월드 아카이브"
   },
   "Items": {
     "cn": "物品",
@@ -2063,6 +2071,7 @@
   }
   function apply(document, locale) {
     document.documentElement.lang = languages[language(locale)];
+    globalThis.ReaderTheme?.ensureFont?.(locale, document);
     for (const node of document.querySelectorAll("[data-i18n]")) node.textContent = text(node.dataset.i18n, locale);
     for (const attribute of ["placeholder", "aria-label", "title"]) {
       for (const node of document.querySelectorAll(`[data-i18n-${attribute}]`)) {

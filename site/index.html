@@ -1,16 +1,17 @@
 <!doctype html>
 <html lang="en" data-reader-profile="public">
 <head>
-  <script src="scripts/config.js?v=327b829ffb87a7eb"></script>
-  <script src="scripts/reader_publication.js?v=adb6fb298994787e"></script>
-  <script src="scripts/reader_theme.js?v=b99dbfb0288544d2"></script>
+  <script src="scripts/config.js?v=a7d1f23ec5d005a9"></script>
+  <script src="scripts/reader_publication.js?v=ad69296859f23fa5"></script>
+  <script src="scripts/reader_theme.js?v=f1f56fad404108da"></script>
   <script>ReaderPublication.preloadRoute();</script>
   <meta charset="utf-8">
+  <link id="reader-fonts-css" rel="stylesheet" href="styles/reader_fonts.css?v=e91a6f1e49e64964" data-fonts-cn="styles/reader_fonts_cn.css?v=7ed165fd2bf24fa1" data-fonts-jp="styles/reader_fonts_jp.css?v=3ee011d495d996c0" data-fonts-kr="styles/reader_fonts_kr.css?v=40ab8ad884c68752">
+  <script>ReaderTheme.syncFonts();</script>
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
 <link rel="preconnect" href="https://raw.githubusercontent.com">
 <link rel="preload" href="assets/fonts/tea-reader-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles/reader_fonts.css?v=3d7f7cc1c1c07abe">
-  <link rel="stylesheet" href="styles/reader_home.css?v=b0b0de43b7b49e73">
+<link rel="stylesheet" href="styles/reader_home.css?v=b0b0de43b7b49e73">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Esperia Archive</title>
   <style>
@@ -3807,10 +3808,10 @@
     </figure>
   </dialog>
 
-  <link rel="stylesheet" href="styles/reader_bundle.css?v=4642518dd8c242a1">
-<link rel="stylesheet" href="styles/reader_theme.css?v=7d56085553e391e5">
-<link rel="stylesheet" href="styles/reader_layout.css?v=5ea87bde12ba3b28">
-<script src="scripts/reader_bundle.js?v=6331632bb88356d1"></script>
+  <link rel="stylesheet" href="styles/reader_bundle.css?v=656400a323cfbfaa">
+<link rel="stylesheet" href="styles/reader_theme.css?v=69ce6a3e39854589">
+<link rel="stylesheet" href="styles/reader_layout.css?v=915d6e8eab2f1b27">
+<script src="scripts/reader_bundle.js?v=49a8c63b312f4ee4"></script>
   <script>
     // Generated into both readers by tools/sync_reader_sources.py.
     const READER_PUBLIC = Boolean(window.TEA_CONFIG?.public_reader) || document.documentElement.dataset.readerProfile === "public";
@@ -3869,6 +3870,7 @@
       season_5: "Thorns of Devotion",
       season_6: "Tower of Memory",
       season_7: "Crown of Ashes",
+      season_8: "Veil of Memories",
       special_events: "Special Events",
     };
 
@@ -4306,6 +4308,9 @@
     let selectedAssetKey = assetKeyFromParts(selectedSection, selectedCategory, selectedStoryId);
     const storyCatalogLoads = new Map();
     let combatCatalogLoad = null;
+    const loadedRuntimeFeatures = new Set();
+    let rawGroupCatalogsLoad = null;
+    let pictureInspectionsLoad = null;
 
     let selectedLanguage = ReaderUI.language(localStorage.getItem(STORAGE_KEYS.language));
     let readerMode = READER_PUBLIC ? publicReadingMode(localStorage.getItem(STORAGE_KEYS.mode)) : (localStorage.getItem(STORAGE_KEYS.mode) || "interactive");
@@ -4934,7 +4939,12 @@
       ) {
         return EN_COLLECTION_TITLES[collection.key];
       }
-      return localizedValue(collection.title) || EN_COLLECTION_TITLES[collection.key] || collection.key;
+      const title = collection.title?.[selectedLanguage];
+      if (title && title !== collection.key) return title;
+      const fallback = EN_COLLECTION_TITLES[collection.key];
+      if (fallback) return uiText(fallback);
+      const season = /^season_(\d+)$/.exec(collection.key || "");
+      return season ? uiText("Season {n}", {n:Number(season[1])}) : localizedValue(collection.title) || collection.key;
     }
 
     function uniqueAssetKeys(values, includeScopedAssets = false) {
@@ -5108,7 +5118,7 @@
           sourceCollection.title,
         );
         for (const sourceStory of sourceCollection.stories || []) {
-          const categoryKey = ReaderStoryRoutes.categoryFor(collection.key, "mini", sourceStory.group_id);
+          const categoryKey = ReaderStoryRoutes.categoryFor(collection.key, "mini", sourceStory.group_id, sourceStory);
           const category = ensureLogicalCategory(collection, categoryKey, categoryKey === "starry" ? 4.5 : 4);
           const eventGroup = storyRuntimeCatalog?.letter_collections?.find(letters =>
             letters.collection === collection.key
@@ -5395,13 +5405,12 @@
     function heartToHeartSeasonHeading(interaction) {
       const collectionKey = heartToHeartCollectionKey(interaction);
       const collection = logicalCollectionByKey.get(collectionKey);
-      const title = collectionDisplayTitle(collection)
-        || EN_COLLECTION_TITLES[collectionKey]
-        || collectionKey;
+      const title = collectionDisplayTitle(collection || {key:collectionKey});
       const match = /^season_(\d+)$/i.exec(collectionKey);
       return {
         collectionKey,
-        number: match ? `Season ${Number(match[1])}` : "",
+        number: match && title !== uiText("Season {n}", {n:Number(match[1])})
+          ? uiText("Season {n}", {n:Number(match[1])}) : "",
         title,
       };
     }
@@ -6374,6 +6383,13 @@
     }
 
     function renderArchive() {
+      // One pane serves all five tabs, but its position belongs to the current tab.
+      if (archiveList.dataset.kind !== archiveKind) {
+        archiveList.dataset.kind = archiveKind;
+        archiveList.scrollTop = 0;
+        archiveDetail.scrollTop = 0;
+        delete archiveList.dataset.selectionKey;
+      }
       const worldKind = ReaderWorldArchive.kinds.includes(archiveKind);
       if (worldKind) archiveBrowser.dataset.worldKind = archiveKind;
       else { delete archiveBrowser.dataset.worldKind; worldArchive.reset(); }
@@ -6545,7 +6561,7 @@
       const archiveBrowse = primaryView === "archive";
       appShell.classList.toggle("home-view", homeOpen);
       appShell.classList.toggle("cosmetics-view", cosmeticsOpen);
-      if (!cosmeticsOpen) appShell.classList.remove("wardrobe-expanded");
+      if (!cosmeticsOpen) appShell.classList.remove("wardrobe-expanded", "wardrobe-inspecting");
       homePage.hidden = !homeOpen;
       homeTab.classList.toggle("active", homeOpen);
       homeTab.setAttribute("aria-selected", String(homeOpen));
@@ -9388,10 +9404,12 @@
     async function ensureCharacterIndex() {
       if (!routeCatalogs) return;
       if (!characterIndexLoad) characterIndexLoad = routeJson(routeCatalogs.characters).then(catalog => {
-        mysticalCatalog = catalog;
+        const existingInteractions = mysticalCatalog?.interactions || [];
+        const interactions = existingInteractions.length ? existingInteractions : (catalog.interactions || []);
+        mysticalCatalog = { ...catalog, interactions };
         mysticalCharacters = catalog.characters || [];
         mysticalCharacterById = new Map(mysticalCharacters.map(row => [String(row.actor_id), row]));
-        mysticalInteractionByAsset = new Map((catalog.interactions || []).map(row => [row.asset_key, row]));
+        mysticalInteractionByAsset = new Map(interactions.map(row => [row.asset_key, row]));
         dialoguePortraitCharacterAliases = mysticalCharacters.map(character => ({
           model: character.resource_name || String(character.resource_path || "").split(/[\\/]/).pop(),
           speakerNames: [character.hero_roster_name, ...Object.values(character.names || {})].filter(Boolean),
@@ -9416,8 +9434,86 @@
     async function ensureStoryRuntime() {
       if (!routeCatalogs || storyRuntimeCatalog) return;
       storyRuntimeCatalog = await routeJson(routeCatalogs.runtime);
+      loadedRuntimeFeatures.clear();
       storyHistory = new StoryRuntime.History(storyRuntimeCatalog, localStorage);
       storySession = new StoryRuntime.Session(storyHistory);
+    }
+
+    async function ensureRuntimeFeature(name, owner = "") {
+      const features = storyRuntimeCatalog?.runtime_features;
+      if (!features) return null;
+      if (name === "placements") {
+        if (!owner || storyRuntimeCatalog.placements?.[owner]) return null;
+        const path = features.placements?.[owner];
+        if (!path) return null;
+        ReaderCatalogs.merge(storyRuntimeCatalog, await routeJson(path));
+        return path;
+      }
+      if (name === "scene_summaries") {
+        if (storyRuntimeCatalog.scene_summaries?.assets) return null;
+        const path = features.scene_summaries;
+        if (!path) return null;
+        storyRuntimeCatalog.scene_summaries = await routeJson(path);
+        return path;
+      }
+      if (name === "treatment_feedback") {
+        if (storyRuntimeCatalog.treatment_feedback) return null;
+        const path = features.treatment_feedback?.path;
+        if (!path) return null;
+        ReaderCatalogs.merge(storyRuntimeCatalog, await routeJson(path));
+        return path;
+      }
+      if (loadedRuntimeFeatures.has(name)) return null;
+      const path = features[name];
+      if (!path) return null;
+      const payload = await routeJson(path);
+      ReaderCatalogs.merge(storyRuntimeCatalog, payload);
+      loadedRuntimeFeatures.add(name);
+      return path;
+    }
+
+    async function ensurePictureInspections(lineId = "") {
+      if (storyRuntimeCatalog?.picture_inspections) return storyRuntimeCatalog.picture_inspections;
+      const known = storyRuntimeCatalog?.runtime_features?.picture_inspection_lines;
+      if (Array.isArray(known) && lineId && !known.includes(String(lineId))) return null;
+      if (!pictureInspectionsLoad) {
+        pictureInspectionsLoad = loadOptionalJson("data/picture_inspections.json?v=20261011-native-points")
+          .then(pictures => {
+            if (storyRuntimeCatalog) {
+              storyRuntimeCatalog.picture_inspections = StoryActivities.pictureCatalog(pictures, explorationCatalog);
+            }
+            return storyRuntimeCatalog?.picture_inspections || null;
+          })
+          .catch(error => {
+            pictureInspectionsLoad = null;
+            throw error;
+          });
+      }
+      return pictureInspectionsLoad;
+    }
+
+    async function ensureRawGroupCatalogs() {
+      if (!routeCatalogs || !manifest) return;
+      if (!rawGroupCatalogsLoad) {
+        rawGroupCatalogsLoad = Promise.all([
+          manifest.metadata ? loadOptionalJson(`data/${manifest.metadata}`) : null,
+          manifest.group_index ? routeJson(manifest.group_index) : null,
+        ]).then(([metadata, groupRows]) => {
+          metadataIndex = metadata;
+          if (groupRows) groups = groupRows;
+        }).catch(error => {
+          rawGroupCatalogsLoad = null;
+          throw error;
+        });
+      }
+      return rawGroupCatalogsLoad;
+    }
+
+    async function ensureStoryFeatures(story, group = "", logical = true) {
+      const requests = ReaderCatalogs.runtimeFeatures(storyRuntimeCatalog, {
+        owner: story?.id || "", assets: story?.assetKeys || [], group, logical,
+      });
+      await Promise.all(requests.map(entry => ensureRuntimeFeature(entry.name, entry.owner)));
     }
 
     async function ensureStoryNavigation() {
@@ -9425,27 +9521,21 @@
       if (!storyNavigationLoad) storyNavigationLoad = Promise.all([
         routeJson(routeCatalogs.exploration),
         loadOptionalJson("data/ministory_collections.json"),
-        ensureCharacterIndex(),
         ensureStoryRuntime(),
         routeJson(routeCatalogs.interactions),
-        loadOptionalJson("data/picture_inspections.json?v=20261011-native-points"),
         manifest.story_membership ? routeJson(manifest.story_membership) : null,
-        manifest.metadata ? loadOptionalJson(`data/${manifest.metadata}`) : null,
-        manifest.group_index ? routeJson(manifest.group_index) : null,
-      ]).then(([exploration, mini, unused, runtime, interactions, pictures, membership, metadata, groupRows]) => {
+      ]).then(([exploration, mini, runtime, interactions, membership]) => {
         if (membership) for (const [prefix, identifiers] of Object.entries(membership.prefixes)) {
           for (const id of identifiers) {
             const asset_key = `${prefix}_${id}`;
             if (!manifestStoryByKey.has(asset_key)) manifestStoryByKey.set(asset_key, {asset_key});
           }
         }
-        metadataIndex = metadata;
-        if (groupRows) groups = groupRows;
+        mysticalCatalog ||= { characters: [], interactions: [] };
         mysticalCatalog.interactions = interactions.interactions || [];
         for (const row of mysticalCatalog.interactions) mysticalInteractionByAsset.set(row.asset_key, row);
         explorationCatalog = exploration;
         miniStoryCatalog = mini;
-        storyRuntimeCatalog.picture_inspections = StoryActivities.pictureCatalog(pictures, exploration);
         buildLogicalNavigation();
       }).catch(error => { storyNavigationLoad = null; throw error; });
       return storyNavigationLoad;
@@ -9459,7 +9549,15 @@
         Promise.all((story.detailPaths || []).map(routeJson)),
         ensureStoryRecords(story.assetKeys),
         ensureStoryBundles(story),
+        typeof ensurePictureInspections === "function" ? ensurePictureInspections(story.id) : null,
+        typeof ensureStoryFeatures === "function" ? ensureStoryFeatures(story) : null,
       ]);
+      const inspection = typeof StoryActivities !== "undefined" ? StoryActivities.pictureStory(storyRuntimeCatalog, story.id) : null;
+      if (inspection && !story.pictureInspection) {
+        story.pictureInspection = inspection;
+        story.assetKeys = inspection.ordered_asset_keys;
+        await ensureStoryRecords(story.assetKeys);
+      }
       for (const detail of details) {
         if (String(detail.quest.line_id) === String(story.id)) {
           // Preserve the former navigation contract: asset membership does not
@@ -9474,14 +9572,22 @@
     }
 
     async function ensureRuntimeGroup(key) {
+      const loadFeature = typeof ensureRuntimeFeature === "function" ? ensureRuntimeFeature : null;
       if (storyRuntimeCatalog?.route_dialogue_stories) {
+        if (!logicalNavigation && loadFeature) await loadFeature("route_dialogue_assets");
         const owner = String(activeBeat?.logicalStory?.id || "");
         const path = storyRuntimeCatalog.route_dialogue_stories[owner];
         const dialoguePaths = logicalNavigation ? [path] : (activeBeat?.stories || []).flatMap(story =>
           storyRuntimeCatalog.route_dialogue_assets?.[story.asset_key] || []);
         const placementPath = logicalNavigation && storyRuntimeCatalog.route_story_groups
           ? storyRuntimeCatalog.route_story_groups[owner] : storyRuntimeCatalog.route_groups?.[key];
-        const payloads = await Promise.all([...new Set([placementPath, ...dialoguePaths].filter(Boolean))].map(routeJson));
+        const featureTasks = loadFeature ? ReaderCatalogs.runtimeFeatures(storyRuntimeCatalog, {
+          owner, assets: activeBeat?.assetKeys || [], group: key, logical: logicalNavigation,
+        }).map(entry => loadFeature(entry.name, entry.owner)) : [];
+        const [payloads] = await Promise.all([
+          Promise.all([...new Set([placementPath, ...dialoguePaths].filter(Boolean))].map(routeJson)),
+          ...featureTasks,
+        ]);
         // Replace per-story arrays as well as maps; previous story contracts
         // must not leak into the next story or overwrite the History object.
         const empty = storyRuntimeCatalog.route_dialogues;
@@ -9493,12 +9599,20 @@
         for (const field of ["phase_references", "parallel_reading_groups"]) {
           empty[field] = payloads.flatMap(payload => payload.route_dialogues?.[field] || []);
         }
+        if (loadFeature) {
+          const needed = ["battles", "fishing", "map_activities"].filter(name => payloads.some(payload => payload?.[name]));
+          if (needed.length) await Promise.all(needed.map(name => loadFeature(name)));
+        }
         return;
       }
       const paths = [storyRuntimeCatalog?.route_groups?.[key],
         storyRuntimeCatalog?.route_dialogue_groups?.[key], storyRuntimeCatalog?.route_dialogue_shared];
       const payloads = await Promise.all([...new Set(paths.filter(Boolean))].map(routeJson));
       for (const payload of payloads) ReaderCatalogs.merge(storyRuntimeCatalog, payload);
+      if (loadFeature) {
+        const needed = ["battles", "fishing", "map_activities"].filter(name => payloads.some(payload => payload?.[name]));
+        if (needed.length) await Promise.all(needed.map(name => loadFeature(name)));
+      }
     }
 
     async function ensureArchiveBindings() {
@@ -9628,7 +9742,13 @@
         ...(story?.detailPaths || []).map(path => `data/${path}`),
         ...[storyRuntimeCatalog?.route_story_groups?.[owner], storyRuntimeCatalog?.route_dialogue_stories?.[owner]]
           .map(path => owner && path ? `data/${path}` : null),
+        ...ReaderCatalogs.runtimeFeatures(storyRuntimeCatalog, {owner, assets: [
+          next.firstAssetKey, ...(story?.assetKeys || []), ...(next.stories || []).map(row => row.asset_key),
+        ]}).map(entry => `data/${entry.path}`),
       ];
+      if (storyRuntimeCatalog?.runtime_features?.picture_inspection_lines?.includes(owner)) {
+        paths.push("data/picture_inspections.json?v=20261011-native-points");
+      }
       for (const key of keys) {
         const runtime = storyRuntimeCatalog?.graphs?.[key], scene = storyRuntimeCatalog?.scene_summaries?.assets?.[key];
         const binding = portraits?.asset_bindings?.[key];
@@ -9877,6 +9997,9 @@
         sequences = { sequences: [] };
         sequenceLinks = new Map();
         return;
+      }
+      if (!(routeCatalogs && primaryView === "mystical" && selectedInteractionAssetKey) && typeof ensureRawGroupCatalogs === "function") {
+        await ensureRawGroupCatalogs();
       }
       const entry = groupEntryFor(section, category);
       const indexPath = entry && entry.index
@@ -13317,6 +13440,7 @@
       if(item.type === "inspection_complete") {
         const status=document.createElement("p");
         status.className="inspection-complete";
+        status.dataset.nodeId=item.nodeId;
         status.textContent=uiText("Inspection complete");
         container.appendChild(status); return;
       }
@@ -14634,8 +14758,7 @@
       runtimeSeekTarget="";
       runtimeNotice="";
       autoRevealUntilPause();
-      render();
-      scrollAfterChoice(markerId);
+      revealInspectionMarker(markerId);
     }
 
     function continueInspection(id) {
@@ -14643,10 +14766,19 @@
       if(readerMode!=="interactive" || currentNodeId!==id || node?.type!=="inspection"
         || !StoryInspections.progress(storySession,node).complete) return;
       pushChoiceSnapshot("inspection");
-      timelineItems.push({type:"inspection_complete",nodeId:id+":complete"});
+      const markerId=`${id}:complete:${timelineItems.length}`;
+      timelineItems.push({type:"inspection_complete",nodeId:markerId});
       currentNodeId=StoryInspections.complete(storySession,node);
       runtimeSeekTarget="";
-      autoRevealUntilPause(); render(); scrollToBottom();
+      autoRevealUntilPause();
+      revealInspectionMarker(markerId);
+    }
+
+    function revealInspectionMarker(id) {
+      renderPreservingScroll();
+      const marker=timeline.querySelector(`[data-node-id="${CSS.escape(id)}"]`);
+      marker?.scrollIntoView({block:"start",inline:"nearest",
+        behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
     }
 
     function appendCurrentLine() {
@@ -15389,6 +15521,17 @@
           ? await Promise.all(storiesWithMenus.map((story) => loadStoryContext(story)))
           : [];
         const firstContext = activeBeatContexts[0] || await loadStoryContext(storyByKey.get(selectedAssetKey));
+        if (storyRuntimeCatalog?.runtime_features && typeof ensureRuntimeFeature === "function") {
+          const needed = new Set();
+          for (const context of (activeBeatContexts.length ? activeBeatContexts : [firstContext])) {
+            for (const node of Object.values(context?.graph?.nodes || {})) {
+              const op = node?.instruction?.op;
+              if (["reasoning", "reasoning_gate", "reasoning_conclusion"].includes(op)) needed.add("reasoning");
+              else if (op === "treatment" || op === "pharmacy") needed.add("pharmacy");
+            }
+          }
+          if (needed.size) await Promise.all([...needed].map(name => ensureRuntimeFeature(name)));
+        }
         const interactiveContext = buildInteractiveStoryContext(
           activeBeatContexts.length ? activeBeatContexts : [firstContext],
         );
@@ -15863,11 +16006,12 @@
         urls.push(new URL("compositor.worker.js", page).href);
         const base = wardrobeConfig.wardrobe_2d_base, more = [];
         if (base) {
-          for (const file of ["catalogue.json", "captures.json"]) urls.push(new URL(file, base).href);
+          for (const file of ["catalogue-core.json", "captures.json"]) urls.push(new URL(file, base).href);
           // The availability index and the opening view's metadata are the largest start-up
           // downloads. Both are immutable; the view follows the editor's own gender choice.
-          more.push(ReaderPublication.fetch(new URL("items-startup.json", base)).then(response => ReaderPublication.readJson(response)).then(startup => {
-            const view = startup.shards?.[(selectedGender === "male" ? "male" : "female") + "/normal/0"];
+          more.push(ReaderPublication.fetch(new URL("items-startup-v2.json", base)).then(response => response.ok ? response : ReaderPublication.fetch(new URL("items-startup.json", base))).then(response => ReaderPublication.readJson(response)).then(startup => {
+            const viewKey = (selectedGender === "male" ? "male" : "female") + "/normal/0";
+            const view = startup.openingShards?.[viewKey] || startup.shards?.[viewKey];
             return Promise.all([startup.coverage, view].filter(info => info?.url).map(info => ReaderPublication.fetch(new URL(info.url, base)).catch(() => null)));
           }).catch(() => null));
         }
@@ -15889,6 +16033,7 @@
       if (type === "tea-cosmetics-height" && height === null) cosmeticsFrame.style.height = "";
       // Phones: the wardrobe's expand button hides the reader's bars.
       if(type === "tea-wardrobe-expand"){appShell.classList.toggle("wardrobe-expanded",primaryView==="cosmetics"&&event.data.expanded===true);return;}
+      if(type === "tea-wardrobe-inspect"){appShell.classList.toggle("wardrobe-inspecting",primaryView==="cosmetics"&&event.data.open===true);return;}
       if(type === "tea-wardrobe-ready"){wardrobeReady=true;sendWardrobeSession();return;}
       const session=wardrobeSession;
       if(!session || primaryView!=="cosmetics" || event.data.sessionId!==session.id)return;
@@ -15905,7 +16050,7 @@
       if(type === "tea-wardrobe-apply" && !session.saving){
         session.saving=true;
         try{
-          const row=await playerAppearance.savePack(event.data.pack,()=>wardrobeSession===session);
+          const row=await playerAppearance.savePack(event.data.pack,()=>wardrobeSession===session,event.data.previewKey);
           if(wardrobeSession!==session)return;
           playerAppearance.applyChoice(row.gender,row.id);selectedGender=row.gender;savePreferences();
           session.applied=true;updateHash(false,true);applyPreferencesToUi();
@@ -16051,7 +16196,7 @@
         }
         await ensureReaderData();
         if (revision !== routeRevision) return;
-        if (route.view === "stories" || !route.view) await ensureStoryNavigation();
+        if (route.view === "stories" || !route.view) await Promise.all([ensureStoryNavigation(), ensureCharacterIndex()]);
         else if (route.view !== "archive") await ensureCharacterIndex();
         if (revision !== routeRevision) return;
         if (route.namedCharacter && !mysticalCharacterById.has(route.characterId)) {

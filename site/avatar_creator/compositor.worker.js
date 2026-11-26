@@ -98,6 +98,24 @@
     out[1]=mix(mix(d[a+1],d[b+1],fx),mix(d[c+1],d[e+1],fx),fy);
     out[2]=mix(mix(d[a+2],d[b+2],fx),mix(d[c+2],d[e+2],fx),fy);
   }
+  // Background far from anything bright blooms to exact zeros. Per row, the first and last
+  // columns with any non-zero RGB (NaN counts as non-zero); an empty row has first > last.
+  function extent(image){
+    const {width:w,height:h,data:d}=image,first=new Int32Array(h).fill(w),last=new Int32Array(h).fill(-1);
+    for(let y=0;y<h;y++)for(let x=0,i=y*w*4;x<w;x++,i+=4)if(d[i]!==0||d[i+1]!==0||d[i+2]!==0){if(first[y]===w)first[y]=x;last[y]=x;}
+    return {first,last};
+  }
+  // For each output column, the lowest and highest source column any of the axes reads.
+  function reach(count,axes){
+    const low=new Int32Array(count),high=new Int32Array(count);
+    for(let i=0;i<count;i++){let a=Infinity,b=-Infinity;for(const s of axes){a=Math.min(a,s.low[i]);b=Math.max(b,s.high[i]);}low[i]=a;high[i]=b;}
+    return {low,high};
+  }
+  // Source columns holding non-zero RGB across the given rows, as [first, last].
+  function span(e,rows){let a=Infinity,b=-Infinity;for(const r of rows){a=Math.min(a,e.first[r]);b=Math.max(b,e.last[r]);}return [a,b];}
+  // A pixel whose taps all read zero computes exactly +0 in every pass below (mixes and
+  // weighted sums of +0, and Math.max(...,0) in the prefilter), which is what a fresh
+  // typed array already holds, so such pixels are skipped rather than written.
   function bloom(source,profile,quantize){
     // A Float16Array rounds on write exactly like half(), without a call per value.
     const native=quantize===half&&typeof Float16Array==='function';
@@ -109,12 +127,18 @@
     let first=image(width,height);const down=[first];
     {
       const w=width,h=height,xs=axis(w,source.width,x=>(x+.5)/w),ys=axis(h,source.height,y=>(y+.5)/h);
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      // With a positive threshold, zero color contributes exactly +0.
+      const e=threshold>0?extent(source):null;
+      for(let y=0;y<h;y++){
+        const [from,to]=e?span(e,[ys.low[y],ys.high[y]]):[0,source.width];if(from>to)continue;
+        for(let x=0;x<w;x++){
+        if(xs.high[x]<from||xs.low[x]>to)continue;
         const i=(y*w+x)*4;blend(source,xs,x,ys,y,s0);
         const r=Math.min(fromSrgb(s0[0]),profile.bloomClamp),g=Math.min(fromSrgb(s0[1]),profile.bloomClamp),b=Math.min(fromSrgb(s0[2]),profile.bloomClamp);
         const brightness=Math.max(r,g,b);let soft=clamp(brightness-threshold+knee,0,2*knee);soft=soft*soft/(4*knee+.0001);
         const contribution=Math.max(soft,brightness-threshold)/Math.max(brightness,.0001);
         first.data[i]=q(Math.max(r*contribution,0));first.data[i+1]=q(Math.max(g*contribution,0));first.data[i+2]=q(Math.max(b*contribution,0));
+        }
       }
     }
     const weights=[.194595,.121622,.054054,.016216];
@@ -125,19 +149,29 @@
       const center=axis(w,source.width,x=>(x+.5)/w),rows=axis(h,source.height,y=>(y+.5)/h);
       const left=[],right=[];
       for(let k=1;k<=4;k++){left.push(axis(w,source.width,x=>(x+.5)/w-k*2/source.width));right.push(axis(w,source.width,x=>(x+.5)/w+k*2/source.width));}
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      const across=reach(w,[center,...left,...right]),sourceExtent=extent(source);
+      for(let y=0;y<h;y++){
+        const [from,to]=span(sourceExtent,[rows.low[y],rows.high[y]]);if(from>to)continue;
+        for(let x=0;x<w;x++){
+        if(across.high[x]<from||across.low[x]>to)continue;
         const i=(y*w+x)*4;blend(source,center,x,rows,y,s0);
         let r=s0[0]*.227027,g=s0[1]*.227027,b=s0[2]*.227027;
         for(let k=0;k<4;k++){blend(source,left[k],x,rows,y,s1);blend(source,right[k],x,rows,y,s2);const wk=weights[k];r+=(s1[0]+s2[0])*wk;g+=(s1[1]+s2[1])*wk;b+=(s1[2]+s2[2])*wk;}
         horizontal.data[i]=q(r);horizontal.data[i+1]=q(g);horizontal.data[i+2]=q(b);
+        }
       }
       // Vertical: same level, centre plus two linear taps each side.
       const columns=axis(w,w,x=>(x+.5)/w),mid=axis(h,h,y=>(y+.5)/h);
       const up1=axis(h,h,y=>(y+.5)/h-1.384615/h),down1=axis(h,h,y=>(y+.5)/h+1.384615/h),up2=axis(h,h,y=>(y+.5)/h-3.230769/h),down2=axis(h,h,y=>(y+.5)/h+3.230769/h);
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      const horizontalExtent=extent(horizontal),taps=[mid,up1,down1,up2,down2];
+      for(let y=0;y<h;y++){
+        const [from,to]=span(horizontalExtent,taps.flatMap(a=>[a.low[y],a.high[y]]));if(from>to)continue;
+        for(let x=0;x<w;x++){
+        if(columns.high[x]<from||columns.low[x]>to)continue;
         const i=(y*w+x)*4;
         blend(horizontal,columns,x,mid,y,s0);blend(horizontal,columns,x,up1,y,s1);blend(horizontal,columns,x,down1,y,s2);blend(horizontal,columns,x,up2,y,s3);blend(horizontal,columns,x,down2,y,s4);
         for(let c=0;c<3;c++)vertical.data[i+c]=q(s0[c]*.227027+(s1[c]+s2[c])*.316216+(s3[c]+s4[c])*.070270);
+        }
       }
       down.push(vertical);
     }
@@ -145,9 +179,14 @@
     for(let level=count-2;level>=0;level--){
       const high=down[level],up=image(high.width,high.height),w=up.width,h=up.height;
       const hx=axis(w,high.width,x=>(x+.5)/w),hy=axis(h,high.height,y=>(y+.5)/h),lx=axis(w,low.width,x=>(x+.5)/w),ly=axis(h,low.height,y=>(y+.5)/h);
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      const highExtent=extent(high),lowExtent=extent(low);
+      for(let y=0;y<h;y++){
+        const [hFrom,hTo]=span(highExtent,[hy.low[y],hy.high[y]]),[lFrom,lTo]=span(lowExtent,[ly.low[y],ly.high[y]]);if(hFrom>hTo&&lFrom>lTo)continue;
+        for(let x=0;x<w;x++){
+        if((hx.high[x]<hFrom||hx.low[x]>hTo)&&(lx.high[x]<lFrom||lx.low[x]>lTo))continue;
         const i=(y*w+x)*4;blend(high,hx,x,hy,y,s1);blend(low,lx,x,ly,y,s2);
         up.data[i]=q(mix(s1[0],s2[0],scatter));up.data[i+1]=q(mix(s1[1],s2[1],scatter));up.data[i+2]=q(mix(s1[2],s2[2],scatter));
+        }
       }
       low=up;
     }
@@ -714,6 +753,21 @@ const cache=new Map(),rangesBlocked=new Set();let cacheBytes=0,queue=Promise.res
 // hairstyle can reuse the current body, face and palette without expanding them.
 const TRANSFER_CACHE_LIMIT=24*1024*1024;
 const decodedCache=new Map();let decodedBytes=0;
+const packDirectories=new Map();
+const openingRequests=new Map();
+function prepareOpeningFiles(files,root){
+  for(const file of files){
+    if(!/^runtime\/[a-f0-9]{64}\.wpack$/.test(file))continue;
+    const url=new URL(file,root).href;
+    if(cache.has(url)||openingRequests.has(url))continue;
+    const request=fetch(url).then(response=>{
+      if(response.status!==200)throw Error('Opening pack unavailable.');
+      return response.arrayBuffer();
+    }).then(value=>remember(url,value)).finally(()=>openingRequests.delete(url));
+    openingRequests.set(url,request);
+    request.catch(()=>{}); // A normal range request retries a failed early transfer.
+  }
+}
 const DECODED_MEMBER_LIMIT=160*1024*1024;
 // Remote packs cost a round trip per request. Up to ten packs download at once and nearby
 // members share a request (gaps up to 256 KiB, spans up to 8 MiB); at most four members
@@ -751,6 +805,9 @@ async function range(url,start,end,allowShort=false){
   if(cache.has(key)){const value=cache.get(key);cache.delete(key);cache.set(key,value);return checked(value);}
   // Plain static hosts may ignore Range; cache their complete response once.
   if(cache.has(url))return checked(cache.get(url).slice(start,end+1));
+  if(openingRequests.has(url)){
+    try{return checked((await openingRequests.get(url)).slice(start,end+1));}catch(_){}
+  }
   // If a host refuses a browser's range request, retry it without the Range header.
   // A successful fallback switches only that origin to whole-pack requests.
   let response;const origin=new URL(url).origin;
@@ -766,23 +823,26 @@ async function range(url,start,end,allowShort=false){
   if(response.status!==206||(contentRange&&(!match||Number(match[1])!==start||Number(match[2])!==start+value.byteLength-1)))throw new Error('Invalid wardrobe range response.');
   return remember(key,checked(value));
 }
-async function packedMembers(url,keys,isCurrent){
+async function packedMembers(url,keys,isCurrent,cacheKey=key=>url+'#'+key){
   const result=new Map(),missing=[];
-  for(const key of keys){const value=decodedGet(url+'#'+key);if(value)result.set(key,value);else missing.push(key);}
+  for(const key of keys){const value=decodedGet(cacheKey(key));if(value)result.set(key,value);else missing.push(key);}
   if(!missing.length)return result;
-  const first=await range(url,0,65535,true),head=new Uint8Array(first);
-  if(head.length<8||!ItemStorage.MAGICS.has(String.fromCharCode(...head.subarray(0,4))))throw new Error('Invalid wardrobe pack.');
-  const length=new DataView(first).getUint32(4,true);
-  if(length>16*1024*1024)throw new Error('Wardrobe pack index is too large.');
-  const header=length+8<=head.length?head.subarray(8,8+length):new Uint8Array(await range(url,8,7+length));
-  const index=JSON.parse(new TextDecoder().decode(header));
+  let index=packDirectories.get(url),head=new Uint8Array(0),payloadStart=0;
+  if(!index){
+    const first=await range(url,0,65535,true);head=new Uint8Array(first);
+    if(head.length<8||!ItemStorage.MAGICS.has(String.fromCharCode(...head.subarray(0,4))))throw new Error('Invalid wardrobe pack.');
+    const length=new DataView(first).getUint32(4,true);
+    if(length>16*1024*1024)throw new Error('Wardrobe pack index is too large.');
+    const header=length+8<=head.length?head.subarray(8,8+length):new Uint8Array(await range(url,8,7+length));
+    index=JSON.parse(new TextDecoder().decode(header));payloadStart=8+length;
+  }
   const valid=meta=>meta&&[meta.offset,meta.length].every(Number.isSafeInteger)&&meta.offset>=0&&meta.length>0;
   // Members that lie close together arrive in one request, and every request starts now:
   // otherwise each member past the first 64 KiB waits a round trip behind the one before.
   const wanted=new Set(),want=key=>{if(wanted.has(key)||!valid(index[key]))return;wanted.add(key);if(index[key].master)want(index[key].master);};
   missing.forEach(want);
   const spans=[];
-  for(const [start,end] of [...wanted].map(key=>[8+length+index[key].offset,8+length+index[key].offset+index[key].length])
+  for(const [start,end] of [...wanted].map(key=>[payloadStart+index[key].offset,payloadStart+index[key].offset+index[key].length])
     .filter(([,end])=>end>head.length).sort((a,b)=>a[0]-b[0])){
     const last=spans[spans.length-1];
     if(last&&start-last.end<=SPAN_GAP&&Math.max(end,last.end)-last.start<=SPAN_LIMIT)last.end=Math.max(last.end,end);
@@ -794,15 +854,15 @@ async function packedMembers(url,keys,isCurrent){
     return span?(await span.bytes).subarray(start-span.start,end-span.start):new Uint8Array(await range(url,start,end-1));
   };
   async function readMember(key){
-    const cached=decodedGet(url+'#'+key);
+    const cached=decodedGet(cacheKey(key));
     if(cached)return cached;
     const meta=index[key];
     if(!valid(meta))throw new Error('Missing wardrobe member.');
-    const start=8+length+meta.offset,end=start+meta.length;
+    const start=payloadStart+meta.offset,end=start+meta.length;
     const bytes=end<=head.length?head.subarray(start,end):await slice(start,end);
     if(meta.master&&(!Object.hasOwn(index,meta.master)||index[meta.master].master))throw Error('Invalid shared pixel dependency');
     const master=meta.master?await readMember(meta.master):null;
-    return decodedRemember(url+'#'+key,await decodeSlot(()=>ItemStorage.decodeMember(meta,bytes,{cropped:true,master})));
+    return decodedRemember(cacheKey(key),await decodeSlot(()=>ItemStorage.decodeMember(meta,bytes,{cropped:true,master})));
   }
   for(const key of missing){
     if(!isCurrent())return result;
@@ -827,7 +887,7 @@ async function bytes(url){
   }
   return remember(url,value);
 }
-async function load(entry,dataRoot,isCurrent){
+async function load(entry,dataRoot,isCurrent,openingMembers){
   const root=new URL(dataRoot,self.location.href);
   // The library may be a release on another site; every asset must still sit inside it.
   if(!/^https?:$/.test(root.protocol)||!root.pathname.endsWith('/'))throw new Error('Invalid wardrobe data root.');
@@ -838,10 +898,19 @@ async function load(entry,dataRoot,isCurrent){
   for(const row of entry.clothingFit?.layers||[])if(row.skinMask)names.add(row.skinMask.delta);
   for(const row of entry.hairFit?.layers||[])if(row.skinMask)names.add(row.skinMask.delta);
   for(const name of entry.hairFit?.referenceBody||[])names.add(name);
-  const requests=[...new Set([...names].map(name=>name.split('#')[0]))].map(name=>{
+  const packed=[...names].filter(name=>name.includes('#'));
+  const grouped=openingMembers&&packed.length>0&&packed.every(name=>Object.hasOwn(openingMembers,name));
+  const files=new Map();
+  for(const name of names){
+    const address=grouped&&name.includes('#')?openingMembers[name]:name;
+    const [file,key]=address.split('#');
+    if(!files.has(file))files.set(file,new Map());
+    if(key)files.get(file).set(key,name);
+  }
+  const requests=[...files].map(([name,members])=>{
     const url=new URL(name,root);
     if(url.origin!==root.origin||!url.pathname.startsWith(root.pathname))throw new Error('Asset is outside the wardrobe library.');
-    return [name,url.href];
+    return [name,url.href,members];
   });
   const loaded=new Map(),decoded=new Map();let cursor=0,failure=null;
   // Keep one copy per URL in this render. Packs download several at a time, since each
@@ -849,15 +918,25 @@ async function load(entry,dataRoot,isCurrent){
   // Queueing also prevents overlapping multi-GB loads.
   await Promise.all(Array.from({length:Math.min(NETWORK_LANES,requests.length)},async()=>{
     while(!failure&&isCurrent()&&cursor<requests.length){
-      const [name,url]=requests[cursor++];
+      const [name,url,members]=requests[cursor++];
       try{
-        const keys=[...names].filter(value=>value.startsWith(name+'#')).map(value=>value.split('#')[1]);
-        if(keys.length){for(const [key,value] of await packedMembers(url,keys,isCurrent))decoded.set(name+'#'+key,value);}
+        if(members.size){
+          // Grouped member names preserve the original pack hash and member key,
+          // including shared-pixel masters. Later edits reuse the same decoded buffers.
+          const originalKey=grouped?key=>{
+            const match=/^([a-f0-9]{64})\.([\w.-]+)$/.exec(key);
+            if(!match)throw Error('Invalid grouped wardrobe member.');
+            return new URL('items/packs/'+match[1]+'.wpack#'+match[2],root).href;
+          }:undefined;
+          for(const [key,value] of await packedMembers(url,[...members.keys()],isCurrent,originalKey))decoded.set(members.get(key),value);
+        }
         else loaded.set(name,await bytes(url));
       }catch(error){failure=error;}
     }
   }));
-  if(!isCurrent())return null;if(failure)throw failure;
+  if(!isCurrent())return null;
+  if(failure&&grouped)return load(entry,dataRoot,isCurrent);
+  if(failure)throw failure;
   const floats=name=>decoded.get(name)||new Float32Array(loaded.get(name));
   return {
     layers:entry.layers.map(l=>({...l,base:floats(l.base),gbuffer:floats(l.gbuffer),patches:(l.patches||[]).map(p=>p.blend?{...p,blend:floats(p.blend)}:{...p,delta:floats(p.delta)})})),
@@ -892,7 +971,7 @@ async function render(job){
         ({frame,context}=previewFrame);
       }else{
         if(job.preview)previewFrame=null;
-        const loaded=await load(job.assetEntry,job.dataRoot,isCurrent);
+        const loaded=await load(job.assetEntry,job.dataRoot,isCurrent,job.openingMembers);
         if(!loaded){self.postMessage({id,cancelled:true});return;}
         const postContext={...context,lut:loaded.lut};
         const fit=options?.clothingFit&&loaded.clothingFit?ClothingFit.apply(loaded.layers,loaded.surfaces,context,loaded.clothingFit):loaded;
@@ -921,6 +1000,14 @@ function prefetch(job){
 }
 self.onmessage=event=>{
   const job=event.data;
+  if(job.openingFiles){prepareOpeningFiles(job.openingFiles,job.dataRoot);return;}
+  if(job.packDirectories){
+    for(const [file,directory] of Object.entries(job.packDirectories)){
+      if(!/^(?:items\/packs|runtime)\/[a-f0-9]{64}\.wpack$/.test(file))continue;
+      packDirectories.set(new URL(file,job.dataRoot).href,directory);
+    }
+    while(packDirectories.size>64)packDirectories.delete(packDirectories.keys().next().value);
+  }
   if(job.prefetch){prefetch(job);return;}
   if(job.preview)latestPreview=job.id;
   pendingRenders++;

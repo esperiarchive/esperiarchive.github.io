@@ -1,4 +1,5 @@
 /* Keep offscreen archive rows searchable and focusable while deferring their layout. */
+.archive-list { grid-auto-rows: max-content; }
 .archive-entry {
   content-visibility: auto;
   contain-intrinsic-block-size: auto max(44px, calc(44px * var(--reader-font-ratio) + 6px));

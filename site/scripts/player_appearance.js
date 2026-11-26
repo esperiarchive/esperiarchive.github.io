@@ -250,13 +250,15 @@
       if(saved.has(id) && saved.get(id).gender!==g) throw new Error('Appearance gender does not match.');
       saveChoice(g,id);
     }
-    async function savePack(source,isCurrent=()=>true){
+    async function savePack(source,isCurrent=()=>true,previewKey){
       if(!lookStore)throw new Error('Saved looks require browser storage.');
       await savedIndex();
       const parsed=parsePack(source),data=await materializePack(parsed);
       try {
         if(!isCurrent())throw new Error('Import cancelled.');
         const row={id:'custom:'+randomId(),gender:data.gender,displayName:data.displayName,group:'local',recipe:data.recipe,createdAt:Date.now()};
+        // Only Save and apply supplies a renderer key. Imported portraits may use arbitrary art.
+        if(typeof previewKey==='string'&&previewKey.length>0&&previewKey.length<=512)row.previewKey=previewKey;
         row.thumbnail=await chooserImage(data.portraits.normal.source);row.thumbnailVersion=2;
         if(!isCurrent())throw new Error('Import cancelled.');
         await lookStore.put(row,source);
@@ -296,7 +298,8 @@
       await load(id);const data=loaded.get(id);
       if(id.startsWith('custom:')||id.startsWith('local:')){
         if(!data.recipe?.sourcePreset&&!data.recipe?.avatarIds?.outfit)throw new Error(text('This pack has no editable recipe. Create your own look instead.'));
-        return {gender:g,name:data.displayName,recipe:data.recipe};
+        const key=saved.get(id)?.previewKey;
+        return {gender:g,name:data.displayName,recipe:data.recipe,...(key&&{openingPortrait:{key,source:data.portraits.normal.source}})};
       }
       return {gender:g,recipe:{sourcePreset:id}};
     }

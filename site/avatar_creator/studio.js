@@ -33,7 +33,7 @@
   const backPoses=new Set(['normal','standing']);
   let language=WardrobeLocale.language(params.get('lang'));
   const itemLabel=(item,gender)=>WardrobeLocale.label(item,gender,language);
-  const translate=()=>{document.documentElement.lang={en:'en',cn:'zh-Hans',jp:'ja',kr:'ko'}[language];translateDocument();};
+  const translate=()=>{document.documentElement.lang=W.documentLang(language);translateDocument();};
   if(!embedded && ['127.0.0.1','localhost'].includes(location.hostname)){
     const progress=document.createElement('a');progress.href='http://127.0.0.1:8879/';
     progress.textContent='Capture progress ↗';progress.className='capture-progress-link';progress.target='_blank';progress.rel='noopener';
@@ -51,52 +51,78 @@
   const families=new Map(),readiness=new Map();
   let history=[],future=[],toastTimer;
   let readerSession='',readerBusy=false,studioReady=false,setExpanded=()=>false;
+  let pendingReaderInit=null;
+  let openingPacks=null;
+  let standaloneOpeningSeed=null;
+  let openingPortrait=null;
+  const narrow=matchMedia('(max-width: 760px)');
+  let rosterDeferred=false;
   const reportExpanded=expanded=>window.parent.postMessage({type:'tea-wardrobe-expand',expanded},location.origin);
   const worker=new Worker('compositor.worker.js'),pending=new Map();let sequence=0;
   const lighting=()=>({rim:$('rim').checked,bloom:$('bloom').checked,grade:$('grade').checked,half:true,hiddenRgb:false,detail:true,clothingFit:$('clothing-fit').value==='clothing',hairFit:$('hair-fit').checked});
   function notify(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,5000);}
   function setupPreviewNavigation(){
-    const stage=$('stage'),canvas=$('avatar'),camera={zoom:1,y:0};let drag=null;
+    const stage=$('stage'),canvas=$('avatar'),camera={zoom:1,x:0,y:0};let drag=null,inspecting=false,savedCamera=null;
+    const touches=new Map();let pinch=null;
     const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
     function update(){
-      camera.zoom=Math.round(clamp(camera.zoom,.85,1.5)*100)/100;
+      camera.zoom=Math.round(clamp(camera.zoom,.85,inspecting?4:1.5)*100)/100;
       // Normal framing stays centered; pan room grows with magnification.
       const extra=Math.max(0,camera.zoom-1);
       camera.y=clamp(camera.y,-stage.clientHeight*.5*extra,stage.clientHeight*.5*extra);
+      camera.x=inspecting?clamp(camera.x,-stage.clientWidth*.5*extra,stage.clientWidth*.5*extra):0;
       stage.style.setProperty('--preview-zoom',camera.zoom);
-      stage.style.setProperty('--preview-x','0px');stage.style.setProperty('--preview-y',camera.y+'px');
+      stage.style.setProperty('--preview-x',camera.x+'px');stage.style.setProperty('--preview-y',camera.y+'px');
       stage.classList.toggle('pannable',camera.zoom>1);
       $('zoom-value').textContent=Math.round(camera.zoom*100)+'%';
-      $('zoom-out').disabled=camera.zoom<=.85;$('zoom-in').disabled=camera.zoom>=1.5;
-      $('reset-view').disabled=camera.zoom===1&&camera.y===0;
+      $('zoom-out').disabled=camera.zoom<=.85;$('zoom-in').disabled=camera.zoom>=(inspecting?4:1.5);
+      $('reset-view').disabled=camera.zoom===1&&camera.x===0&&camera.y===0;
     }
-    function reset(){Object.assign(camera,{zoom:1,y:0});update();}
+    function reset(){Object.assign(camera,{zoom:1,x:0,y:0});update();}
+    stage.addEventListener('wardrobe-inspect',event=>{
+      inspecting=event.detail;
+      if(inspecting){savedCamera={...camera};reset();}
+      else if(savedCamera){Object.assign(camera,savedCamera);savedCamera=null;update();}
+      drag=null;pinch=null;touches.clear();stage.classList.remove('dragging');
+    });
     function zoom(step){camera.zoom+=step;update();}
     $('zoom-out').onclick=()=>zoom(-.1);$('zoom-in').onclick=()=>zoom(.1);$('reset-view').onclick=reset;
     canvas.tabIndex=0;canvas.title='Right-drag left/right to zoom out/in. Drag up or down when zoomed in. Use + / − to zoom, up and down arrows to pan, or 0 to reset.';
     canvas.addEventListener('contextmenu',event=>event.preventDefault());
     canvas.addEventListener('pointerdown',event=>{
+      if(inspecting&&event.pointerType==='touch'&&!canvas.hidden){
+        touches.set(event.pointerId,{x:event.clientX,y:event.clientY});canvas.setPointerCapture(event.pointerId);
+        if(touches.size===2){
+          const [a,b]=[...touches.values()];pinch={distance:Math.hypot(a.x-b.x,a.y-b.y),zoom:camera.zoom};
+          drag=null;event.preventDefault();return;
+        }
+      }
       const zooming=event.button===2&&event.pointerType!=='touch';
       if(canvas.hidden||!zooming&&(event.button!==0||camera.zoom<=1)||drag)return;
       event.preventDefault();canvas.focus({preventScroll:true});
-      drag={pointer:event.pointerId,zooming,x:event.clientX,y:event.clientY,startZoom:camera.zoom,startY:camera.y};
+      drag={pointer:event.pointerId,zooming,x:event.clientX,y:event.clientY,startZoom:camera.zoom,startX:camera.x,startY:camera.y};
       canvas.setPointerCapture(event.pointerId);stage.classList.add('dragging');
     });
     canvas.addEventListener('pointermove',event=>{
+      if(touches.has(event.pointerId))touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      if(pinch&&touches.size===2){
+        const [a,b]=[...touches.values()];camera.zoom=pinch.zoom*Math.hypot(a.x-b.x,a.y-b.y)/Math.max(1,pinch.distance);update();return;
+      }
       if(!drag||drag.pointer!==event.pointerId)return;
       if(drag.zooming)camera.zoom=drag.startZoom+(event.clientX-drag.x)/300;
-      else if(camera.zoom>1)camera.y=drag.startY+event.clientY-drag.y;
+      else if(camera.zoom>1){camera.y=drag.startY+event.clientY-drag.y;if(inspecting)camera.x=drag.startX+event.clientX-drag.x;}
       update();
     });
-    const end=()=>{drag=null;stage.classList.remove('dragging');};
+    const end=event=>{touches.delete(event.pointerId);pinch=null;drag=null;stage.classList.remove('dragging');};
     canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);canvas.addEventListener('lostpointercapture',end);
-    canvas.addEventListener('wheel',event=>{if(event.ctrlKey||event.metaKey){event.preventDefault();zoom(event.deltaY<0?.05:-.05);}},{passive:false});
+    canvas.addEventListener('wheel',event=>{if(inspecting||event.ctrlKey||event.metaKey){event.preventDefault();zoom(event.deltaY<0?.05:-.05);}},{passive:false});
     canvas.addEventListener('keydown',event=>{
-      if(['+','=','-','0','ArrowUp','ArrowDown'].includes(event.key))event.preventDefault();else return;
+      if(['+','=','-','0','ArrowUp','ArrowDown',...(inspecting?['ArrowLeft','ArrowRight']:[])].includes(event.key))event.preventDefault();else return;
       if(event.key==='0')return reset();
       if(['+','=','-'].includes(event.key))return zoom(event.key==='-'?-.1:.1);
       if(camera.zoom<=1)return;
-      camera.y+=event.key==='ArrowUp'?-10:event.key==='ArrowDown'?10:0;update();
+      camera.y+=event.key==='ArrowUp'?-10:event.key==='ArrowDown'?10:0;
+      camera.x+=event.key==='ArrowLeft'?-10:event.key==='ArrowRight'?10:0;update();
     });
     new ResizeObserver(update).observe(stage);update();return reset;
   }
@@ -173,9 +199,12 @@
     W.bindHorizontalWheel($('poses'));
     W.placeItemDetail($('item-detail'),$('stage'),matchMedia('(max-width: 760px)'));
     // Phones can hide the reader's bars and the look-name row; the stage keeps the way back.
-    const expand=node('button','expand-toggle'),expandIcon=document.createElementNS(svg,'svg');expand.type='button';expand.setAttribute('aria-label','Expand wardrobe');
+    const expand=node('button','expand-toggle'),expandIcon=document.createElementNS(svg,'svg');expand.type='button';expand.setAttribute('aria-label','Stretch');expand.title='Stretch';
     expandIcon.setAttribute('viewBox','0 0 24 24');expandIcon.setAttribute('aria-hidden','true');expandIcon.append(document.createElementNS(svg,'path'));expand.append(expandIcon);$('stage').append(expand);
     setExpanded=W.bindExpand(expand,matchMedia('(max-width: 760px)'),reportExpanded);
+    W.bindPreviewFullscreen($('stage'),open=>window.parent.postMessage({type:'tea-wardrobe-inspect',open},location.origin),[
+      [$('zoom-out'),'Zoom out preview','−'],[$('reset-view'),'Reset view','↺'],[$('zoom-in'),'Zoom in preview','+']
+    ]);
     // One sort menu instead of field and direction.
     const sort=node('select');sort.id='sort-combined';sort.setAttribute('aria-label','Sort items');
     W.setupSortMenu(sort,true);
@@ -191,12 +220,11 @@
       .observe(previewStatus,{childList:true,characterData:true,subtree:true});
     // Readers tall enough give the wardrobe the window, and it scrolls only its
     // own panels; short windows scroll the page, so the frame follows the content.
-    const tall=window.parent.matchMedia('(min-height: 560px)');
-    const report=()=>{
-      const fit=tall.matches;document.documentElement.classList.toggle('reader-fit',fit);
-      window.parent.postMessage({type:'tea-cosmetics-height',height:fit?null:Math.max(480,main.offsetHeight)},location.origin);
-    };
-    tall.addEventListener('change',report);new ResizeObserver(report).observe(main);report();
+    const report=W.bindReaderFrameFit(
+      height=>window.parent.postMessage({type:'tea-cosmetics-height',height},location.origin),
+      fit=>{if(rosterDeferred&&(!fit||!narrow.matches))drawItems();}
+    );
+    narrow.addEventListener('change',report);
   }
   function openCategory(){
     const panel=document.querySelector('.wardrobe-panel');if(panel)panel.dataset.level='items';
@@ -207,14 +235,20 @@
   // verified shards are then the whole library, and a pinned release never changes.
   // A library at a configured address is such a release, so it is not asked for items.json.
   const releasedLibrary=DATA.href!==new URL('data/',location.href).href;
-  let libraryWatched=true;
-  // A release's indexes have fixed names, so they download alongside the catalogue.
-  const early=new Map();
-  function startEarly(){if(releasedLibrary)for(const path of ['items-startup.json','captures.json']){const request=get(path);request.catch(()=>{});early.set(path,request);}}
-  function getEarly(path){const request=early.get(path);early.delete(path);return request||get(path);}
-  async function getItems(){
+  function prepareOpeningPacks(seed){
+    if(!openingPacks||!seed||generation)return;
+    const recipe=seed.recipe||{},gender=seed.gender;
+    if(recipe.wardrobe3d)return;
+    const preset=recipe.avatarIds?.outfit
+      ?Object.values(openingPacks).find(row=>row.gender===gender&&W.key(gender,row.recipe)===W.key(gender,recipe.avatarIds))
+      :openingPacks[recipe.sourcePreset||('player_'+gender+'_default1')];
+    if(preset?.gender!==gender||!Array.isArray(preset?.files))return;
+    worker.postMessage({openingFiles:preset.files,dataRoot:DATA.href});
+    openingPacks=null;
+  }
+  async function getItems(draftGender){
     if(typeof DecompressionStream==='function')try{
-      const [startup,head]=await Promise.all([getEarly('items-startup.json'),releasedLibrary?null:fetch(new URL('items.json',DATA),{method:'HEAD',cache:'no-cache'})]);
+      const [startup,head]=await Promise.all([get('items-startup-v2.json').catch(()=>get('items-startup.json')),releasedLibrary?null:fetch(new URL('items.json',DATA),{method:'HEAD',cache:'no-cache'})]);
       const metadata=await startup.json(),released=releasedLibrary||head.status===404;
       if(released||WardrobeLibrary.matches(metadata,head)){
         const read=async info=>{
@@ -225,8 +259,13 @@
           return JSON.parse(new TextDecoder().decode(bytes));
         };
         // The opening look's view downloads with the availability index rather than after it.
-        const runtime=await WardrobeLibrary.open(metadata,read,[(embedded&&params.get('gender')==='male'?'male':'female')+'/normal/0']);libraryWatched=!released;
-        return {library:runtime.library,runtime,stamp:WardrobeUpdates.responseStamp(released?startup:head)};
+        const gender=pendingReaderInit?.seed?.gender||state?.gender||(embedded?params.get('gender'):draftGender);
+        if(metadata.presetPacks){
+          openingPacks=metadata.presetPacks;
+          prepareOpeningPacks(embedded?pendingReaderInit?.seed:standaloneOpeningSeed);
+        }
+        const runtime=await WardrobeLibrary.open(metadata,read,[(gender==='male'?'male':'female')+'/normal/0']);
+        return {library:runtime.library,runtime,watch:!released,stamp:WardrobeUpdates.responseStamp(released?startup:head)};
       }
     }catch(error){if(releasedLibrary)throw error;/* Older publications use the complete canonical manifest below. */}
     if(releasedLibrary)throw new Error('This browser needs gzip decompression support.');
@@ -247,10 +286,24 @@
     const response=await get('items.json');
     return {library:await response.json(),stamp:WardrobeUpdates.responseStamp(response)};
   }
-  async function loadLibrary(manifest){
+  async function loadLibrary(manifest,draftGender){
     if(!manifest)return {library:null,stamp:null};
-    if(manifest==='items.json')return getItems();
+    if(manifest==='items.json')return getItems(draftGender);
     const response=await get(manifest);return {library:await response.json(),stamp:WardrobeUpdates.responseStamp(response)};
+  }
+  async function loadStartupData(draftGender){
+    const readJson=path=>get(path).then(response=>response.json());
+    const expand=data=>typeof W==='object'&&W.expandCatalogue?W.expandCatalogue(data):data;
+    const catalogueRequest=readJson('catalogue-core.json').catch(()=>readJson('catalogue.json')).then(expand);
+    // Pinned releases use these manifests. Start their dependent requests during the catalogue download.
+    let items=releasedLibrary?getItems(draftGender):null;
+    let complete=releasedLibrary?readJson('captures.json'):null;
+    items?.catch(()=>{});complete?.catch(()=>{});
+    const data=await catalogueRequest;
+    if(!items||data.itemManifest!=='items.json')items=loadLibrary(data.itemManifest,draftGender);
+    if(!complete||data.captureManifest!=='captures.json')complete=data.captureManifest?readJson(data.captureManifest):{cases:[]};
+    const [loaded,captures]=await Promise.all([items,complete]);
+    return {catalogue:data,loaded,captures};
   }
   function libraryStats(){
     $('total-count').textContent=catalogue.stats.items.toLocaleString();
@@ -258,18 +311,18 @@
     if($('library-count'))$('library-count').textContent=itemLibrary?itemLibrary.parts.length.toLocaleString()+' reusable item views':'';
   }
   function watchLibrary(version){
-    if(!catalogue.itemManifest||!libraryWatched)return;
+    if(!catalogue.itemManifest)return;
     const controls=document.querySelector('.catalogue-stats'),progress=controls.querySelector('.capture-progress-link');
     const count=node('small');count.id='library-count';controls.insertBefore(count,progress);
     const button=node('button','library-refresh','Refresh previews');button.type='button';button.title='Check for newly published captures while keeping this look';controls.insertBefore(button,progress);
     const check=WardrobeUpdates.createUpdater({version,
       blocked:()=>exporting||document.hidden||(embedded&&window.frameElement?.hidden),
       check:async()=>{const response=await fetch(new URL(catalogue.itemManifest,DATA),{method:'HEAD',cache:'no-cache'});if(!response.ok)throw new Error('Could not check preview updates.');return WardrobeUpdates.responseStamp(response);},
-      load:async()=>{const next=await(await get('catalogue.json')).json();const [loaded,complete]=await Promise.all([loadLibrary(next.itemManifest),next.captureManifest?get(next.captureManifest).then(r=>r.json()):{cases:[]}]);return {...loaded,catalogue:next,captures:complete};},
+      load:async()=>{const next=W.expandCatalogue(await get('catalogue-core.json').catch(()=>get('catalogue.json')).then(r=>r.json()));const [loaded,complete]=await Promise.all([loadLibrary(next.itemManifest),next.captureManifest?get(next.captureManifest).then(r=>r.json()):{cases:[]}]);return {...loaded,catalogue:next,captures:complete};},
       apply:data=>{
         if(data.library?.schema!=='afk.wardrobe.items'||data.library.validation?.passed!==true)throw new Error('New previews have not passed validation.');
         const nextIndex=W.createIndex(data.catalogue,data.captures,data.library);
-        catalogue=data.catalogue;captures=data.captures;itemLibrary=data.library;runtimeLibrary=data.runtime;index=nextIndex;
+        catalogue=data.catalogue;captures=data.captures;itemLibrary=data.library;runtimeLibrary=data.runtime;index=nextIndex;detailsRequest=null;
         buildFamilies();libraryStats();refresh();notify('Preview library updated. Your look is kept.');
       },
       onCurrent:manual=>{if(manual)notify('Previews are up to date.');},
@@ -347,10 +400,11 @@
     }
     for(const variants of families.values())variants.sort((a,b)=>a.order-b.order||a.id-b.id);
   }
-  function itemRows(matches,only){
+  function* itemRows(matches,only){
     const rows=[],slot=W.categorySlot(category);
     for(const variants of families.values()){
       if(W.itemCategory(variants[0])!==category)continue;
+      yield;
       const options=[];
       const visible=only?variants.filter(readyFor):variants;
       for(const item of visible){
@@ -399,27 +453,19 @@
   }
   function drawRoster(){drawItems();$('items').scrollTop=0;}
   const fitItemNames=WardrobeLocale.bindItemTypography($('items'),embedded ? parent.document.documentElement : null);
-  function drawItems(){
-    const roster=$('items'),scrollTop=roster.scrollTop;
-    const focused=roster.contains(document.activeElement)?document.activeElement.dataset.itemKey:null;
-    const text=$('search').value.trim().toLocaleLowerCase(),only=readyFilter?.checked??true,sort=$('sort').value,presets=category==='presets';
+  function rosterSettings(){
+    const text=$('search').value.trim().toLocaleLowerCase(),only=readyFilter?.checked??true,sort=$('sort').value;
     const direction=$('sort-order').value==='desc'?-1:1;
+    return {category,text,only,sort,direction,language};
+  }
+  function* buildRoster({text,only,sort,direction}){
+    const presets=category==='presets';
     const matches=(name,item)=>!text||`${name} ${item.id} ${item.colorName||''}`.toLocaleLowerCase().includes(text);
     const rows=presets?catalogue.presets
       .filter(p=>p.gender===state.gender&&matches(p.name,p))
       .map(item=>({item,name:item.name,ready:!!index.resolve(presetState(item)),sortName:item.name,sortId:item.id}))
-      .filter(row=>!only||row.ready):itemRows(matches,only);
+      .filter(row=>!only||row.ready):(yield* itemRows(matches,only));
     W.sortRows(rows,sort,direction,language);
-    $('category-title').textContent=presets?'Complete looks':W.browseCategories(catalogue.categories).find(c=>c.id===category)?.name||'Wardrobe';
-    $('result-count').textContent=rows.length+' '+(presets?'look':'item')+(rows.length===1?'':'s');$('no-items').hidden=!!rows.length;
-    if(!rows.length){
-      const hint=$('no-items').querySelector('p');
-      if(only&&!text&&category==='bodypaint')hint.textContent='Body paint previews depend on the outfit, skin, build and expression. Try another outfit or turn off Preview-ready to browse the full list.';
-      else if(only&&!text&&category==='makeup')hint.textContent='Makeup previews depend on the face, skin, build and expression. Try another face or turn off Preview-ready to browse the full list.';
-      else hint.textContent='Clear the search, choose a complete look, or turn off Preview-ready to browse the full list.';
-      if(!readyFilter||!only)hint.textContent=hint.textContent.replace(', choose a complete look, or turn off Preview-ready to browse the full list.',' or choose a complete look.').replace(' or turn off Preview-ready to browse the full list.','.');
-    }
-    drawColors(only);
     const grid=document.createDocumentFragment();
     const slot=W.categorySlot(category);
     if(!presets&&W.OPTIONAL.has(slot)&&!text){const none=node('button','item-card');none.dataset.itemKey='none';none.append(node('span','item-art fallback-icon','◇'),node('span','item-name','None'),node('span','item-state','Remove this part'));none.setAttribute('aria-pressed',String(!state.avatarIds[slot]));none.onclick=()=>setState({...state,name:'',avatarIds:{...state.avatarIds,[slot]:0}});grid.append(none);}
@@ -434,20 +480,91 @@
       const candidate=()=>presets?presetState(item):{...state,avatarIds:{...state.avatarIds,[item.slot]:item.id}};
       card.onpointerenter=card.onfocus=()=>prefetchLook(candidate());card.onpointerleave=()=>clearTimeout(hoverTimer);
       grid.append(card);
+      yield;
     }
+    return {grid,count:rows.length};
+  }
+  let openingRoster=null;
+  function warmOpeningRoster(){
+    if(!rosterDeferred||category!=='outfit'||openingRoster||document.hidden||!current)return;
+    // Keep the partially built grid detached so a tap can take over between slices.
+    const settings=rosterSettings(),job={key:JSON.stringify(settings),steps:buildRoster(settings)};
+    openingRoster=job;
+    const schedule=()=>window.requestIdleCallback?window.requestIdleCallback(advance):setTimeout(advance,32);
+    function advance(deadline){
+      if(openingRoster!==job)return;
+      if(document.hidden){openingRoster=null;return;}
+      const until=performance.now()+Math.min(6,deadline?deadline.timeRemaining():6);
+      while(performance.now()<until){
+        let step;
+        try{step=job.steps.next();}
+        catch{openingRoster=null;return;} // Opening the category can retry in the foreground.
+        if(step.done){
+          job.result=step.value;
+          const connection=navigator.connection;
+          if(!connection?.saveData&&!['slow-2g','2g'].includes(connection?.effectiveType)){
+            // Reuse these same images on tap. The rest can wait until the grid is visible.
+            for(const img of job.result.grid.querySelectorAll('.item-card:nth-child(-n+4) img')){
+              img.fetchPriority='low';img.loading='eager';
+            }
+          }
+          return;
+        }
+      }
+      schedule();
+    }
+    schedule();
+  }
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)warmOpeningRoster();});
+  function drawItems(){
+    rosterDeferred=embedded&&narrow.matches&&document.documentElement.classList.contains('reader-fit')&&$('wardrobe').dataset.level==='categories';
+    if(rosterDeferred)return;
+    const roster=$('items'),scrollTop=roster.scrollTop;
+    const focused=roster.contains(document.activeElement)?document.activeElement.dataset.itemKey:null;
+    const settings=rosterSettings(),{text,only}=settings,presets=category==='presets';
+    const prepared=openingRoster?.key===JSON.stringify(settings)?openingRoster:null;
+    openingRoster=null;
+    const steps=prepared?.steps||buildRoster(settings);
+    let result=prepared?.result;
+    if(!result){
+      let step;
+      do{step=steps.next();}while(!step.done);
+      result=step.value;
+    }
+    const {grid,count}=result;
+    $('category-title').textContent=presets?'Complete looks':W.browseCategories(catalogue.categories).find(c=>c.id===category)?.name||'Wardrobe';
+    $('result-count').textContent=count+' '+(presets?'look':'item')+(count===1?'':'s');$('no-items').hidden=!!count;
+    if(!count){
+      const hint=$('no-items').querySelector('p');
+      if(only&&!text&&category==='bodypaint')hint.textContent='Body paint previews depend on the outfit, skin, build and expression. Try another outfit or turn off Preview-ready to browse the full list.';
+      else if(only&&!text&&category==='makeup')hint.textContent='Makeup previews depend on the face, skin, build and expression. Try another face or turn off Preview-ready to browse the full list.';
+      else hint.textContent='Clear the search, choose a complete look, or turn off Preview-ready to browse the full list.';
+      if(!readyFilter||!only)hint.textContent=hint.textContent.replace(', choose a complete look, or turn off Preview-ready to browse the full list.',' or choose a complete look.').replace(' or turn off Preview-ready to browse the full list.','.');
+    }
+    drawColors(only);
     roster.replaceChildren(grid);
     fitItemNames();
     roster.scrollTop=scrollTop;
     if(focused)Array.from(roster.children).find(card=>card.dataset.itemKey===focused)?.focus({preventScroll:true});
   }
   function groupName(p){return p.group==='studio'?'Mix preview-ready parts':(p.group==='default'?'Default':/^s\d+$/.test(p.group)?'Season '+Number(p.group.slice(1)):p.group)+' · Look '+p.option;}
+  let detailsRequest=null;
+  function ensureCatalogueDetails(){
+    if(!catalogue?.detailsManifest||detailsRequest)return;
+    const currentCatalogue=catalogue;
+    detailsRequest=get(catalogue.detailsManifest).then(r=>r.json()).then(details=>{
+      if(catalogue!==currentCatalogue||!index)return;
+      W.mergeCatalogueDetails(index.items,details);
+      drawDetail();
+    }).catch(()=>{detailsRequest=null;});
+  }
   function drawDetail(){const el=$('item-detail'),item=index.items.get(state.avatarIds[detailSlot]);
     // Headwear and Hero headgear share a slot; each caption only its own items.
     el.hidden=!item||item.slot===W.categorySlot(category)&&W.itemCategory(item)!==category;if(el.hidden)return;el.replaceChildren();
-    // A description that only repeats the name (the Default outfit) stays blank.
-    const title=itemLabel(item,state.gender),description=WardrobeLocale.description(item,language);
+    if(item.detailsPending)ensureCatalogueDetails();
+    const {title,description}=W.itemDetailContent(item,state.gender,language,WardrobeLocale);
     el.append(node('strong','',title),node('div','detail-meta','AVATAR '+item.id+' · '+(readyFor(item)?'PREVIEW-READY':'CAPTURE NEEDED')),
-    node('p','',description===title?'':description),node('small','',item.genders[state.gender].assetName||(item.slot==='bodyshape'?'Body build':'Material / appearance option')));
+    node('p','',description),node('small','',item.genders[state.gender].assetName||(item.detailsPending?'':item.slot==='bodyshape'?'Body build':'Material / appearance option')));
     if(item.genders[state.gender].previewLod)el.append(node('p','','Uses the game’s available lower-detail model.'));
   }
   function drawPoses(){
@@ -467,6 +584,7 @@
     W.replacePoseButtons($('poses'),buttons);
   }
   function refresh(){
+    openingRoster=null;
     readiness.clear();
     $('look-title').textContent=title();$('undo').disabled=!history.length;$('redo').disabled=!future.length;
     for(const b of document.querySelectorAll('[data-gender]'))b.setAttribute('aria-pressed',String(b.dataset.gender===state.gender));
@@ -479,6 +597,7 @@
     const warnings=W.conflicts(state,index.items);$('compatibility').hidden=!warnings.length;$('compatibility').textContent=warnings.join(' ');
     render();
   }
+  const sentDirectories=new WeakSet();
   async function renderView(view,options,isCurrent=()=>true,preview=false){
     const canvas=document.createElement('canvas');
     if(view.kind==='baked'||view.kind==='capture'||options.detail&&view.entry.hdReference){
@@ -496,40 +615,76 @@
     if(library?.metadataOnly&&view.kind==='items')throw Error('The selected view metadata has not loaded.');
     const clothingFit=view.kind==='items'?ClothingFit.describe(entry,library,catalogue):null;
     const hairFit=view.kind==='items'&&options.hairFit?HairFit.describe(entry,library):null;
-    const output=await compute({assetEntry:{layers:entry.layers,overlays:entry.overlays||[],surfaces:entry.surfaces||[],lut,clothingFit,hairFit},dataRoot:DATA.href,context,options,preview});
+    const openingMembers=preview&&generation===1?library?.openingMembers:undefined;
+    const packDirectories=library?.packDirectories&&!sentDirectories.has(library)?library.packDirectories:undefined;
+    if(packDirectories)sentDirectories.add(library);
+    const output=await compute({assetEntry:{layers:entry.layers,overlays:entry.overlays||[],surfaces:entry.surfaces||[],lut,clothingFit,hairFit},dataRoot:DATA.href,context,options,preview,openingMembers,packDirectories});
     if(output.cancelled||!isCurrent())return null;
     canvas.width=context.width;canvas.height=context.height;canvas.getContext('2d').putImageData(new ImageData(output.pixels,canvas.width,canvas.height),0,0);return canvas;
   }
   const detailIndexes=new WeakMap();
   async function resolveView(snapshot,pose=snapshot.pose||'normal'){
     if(!runtimeLibrary)return index.resolve(snapshot,pose);
-    const library=await runtimeLibrary.ensure(snapshot.gender,pose,snapshot.yaw||0);
+    const yaw=snapshot.yaw||0;
+    if(runtimeLibrary.opening){
+      try{
+        const fast=await runtimeLibrary.opening(snapshot.gender,pose,yaw);
+        if(fast){
+          if(!detailIndexes.has(fast))detailIndexes.set(fast,W.createIndex(catalogue,captures,fast));
+          const hit=detailIndexes.get(fast).resolve(snapshot,pose);
+          if(hit)return {...hit,library:fast};
+        }
+      }catch(_){/* Fall back to the full view shard if the opening micro-shard cannot load. */}
+    }
+    const library=await runtimeLibrary.ensure(snapshot.gender,pose,yaw);
     if(!detailIndexes.has(library))detailIndexes.set(library,W.createIndex(catalogue,captures,library));
     const view=detailIndexes.get(library).resolve(snapshot,pose);
     return view?{...view,library}:null;
   }
+  function normalPortraitKey(snapshot,options){
+    const digest=runtimeLibrary?.viewDigest?.(snapshot.gender,'normal',0);
+    if(!digest||snapshot.yaw||snapshot.pose!=='normal')return '';
+    // Bump the rendering revision when changing the compositor's visible output.
+    return JSON.stringify(['2d-normal-v1',digest,W.key(snapshot.gender,snapshot.avatarIds),options]);
+  }
   async function render(){
     const token=++generation,snapshot=clone(state);current=null;$('export-png').disabled=$('export-set').disabled=true;
+    const target=$('avatar'),settings=lighting(),saved=openingPortrait;
+    openingPortrait=null;
+    let painted=false,preparing=true;
+    if(saved&&saved.key===normalPortraitKey(snapshot,settings)&&saved.key&&typeof saved.source==='string'
+        &&saved.source.startsWith('blob:'+location.origin+'/')&&index.resolve(snapshot)?.kind==='items'){
+      const image=new Image();image.src=saved.source;
+      image.decode().then(()=>{
+        if(token!==generation||!preparing)return;
+        target.width=image.naturalWidth;target.height=image.naturalHeight;
+        target.getContext('2d').drawImage(image,0,0);target.hidden=false;
+        $('empty-preview').hidden=true;$('loading').hidden=true;painted=true;
+      }).catch(()=>{});
+    }
     if(embedded)$('reader-use').disabled=true;
     $('loading').hidden=false;$('preview-status').textContent='Preparing the selected appearance…';
     let view;
-    try{view=await resolveView(snapshot);}catch(error){if(token===generation){$('loading').hidden=true;$('preview-status').textContent='Preview could not load: '+error.message;}return;}
+    try{view=await resolveView(snapshot);}catch(error){preparing=false;if(token===generation){$('loading').hidden=true;target.hidden=true;$('preview-status').textContent='Preview could not load: '+error.message;}return;}
     if(token!==generation)return;
     const detailed=view?.kind==='baked'||!!view?.entry?.hdReference;
     const captured=detailed||view?.kind==='capture';
     $('fit-control').hidden=!(view?.kind==='items'&&view.entry.yaw===180&&(state.avatarIds.cloak||state.avatarIds.back));
     $('hair-fit-control').hidden=!(view?.kind==='items'&&HairFit.describe(view.entry,view.library||itemLibrary));
-    const target=$('avatar');target.getContext('2d').clearRect(0,0,target.width,target.height);target.hidden=!view;$('empty-preview').hidden=!!view;$('loading').hidden=!view;
+    preparing=!!view;
+    if(!painted)target.getContext('2d').clearRect(0,0,target.width,target.height);
+    target.hidden=!view;$('empty-preview').hidden=!!view;$('loading').hidden=!view||painted;
     $('light-controls').disabled=!view||captured;$('preview-kind').textContent=view?(captured?'COMPLETE UNITY CAPTURE':view.kind==='items'?'REUSABLE ITEM PREVIEW':'COMPOSED PREVIEW'):'CAPTURE NEEDED';$('resolution').textContent='';
     $('lighting-caption').textContent=captured?'Baked into portrait':'Capture lighting';$('light-note').textContent=captured?'This capture includes the original Unity lighting and effects.':'Rim lighting, bloom and grading use the capture profile. Effects are a fixed frame.';
     if(!view){$('preview-status').textContent='Some selected parts or appearance variants need preview data. You can still save or export the recipe.';return;}
     $('preview-status').textContent='Preparing the selected appearance…';
-    try{const canvas=await renderView(view,lighting(),()=>token===generation,true);if(token!==generation)return;target.width=canvas.width;target.height=canvas.height;target.getContext('2d').drawImage(canvas,0,0);current={view,canvas,token};
+    try{const canvas=await renderView(view,settings,()=>token===generation,true);if(token!==generation)return;target.width=canvas.width;target.height=canvas.height;target.getContext('2d').drawImage(canvas,0,0);current={view,canvas,token};
       $('resolution').textContent=canvas.width+' × '+canvas.height;$('preview-status').textContent=view.kind==='items'?'Assembled from reusable items · depth-aware veils and adjustable lighting.':view.kind==='layers'?(detailed?'Detailed Unity render · original lighting, 4× antialiasing.':'Preview-ready · this combination was checked against a complete Unity render.'):view.kind==='capture'?(detailed?'Detailed Unity render · original lighting, 4× antialiasing.':'Preview-ready · complete Unity capture with original lighting and effects.'):'Complete captured look · changing parts needs matching captures.';
       $('export-png').disabled=$('export-set').disabled=false;
+      warmOpeningRoster();
       if(embedded)$('reader-use').disabled=readerBusy||!readerSession||!index.resolve({...state,yaw:0},'normal');
     }catch(error){if(token!==generation)return;target.hidden=true;$('preview-status').textContent='Preview could not load: '+error.message;}
-    finally{if(token===generation)$('loading').hidden=true;}
+    finally{preparing=false;if(token===generation)$('loading').hidden=true;}
   }
   const downloadUrls=new Set();
   function clearReadyDownload(){const old=$('export-dialog').querySelector('.ready-download');if(old){URL.revokeObjectURL(old.href);downloadUrls.delete(old.href);old.remove();}}
@@ -541,54 +696,69 @@
   const slug=name=>(name||'merlin').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'merlin';
   const png=canvas=>new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG export failed.')),'image/png'));
   async function buildReaderPack(snapshot,settings,name,progress=()=>{}){
-    snapshot={...clone(snapshot),yaw:0};
+    snapshot={...clone(snapshot),pose:'normal',yaw:0};
+    let previewKey='';
     if(!index.resolve(snapshot,'normal'))throw new Error('A Hand on Hip preview is required to use this look for Merlin.');
     const pack={schema:'afk.reader.portrait-pack',version:1,gender:snapshot.gender,displayName:name.trim().slice(0,80)||'My Merlin',recipe:{avatarIds:Object.fromEntries(Object.entries(snapshot.avatarIds).filter(([slot])=>slot!=='footprint')),presentation:{rim:settings.rim,bloom:settings.bloom,grade:settings.grade,hairFit:settings.hairFit,clothingFit:settings.clothingFit}},poses:{}};
     for(const [pose,label] of poses){
       if(!index.resolve(snapshot,pose))continue;
       progress(label);const view=await resolveView(snapshot,pose),canvas=await renderView(view,settings);
+      if(pose==='normal'&&view.kind==='items')previewKey=normalPortraitKey(snapshot,settings);
       pack.framing ||= view.framing;pack.poses[pose]={png:canvas.toDataURL('image/png'),framing:view.framing};
       if(view.portrait?.choiceFraming)pack.poses[pose].choiceFraming=view.portrait.choiceFraming;
     }
     const source=JSON.stringify(pack);if(new Blob([source]).size>24*1024*1024)throw new Error('This look exceeds the 24 MB portrait-pack limit.');
-    return source;
+    return {pack:source,previewKey};
   }
   async function useForMerlin(){
     if(readerBusy||!readerSession||!current)return;
     readerBusy=exporting=true;$('reader-use').disabled=$('reader-back').disabled=$('random').disabled=true;
     const sessionId=readerSession,snapshot=clone(state),name=$('reader-look-name').value.trim()||title();
     try{
-      const pack=await buildReaderPack(snapshot,lighting(),name,label=>{$('reader-save-status').textContent='Preparing '+label+'…';});
+      const saved=await buildReaderPack(snapshot,lighting(),name,label=>{$('reader-save-status').textContent='Preparing '+label+'…';});
       if(sessionId!==readerSession)return;
       $('reader-save-status').textContent='Saving look…';
-      window.parent.postMessage({type:'tea-wardrobe-apply',sessionId,pack},location.origin);
+      window.parent.postMessage({type:'tea-wardrobe-apply',sessionId,...saved},location.origin);
     }catch(error){$('reader-save-status').textContent=error.message;readerBusy=exporting=false;$('reader-back').disabled=$('random').disabled=false;$('reader-use').disabled=!current;}
+  }
+  function applyReaderInit(message){
+    $('reader-beta').hidden = !message.hasBeta;
+    reportExpanded(setExpanded(message.expanded===true));
+    if(message.sessionId===readerSession)return;
+    readerSession=message.sessionId;readerBusy=exporting=false;$('reader-back').disabled=$('random').disabled=false;$('reader-save-status').textContent='';
+    const seed=message.seed||{},gender=seed.gender==='male'?'male':'female',recipe=seed.recipe||{};
+    const preset=catalogue.presets.find(row=>row.id===recipe.sourcePreset&&row.gender===gender);
+    let next=defaultState(gender);
+    if (recipe.wardrobe3d) {
+      // The installed 3D editor may be unavailable. Keep the saved look intact.
+      $('reader-save-status').textContent = 'This look needs the 3D wardrobe. Start a new 2D look to edit.';
+      readerSession = '';
+      $('reader-use').disabled = true;
+      refresh();
+      return;
+    }
+    if(recipe.avatarIds?.outfit)next={...next,avatarIds:W.normalize(recipe.avatarIds),name:seed.name||''};
+    else if(preset)next={...next,avatarIds:W.normalize(preset.recipe)};
+    else if(recipe.sourcePreset){$('reader-save-status').textContent='This preset is unavailable in the wardrobe. The default look is shown.';}
+    const settings=recipe.presentation||{};for(const key of ['rim','bloom','grade'])$(key).checked=settings[key]!==false;
+    $('hair-fit').checked=settings.hairFit!==false;$('clothing-fit').value=settings.clothingFit===false?'native':'clothing';
+    openingPortrait=seed.openingPortrait||null;
+    history=[];future=[];detailSlot=null;$('reader-look-name').value=seed.name||'';setState(next,{record:false});
   }
   window.addEventListener('message',event=>{
     if(!embedded||event.origin!==location.origin||event.source!==window.parent)return;
-    const message=event.data||{};
-    if(message.type==='tea-wardrobe-language'||message.type==='tea-wardrobe-init'){const next=WardrobeLocale.language(message.language);if(next!==language){language=next;translate();if(studioReady)refresh();}}
-    if(message.type==='tea-wardrobe-init'&&studioReady){
-      $('reader-beta').hidden = !message.hasBeta;
-      reportExpanded(setExpanded(message.expanded===true));
-      if(message.sessionId===readerSession)return;
-      readerSession=message.sessionId;readerBusy=exporting=false;$('reader-back').disabled=$('random').disabled=false;$('reader-save-status').textContent='';
-      const seed=message.seed||{},gender=seed.gender==='male'?'male':'female',recipe=seed.recipe||{};
-      const preset=catalogue.presets.find(row=>row.id===recipe.sourcePreset&&row.gender===gender);
-      let next=defaultState(gender);
-      if (recipe.wardrobe3d) {
-        // The installed 3D editor may be unavailable. Keep the saved look intact.
-        $('reader-save-status').textContent = 'This look needs the 3D wardrobe. Start a new 2D look to edit.';
-        readerSession = '';
-        $('reader-use').disabled = true;
-        return;
+    const message=event.data||{},init=message.type==='tea-wardrobe-init';
+    if(init||message.type==='tea-wardrobe-language'){
+      const next=WardrobeLocale.language(message.language);
+      if(next!==language){
+        language=next;translate();
+        if(studioReady&&(!init||message.sessionId===readerSession))refresh();
       }
-      if(recipe.avatarIds?.outfit)next={...next,avatarIds:W.normalize(recipe.avatarIds),name:seed.name||''};
-      else if(preset)next={...next,avatarIds:W.normalize(preset.recipe)};
-      else if(recipe.sourcePreset){$('reader-save-status').textContent='This preset is unavailable in the wardrobe. The default look is shown.';}
-      const settings=recipe.presentation||{};for(const key of ['rim','bloom','grade'])$(key).checked=settings[key]!==false;
-      $('hair-fit').checked=settings.hairFit!==false;$('clothing-fit').value=settings.clothingFit===false?'native':'clothing';
-      history=[];future=[];detailSlot=null;$('reader-look-name').value=seed.name||'';setState(next,{record:false});
+      if(init){
+        if(studioReady)applyReaderInit(message);
+        else {pendingReaderInit=message;prepareOpeningPacks(message.seed);}
+      }
+      return;
     }
     if(message.sessionId===readerSession&&['tea-wardrobe-error','tea-wardrobe-saved'].includes(message.type)){
       readerBusy=exporting=false;$('reader-back').disabled=$('random').disabled=false;$('reader-use').disabled=!current;
@@ -612,14 +782,16 @@
     }catch(error){$('export-status').textContent=error.message;}finally{exporting=false;$('download-zip').disabled=$('download-pack').disabled=false;}
   }
   async function start(){
-    try{startEarly();catalogue=await(await get('catalogue.json')).json();
-      const [complete,loaded]=await Promise.all([
-        catalogue.captureManifest?getEarly(catalogue.captureManifest).then(response=>response.json()):{cases:[]},
-        loadLibrary(catalogue.itemManifest)
-      ]);
-      captures=complete;itemLibrary=loaded.library;runtimeLibrary=loaded.runtime;
+    try{
+      // The parent can supply the opening look while the assets are still downloading.
+      if(embedded)window.parent.postMessage({type:'tea-wardrobe-ready'},location.origin);
+      let stored;
+      try{stored=JSON.parse(localStorage.getItem(STORE));}catch(_){}
+      if(!embedded)standaloneOpeningSeed={gender:stored?.draft?.gender||'female',recipe:stored?.draft};
+      const data=await loadStartupData(stored?.draft?.gender),loaded=data.loaded;
+      catalogue=data.catalogue;captures=data.captures;itemLibrary=loaded.library;runtimeLibrary=loaded.runtime;
       buildFamilies();index=W.createIndex(catalogue,captures,itemLibrary);state=defaultState(embedded&&params.get('gender')==='male'?'male':'female');
-      try{const stored=JSON.parse(localStorage.getItem(STORE)||'{}');if(stored.draft)state=W.parseRecipe(JSON.stringify(stored.draft),index.items);if(stored.presentation?.clothingFit===false)$('clothing-fit').value='native';if(stored.presentation?.hairFit===false)$('hair-fit').checked=false;}catch(_){}
+      try{if(stored?.draft)state=W.parseRecipe(JSON.stringify(stored.draft),index.items);if(stored?.presentation?.clothingFit===false)$('clothing-fit').value='native';if(stored?.presentation?.hairFit===false)$('hair-fit').checked=false;}catch(_){}
       libraryStats();
       $('coverage-note').textContent=itemLibrary?'Development: full catalogue · Reusable items compose as you choose':'Development: full catalogue · Preview-ready is specific to the selected look';
       $('search').oninput=drawRoster;readyFilter?.addEventListener('change',drawRoster);$('sort').onchange=drawRoster;$('sort-order').onchange=drawRoster;
@@ -653,8 +825,14 @@
         poses.forEach(([,label],i)=>{if(i)summary.append(', ');summary.append(node('span','',label));});
         $('export-status').textContent='';$('export-dialog').showModal();
       };
-      $('download-zip').onclick=()=>exportSet('zip');$('download-pack').onclick=()=>exportSet('pack');refresh();watchLibrary(loaded.stamp);
-      studioReady=true;if(embedded)window.parent.postMessage({type:'tea-wardrobe-ready'},location.origin);
+      $('download-zip').onclick=()=>exportSet('zip');$('download-pack').onclick=()=>exportSet('pack');
+      studioReady=true;
+      if(pendingReaderInit){applyReaderInit(pendingReaderInit);pendingReaderInit=null;}
+      else{
+        refresh();
+        if(embedded)window.parent.postMessage({type:'tea-wardrobe-ready'},location.origin);
+      }
+      if(loaded.watch!==false)watchLibrary(loaded.stamp);
     }catch(error){
       const empty=$('empty-preview');
       empty.hidden=false;

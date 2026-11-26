@@ -680,7 +680,6 @@
     "special-events/starry/21": {"path":"stories/special-events/song-of-the-blizzard"},
     "season-8/side/18010213": {"path":"stories/veil-of-memories/everlasting-memories"},
     "special-events/mini/24": {"path":"stories/veil-of-memories/autumn-legend"},
-    "special-events/mini/23": {"path":"stories/special-events/esperian-case-files"},
     "special-events/starry/22": {"path":"stories/special-events/where-music-finds-us"},
     "base/exploration/10010401": {"path":"stories/base-campaign/a-town-in-peril"},
     "base/exploration/10010513-1": {"path":"stories/base-campaign/valen-after-the-first-fogged-enemy"},
@@ -1011,6 +1010,7 @@
     "season-6/reputation/16010526": {"path":"stories/tower-of-memory/strange-fungus"},
     "season-6/reputation/16010527": {"path":"stories/tower-of-memory/invisible-animal"},
     "season-6/reputation/16010528": {"path":"stories/tower-of-memory/tails-of-farewell"},
-    "season-8/side/18010601": {"path":"stories/veil-of-memories/raven-whispers"}
+    "season-8/side/18010601": {"path":"stories/veil-of-memories/raven-whispers"},
+    "special-events/starry/23": {"path":"stories/special-events/esperian-case-files"}
   }};
 });

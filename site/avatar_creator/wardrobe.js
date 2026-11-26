@@ -21,8 +21,80 @@
     });
   }
   const compareIds=new Intl.Collator(undefined,{numeric:true});
+  const LANG_TAGS={en:'en',cn:'zh-Hans',jp:'ja',kr:'ko'};
+  const documentLang=language=>LANG_TAGS[language]||'en';
+  function expandCatalogueItem(item,hasExternalDetails=false){
+    const genders={};
+    for(const [gender,data] of Object.entries(item.genders||{})){
+      genders[gender]={
+        name:data.name||item.name,
+        icon:data.icon??null,
+        assetName:data.assetName||'',
+        issue:data.issue||'',
+        supported:data.supported!==false,
+        ...(data.previewLod?{previewLod:data.previewLod}:{}),
+        ...(data.names||item.names?{names:data.names||item.names}:{}),
+      };
+    }
+    return {
+      ...item,
+      description:item.description||'',
+      enabled:item.enabled!==false,
+      order:item.order||0,
+      swatch:item.swatch||'',
+      setIds:item.setIds||[],
+      excludeIds:item.excludeIds||[],
+      excludeTypes:item.excludeTypes||[],
+      genders,
+      ...(hasExternalDetails?{detailsPending:true}:{}),
+    };
+  }
+  function expandCatalogue(catalogue){
+    if(!catalogue||!Array.isArray(catalogue.items))return catalogue;
+    if(!catalogue.compact&&!catalogue.detailsManifest)return catalogue;
+    const hasExternalDetails=Boolean(catalogue.detailsManifest);
+    return {...catalogue,items:catalogue.items.map(item=>expandCatalogueItem(item,hasExternalDetails))};
+  }
+  function mergeCatalogueDetails(itemsById,details){
+    const entries=details?.items||{};
+    for(const item of itemsById.values()){
+      const extra=entries[String(item.id)];
+      if(extra){
+        if(extra.description!==undefined)item.description=extra.description;
+        if(extra.descriptions)item.descriptions=extra.descriptions;
+        if(extra.setIds)item.setIds=extra.setIds;
+        if(extra.assets){
+          for(const [gender,assetName] of Object.entries(extra.assets)){
+            if(item.genders?.[gender])item.genders[gender].assetName=assetName;
+          }
+        }
+      }
+      delete item.detailsPending;
+    }
+  }
+  function itemDetailContent(item,gender,language,locale){
+    const title=locale.label(item,gender,language);
+    if(item?.detailsPending)return {title,description:''};
+    // A description that only repeats the name (the Default outfit) stays blank.
+    const described=locale.description(item,language);
+    return {title,description:described===title?'':described};
+  }
+  function bindReaderFrameFit(sendHeight,onLayout){
+    const tall=window.parent.matchMedia('(min-height: 560px)');
+    const main=document.querySelector('main');
+    const report=()=>{
+      const fit=tall.matches;
+      document.documentElement.classList.toggle('reader-fit',fit);
+      if(onLayout)onLayout(fit);
+      sendHeight(fit?null:Math.max(480,main.offsetHeight));
+    };
+    tall.addEventListener('change',report);
+    new ResizeObserver(report).observe(main);
+    report();
+    return report;
+  }
   function sortRows(rows,field,direction,language){
-    const locale={en:'en',cn:'zh-Hans',jp:'ja',kr:'ko'}[language];
+    const locale=documentLang(language);
     const byName=field==='name' ? new Intl.Collator(locale) : null;
     return rows.sort((a,b)=>(!!b.pinned-!!a.pinned) || direction*((byName && byName.compare(a.sortName,b.sortName)) || compareIds.compare(a.sortId,b.sortId)));
   }
@@ -45,7 +117,7 @@
   const itemCategory=item=>item?.slot==='head'&&item.typeId===HERO_HEADGEAR?'herohead':item?.slot;
   const browseCategories=rows=>rows.flatMap(row=>row.id==='head'?[row,{id:'herohead',name:'Hero headgear'}]:[row]);
   // Phones can hide the reader's bars and the look-name row, giving the wardrobe the whole screen.
-  const EXPAND_PATHS={false:'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5',true:'M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5'};
+  const EXPAND_PATHS={false:'M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5',true:'M12 3v18M7 4l5 5 5-5M7 20l5-5 5 5'};
   function bindExpand(button,media,report){
     const root=document.documentElement;
     const set=on=>{
@@ -59,6 +131,42 @@
     media.addEventListener('change',()=>{if(!media.matches&&root.classList.contains('wardrobe-expanded'))report(set(false));});
     set(false);
     return set;
+  }
+  // Reuse the live stage in a modal: no second renderer, asset downloads or image capture.
+  function bindPreviewFullscreen(stage,report,controls=[]){
+    const root=document.documentElement,dialog=document.createElement('dialog');
+    dialog.className='wardrobe-preview-dialog';dialog.setAttribute('aria-label','Full screen');
+    const button=(label,text,cls)=>{
+      const b=document.createElement('button');b.type='button';b.className=cls;
+      b.setAttribute('aria-label',label);b.title=label;b.textContent=text;return b;
+    };
+    const open=button('Full screen','','fullscreen-toggle');
+    open.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>';
+    const close=button('Close full screen','×','preview-close');
+    const actions=document.createElement('div');actions.className='preview-fullscreen-controls';
+    for(const [original,label,text] of controls){
+      const proxy=button(label,text,'');proxy.onclick=()=>original.click();
+      const sync=()=>{proxy.disabled=original.disabled;};sync();
+      new MutationObserver(sync).observe(original,{attributes:true,attributeFilter:['disabled']});
+      actions.append(proxy);
+    }
+    dialog.append(close,actions);document.body.append(dialog);stage.append(open);
+    let placeholder=null;
+    open.onclick=()=>{
+      if(dialog.open)return;
+      placeholder=document.createComment('wardrobe preview');stage.before(placeholder);
+      dialog.prepend(stage);root.classList.add('wardrobe-inspecting');
+      stage.dispatchEvent(new CustomEvent('wardrobe-inspect',{detail:true}));
+      dialog.showModal();close.focus({preventScroll:true});report(true);
+    };
+    close.onclick=()=>dialog.close();
+    dialog.addEventListener('close',()=>{
+      if(!placeholder)return;
+      placeholder.replaceWith(stage);placeholder=null;root.classList.remove('wardrobe-inspecting');
+      stage.dispatchEvent(new CustomEvent('wardrobe-inspect',{detail:false}));
+      report(false);open.focus({preventScroll:true});
+    });
+    return dialog;
   }
   function familyKey(item){return item.colorGroup?`${item.slot}:${item.typeId}:${item.colorGroup}`:item.id;}
   function bindHorizontalWheel(row,media){
@@ -112,7 +220,7 @@
   const ITEM_DEPENDENCIES={body:['outfit','skin'],hair:['hair'],face:['face','skin','eyes','hair'],head:['head'],cloak:['cloak'],back:['back'],mask:['mask'],beard:['beard']};
   const SKIN_OVERLAYS={body:'bodypaint',face:'makeup'};
   function createItemIndex(library){
-    const parts=new Map(),appearance=new WeakMap(),invisible=new WeakMap();
+    const parts=new Map(),appearance=new Map(),invisible=new WeakMap();
     if(library?.schema!=='afk.wardrobe.items'||![1,2,3].includes(library.version)||library.validation?.passed!==true)return ()=>null;
     const dependencies=library.version>=2?{...ITEM_DEPENDENCIES,body:['outfit'],face:['face']}:ITEM_DEPENDENCIES;
     if(library.version===3){dependencies.body.push('bodyshape');dependencies.face.push('bodyshape');}
@@ -120,21 +228,24 @@
     for(const part of library.parts||[]){
       if(!ITEM_DEPENDENCIES[part.group]||!part.validated)continue;
       parts.set(partKey(part.group,part.gender,part.pose,part.yaw,part.avatarIds),part);
-      invisible.set(part,new Set(part.invisibleOverlays||[]));
-      for(const layer of part.layers||[]){
-        const slots=new Map(),overlays=new Map();
-        for(const patch of layer.patches||[]){
-          if(patch.slot==='makeup'||patch.slot==='bodypaint'){
-            const key=[patch.slot,patch.avatarId,patch.skinId].join(':');
-            if(!overlays.has(key))overlays.set(key,patch);
-          }else{
-            if(!slots.has(patch.slot))slots.set(patch.slot,new Map());
-            const choices=slots.get(patch.slot);
-            if(!choices.has(patch.avatarId))choices.set(patch.avatarId,patch);
-          }
+    }
+    // Only selected parts need a patch lookup. Many availability rows share one patch list.
+    function patchOptions(patches){
+      if(appearance.has(patches))return appearance.get(patches);
+      const slots=new Map(),overlays=new Map();
+      for(const patch of patches||[]){
+        if(patch.slot==='makeup'||patch.slot==='bodypaint'){
+          const key=[patch.slot,patch.avatarId,patch.skinId].join(':');
+          if(!overlays.has(key))overlays.set(key,patch);
+        }else{
+          if(!slots.has(patch.slot))slots.set(patch.slot,new Map());
+          const choices=slots.get(patch.slot);
+          if(!choices.has(patch.avatarId))choices.set(patch.avatarId,patch);
         }
-        appearance.set(layer,{slots,overlays});
       }
+      const options={slots,overlays};
+      appearance.set(patches,options);
+      return options;
     }
     return (state,pose=state.pose||'normal',yaw=state.yaw||0)=>{
       const ids=normalize(state.avatarIds);
@@ -151,10 +262,13 @@
       const appliedOverlays=new Set();
       for(const part of selected){
         const overlaySlot=SKIN_OVERLAYS[part.group];
-        if(overlaySlot&&ids[overlaySlot]&&invisible.get(part).has([overlaySlot,ids[overlaySlot],ids.skin].join(':')))appliedOverlays.add(overlaySlot);
+        if(overlaySlot&&ids[overlaySlot]&&part.invisibleOverlays?.length){
+          if(!invisible.has(part))invisible.set(part,new Set(part.invisibleOverlays));
+          if(invisible.get(part).has([overlaySlot,ids[overlaySlot],ids.skin].join(':')))appliedOverlays.add(overlaySlot);
+        }
         for(const layer of part.layers||[]){
         const patches=[];
-        const options=appearance.get(layer);
+        const options=patchOptions(layer.patches);
         for(const [slot,choices] of options.slots){
           const patch=choices.get(ids[slot]);if(!patch)return null;patches.push(patch);
         }
@@ -258,5 +372,5 @@
     const end=new Uint8Array(22),view=new DataView(end.buffer);view.setUint32(0,0x06054b50,true);view.setUint16(8,files.length,true);view.setUint16(10,files.length,true);view.setUint32(12,size,true);view.setUint32(16,offset,true);
     return new Blob([...chunks,...central,end],{type:'application/zip'});
   }
-  return {SLOTS,POSES,OPTIONAL,setupSortMenu,bindOptionsPanel,bindHorizontalWheel,placeItemDetail,bindExpand,libraryBase,categorySlot,itemCategory,browseCategories,replacePoseButtons,familyKey,sortRows,isBasicOutfit,randomLook,ITEM_DEPENDENCIES,normalize,key,label,createItemIndex,createIndex,parseRecipe,exportRecipe,conflicts,zip,crc32};
+  return {SLOTS,POSES,OPTIONAL,documentLang,expandCatalogueItem,expandCatalogue,mergeCatalogueDetails,itemDetailContent,bindReaderFrameFit,setupSortMenu,bindOptionsPanel,bindHorizontalWheel,placeItemDetail,bindExpand,bindPreviewFullscreen,libraryBase,categorySlot,itemCategory,browseCategories,replacePoseButtons,familyKey,sortRows,isBasicOutfit,randomLook,ITEM_DEPENDENCIES,normalize,key,label,createItemIndex,createIndex,parseRecipe,exportRecipe,conflicts,zip,crc32};
 });

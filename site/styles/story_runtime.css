@@ -124,7 +124,8 @@
 .inspection-points button.inspection-read { border-color: #6baf99; }
 .inspection-continue:disabled { opacity: .45; cursor: default; }
 .inspection-progress { color: var(--muted, #acaaa3); }
-.inspection-point-heading { margin: 24px 0 12px; font-size: .75em; color: var(--muted, #acaaa3); scroll-margin-top: 24px; }
+.inspection-point-heading { margin: 24px 0 12px; font-size: .75em; color: var(--muted, #acaaa3); }
+.inspection-point-heading, .inspection-complete { scroll-margin-block-start: min(20vh, 150px); }
 .inspection-complete { margin: 24px 0; color: #6baf99; font-size: .8em; }
 .inspection-points button:focus-visible, .inspection-continue:focus-visible { outline: 2px solid #d99729; outline-offset: 3px; }
 .story-encounter-dialogue { margin: 1rem 0 0; min-width: 0; overflow-wrap: anywhere; }

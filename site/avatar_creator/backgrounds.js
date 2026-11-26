@@ -1,7 +1,10 @@
 /* Original game backgrounds, shared by the 2D and 3D studios. */
 (function(root,factory){
   const script=typeof document==='undefined'?null:document.currentScript;
-  const api=factory(script?new URL('backgrounds/',script.src).href:'backgrounds/');
+  const base=script?.dataset?.backgroundsBase
+    ? new URL(script.dataset.backgroundsBase,script.src).href
+    : (script?new URL('backgrounds/',script.src).href:'backgrounds/');
+  const api=factory(base);
   if(typeof module==='object'&&module.exports)module.exports=api;else root.WardrobeBackgrounds=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(base){
   const entries=Object.freeze([

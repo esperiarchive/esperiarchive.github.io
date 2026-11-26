@@ -115,7 +115,9 @@ Skin|肤色|肌の色|피부
 Eyes|瞳色|目の色|동공
 Headwear|头饰|頭飾り|머리 장식
 Hero headgear|英雄头饰|英雄頭装飾|영웅 머리 장식
-Expand wardrobe|展开衣橱|ワードローブを広げる|옷장 펼치기
+Stretch|展开|広げる|늘리기
+Full screen|全屏|全画面|전체 화면
+Close full screen|关闭全屏|全画面を閉じる|전체 화면 닫기
 Masks|面饰|マスク|액세서리
 Cloaks|披风|マント|망토
 Back & tails|背饰与尾巴|背中・尻尾|등 장식 및 꼬리
@@ -227,9 +229,9 @@ Build: {name}|体型：{name}|体型：{name}|체형: {name}
     const nameMeasure=document.createElement('canvas').getContext('2d');
     // The reader's font-size setting, as a multiplier (1 outside the reader).
     function textScale(){return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--wardrobe-text'))||1;}
-    function fitItemNames(){
+    function fitLabels(labels){
       const scale=textScale(),maximum=12*scale,minimum=9*scale;
-      const updates=Array.from(grid.querySelectorAll('.item-name'),label=>{
+      const updates=Array.from(labels,label=>{
         const style=getComputedStyle(label);
         const available=label.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight)-1;
         if(available<=0)return null;
@@ -247,6 +249,28 @@ Build: {name}|体型：{name}|体型：{name}|체형: {name}
         update.label.style.fontSize=update.size+'px';
         update.label.style.whiteSpace=update.singleLine?'nowrap':'normal';
       }
+    }
+    // The phone grid scrolls inside its own panel. Size names just ahead of scrolling.
+    const nearby=new Set(),narrow=readerRoot&&matchMedia('(max-width: 760px)');
+    let firstObservedCard=null;
+    const observer=readerRoot&&typeof IntersectionObserver==='function'&&new IntersectionObserver(entries=>{
+      const entering=[];
+      for(const entry of entries){
+        if(!firstObservedCard||!grid.contains(entry.target))continue;
+        if(entry.isIntersecting){nearby.add(entry.target);entering.push(entry.target);}
+        else nearby.delete(entry.target);
+      }
+      if(entering.length)fitLabels(entering);
+    },{root:grid,rootMargin:'140px 0px'});
+    function fitItemNames(){
+      if(observer&&narrow.matches&&document.documentElement.classList.contains('reader-fit')){
+        if(firstObservedCard===grid.firstElementChild){if(nearby.size)fitLabels(nearby);return;}
+        observer.disconnect();nearby.clear();firstObservedCard=grid.firstElementChild;
+        for(const label of grid.querySelectorAll('.item-name'))observer.observe(label);
+        return;
+      }
+      if(firstObservedCard){observer.disconnect();nearby.clear();firstObservedCard=null;}
+      fitLabels(grid.querySelectorAll('.item-name'));
     }
     let namesWidth=0;
     new ResizeObserver(entries=>{

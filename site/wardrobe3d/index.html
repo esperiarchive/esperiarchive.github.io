@@ -3,12 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Merlin's Wardrobe 3D</title>
-<link rel="stylesheet" href="../avatar_creator/studio.css">
-<link rel="stylesheet" href="../styles/reader_fonts.css">
-<script src="../scripts/reader_theme.js"></script>
-<link rel="stylesheet" href="../styles/reader_theme.css">
-<link rel="stylesheet" href="studio.css"><link rel="stylesheet" href="../avatar_creator/backgrounds.css">
-<script src="../scripts/config.js"></script></head>
+<link rel="preconnect" href="https://pub-a8a7fda2efe44ce0add6775c31285cdf.r2.dev" crossorigin>
+<link rel="preconnect" href="https://pub-a8a7fda2efe44ce0add6775c31285cdf.r2.dev">
+<link rel="stylesheet" href="../avatar_creator/studio.css?v=c3ec7c81171264ee">
+<link rel="stylesheet" href="../styles/reader_fonts.css?v=e91a6f1e49e64964">
+<script src="../scripts/reader_theme.js?v=f1f56fad404108da"></script>
+<link rel="stylesheet" href="../styles/reader_theme.css?v=69ce6a3e39854589">
+<link rel="stylesheet" href="studio.css?v=12a64028bd18daac"><link rel="stylesheet" href="../avatar_creator/backgrounds.css?v=d8b68bb40f7b142f">
+<script src="../scripts/config.js?v=a7d1f23ec5d005a9"></script></head>
 <body><main>
 <header class="intro">
   <div><h1>Cosmetics</h1></div>
@@ -32,7 +34,7 @@
       <div id="status" role="status"></div>
       <span class="hint">Drag to rotate · right-drag up or down to pan · scroll to zoom</span>
       <div class="busy" id="busy" hidden>Loading…</div>
-      <button id="expand" class="expand-toggle" aria-pressed="false" aria-label="Expand wardrobe"><svg viewBox="0 0 24 24" aria-hidden="true"><path/></svg></button>
+      <button id="expand" class="expand-toggle" aria-pressed="false" aria-label="Stretch" title="Stretch"><svg viewBox="0 0 24 24" aria-hidden="true"><path/></svg></button>
     </div>
     <div class="look-title">
       <div><p class="overline">CURRENT LOOK</p><h2 id="look-title"></h2></div>
@@ -85,15 +87,7 @@
   </section>
 </div>
 </main>
-<script src="../avatar_creator/wardrobe.js"></script>
-<script src="renderer.js"></script>
-<script src="wardrobe-renderer.js?v=stage-viewport-2"></script>
-<script src="effects.js"></script>
-<script src="wardrobe3d-renderer.js?v=parallel-loading-20261124"></script>
-<script src="../avatar_creator/locale.js"></script>
-<script src="locale.js"></script>
-<script src="../avatar_creator/backgrounds.js"></script>
-<script src="studio.js"></script>
+<script src="editor_bundle.js?v=7875fcc87fcc2140" data-backgrounds-base="../avatar_creator/backgrounds/"></script>
 <script>
 if (location.hostname === "esperiarchive.github.io") {
   const beacon = document.createElement("script");

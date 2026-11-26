@@ -122,6 +122,8 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 .app-shell.cosmetics-view.wardrobe-expanded { grid-template-rows: minmax(0, 1fr); }
 .app-shell.cosmetics-view.wardrobe-expanded > .topbar { display: none; }
 .app-shell.cosmetics-view.wardrobe-expanded .story-scroll { padding-top: max(6px, env(safe-area-inset-top)); }
+body:has(.cosmetics-view.wardrobe-inspecting) { overflow: hidden; }
+.cosmetics-view.wardrobe-inspecting #cosmetics-frame { position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100dvh!important; min-height: 0; max-width: none; margin: 0; }
 @media (max-width: 600px) {
   .player-appearance-dialog { border-radius: 0; }
 }
